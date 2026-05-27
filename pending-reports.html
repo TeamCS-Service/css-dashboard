@@ -1538,7 +1538,10 @@
                                 <option value="BROTO88 (D-GAMING)">BROTO88 (D-GAMING)</option>
                                 <option value="WOY99 (D-GAMING)">WOY99 (D-GAMING)</option>
                                 <option value="NAGAHITAM88 (D-GAMING)">NAGAHITAM88 (D-GAMING)</option>
-                                <option value="MEYOLX (D-GAMING)">MEYOLX (D-GAMING)</option>
+                                <option value="MEYOLX (D-GAMING)">MEYOLX ( D-GAMING)</option>
+                                <option value="AYOPLAY77 (D-GAMING)">AYOPLAY77 ( D-GAMING)</option>
+                                <option value="NEX178 (D-GAMING)">NEX178 ( D-GAMING)</option>
+                                <option value="7PLAYASIA (D-GAMING)">7PLAYASIA ( D-GAMING)</option>
                                 <option value="MEDUSA88 (GACHA)">MEDUSA88 (GACHA)</option>
                                 <option value="ATHENA168 (GACHA)">ATHENA168 (GACHA)</option>
                                 <option value="ARES GACOR (GACHA)">ARES GACOR (GACHA)</option>
@@ -1731,7 +1734,10 @@
                                 <option value="BROTO88 (D-GAMING)">BROTO88 (D-GAMING)</option>
                                 <option value="WOY99 (D-GAMING)">WOY99 (D-GAMING)</option>
                                 <option value="NAGAHITAM88 (D-GAMING)">NAGAHITAM88 (D-GAMING)</option>
-                                <option value="MEYOLX (D-GAMING)">MEYOLX (D-GAMING)</option>
+                                <option value="MEYOLX (D-GAMING)">MEYOLX ( D-GAMING)</option>
+                                <option value="AYOPLAY77 (D-GAMING)">AYOPLAY77 ( D-GAMING)</option>
+                                <option value="NEX178 (D-GAMING)">NEX178 ( D-GAMING)</option>
+                                <option value="7PLAYASIA (D-GAMING)">7PLAYASIA ( D-GAMING)</option>
                                 <option value="MEDUSA88 (GACHA)">MEDUSA88 (GACHA)</option>
                                 <option value="ATHENA168 (GACHA)">ATHENA168 (GACHA)</option>
                                 <option value="ARES GACOR (GACHA)">ARES GACOR (GACHA)</option>
@@ -1881,7 +1887,7 @@
                                         <option value="">Select Brand</option>
                                         <option value="ALL BRAND">ALL BRAND</option>
 
-                                <option value="CERIASLOT99 (D-GAMING)">CERIASLOT99 (D-GAMING)</option>
+                               <option value="CERIASLOT99 (D-GAMING)">CERIASLOT99 (D-GAMING)</option>
                                 <option value="RAJASCATTER88 (D-GAMING)">RAJASCATTER88 (D-GAMING)</option>
                                 <option value="MAHJONGJP88 (D-GAMING)">MAHJONGJP88 (D-GAMING)</option>
                                 <option value="NAGAHOKI88 (D-GAMING)">NAGAHOKI88 (D-GAMING)</option>
@@ -1890,7 +1896,10 @@
                                 <option value="BROTO88 (D-GAMING)">BROTO88 (D-GAMING)</option>
                                 <option value="WOY99 (D-GAMING)">WOY99 (D-GAMING)</option>
                                 <option value="NAGAHITAM88 (D-GAMING)">NAGAHITAM88 (D-GAMING)</option>
-                                <option value="MEYOLX (D-GAMING)">MEYOLX (D-GAMING)</option>
+                                <option value="MEYOLX (D-GAMING)">MEYOLX ( D-GAMING)</option>
+                                <option value="AYOPLAY77 (D-GAMING)">AYOPLAY77 ( D-GAMING)</option>
+                                <option value="NEX178 (D-GAMING)">NEX178 ( D-GAMING)</option>
+                                <option value="7PLAYASIA (D-GAMING)">7PLAYASIA ( D-GAMING)</option>
                                 <option value="MEDUSA88 (GACHA)">MEDUSA88 (GACHA)</option>
                                 <option value="ATHENA168 (GACHA)">ATHENA168 (GACHA)</option>
                                 <option value="ARES GACOR (GACHA)">ARES GACOR (GACHA)</option>
@@ -2171,10 +2180,33 @@
         };
 
         // Initialize Firebase
+        // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
         const analytics = firebase.analytics();
+
+        // ========== KONFIGURASI EXCEL WEBHOOK ==========
+        const EXCEL_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyVB7Vtysf2eL6Z-K8ez-13fzugM1dyWtV90_AEmASzaCCOwxxaNU2_RAIkDjbBwUYD/exec';   
+
+        // Fungsi untuk mengirim data ke Google Sheets
+        async function sendToExcel(reportData) {
+            try {
+                await fetch(EXCEL_WEBHOOK_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(reportData)
+                });
+                console.log('✅ Data sent to Google Sheets:', reportData.reportId);
+                return true;
+            } catch (error) {
+                console.error('❌ Failed to send to Google Sheets:', error);
+                return false;
+            }
+        }
 
         // Variabel global
         let currentUser = null;
@@ -2353,7 +2385,7 @@
             }
         }
 
-        // Fungsi untuk menambahkan laporan baru
+                // Fungsi untuk menambahkan laporan baru
         async function addNewReport() {
             const title = document.getElementById('reportTitle').value;
             const category = document.getElementById('reportCategory').value;
@@ -2383,6 +2415,26 @@
                     priority: 'medium',
                     reportedBy: currentUser.displayName || 'Unknown'
                 });
+                
+                // ========== KIRIM DATA KE GOOGLE SHEETS ==========
+                const excelData = {
+                    reportId: docRef.id,
+                    title: title,
+                    category: category,
+                    brand: brand,
+                    description: description,
+                    screenshotUrl: screenshotUrl || '',
+                    status: 'pending',
+                    dueDate: dueDate,
+                    userId: currentUser.uid,
+                    reportedBy: currentUser.displayName || currentUser.email || 'Unknown',
+                    dateCreated: new Date().toISOString(),
+                    timestamp: new Date().toLocaleString('id-ID')
+                };
+                
+                // Kirim ke Google Sheets (tidak perlu menunggu)
+                sendToExcel(excelData);
+                // ========== SAMPAI SINI ==========
                 
                 showToast('Report added successfully!');
                 
@@ -2660,7 +2712,31 @@
                 
                 // Commit batch operation
                 await batch.commit();
-                
+                // ========== UPDATE STATUS DI GOOGLE SHEETS ==========
+// ========== UPDATE STATUS DI GOOGLE SHEETS ==========
+const updateData = {
+    action: 'update_status',
+    reportId: currentReportId,
+    status: 'completed',
+    resolvedBy: currentUser.displayName || currentUser.email || 'Unknown',
+    resolution: resolutionDescription,
+    timestamp: new Date().toLocaleString('id-ID')
+};
+
+// Kirim update ke Google Sheets
+try {
+    await fetch(EXCEL_WEBHOOK_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData)
+    });
+    console.log('✅ Status updated in Google Sheets for:', currentReportId);
+} catch (err) {
+    console.error('❌ Failed to update Google Sheets:', err);
+}
+
+// ========== SAMPAI SINI ==========    
                 // Tambahkan notifikasi
                 addNotification({
                     type: 'report_solved',
