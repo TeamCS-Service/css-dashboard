@@ -1192,7 +1192,6 @@
 </div>
     <script src="sidebar-loader.js"></script>
     <script src="user-profile.js"></script>
-    <script src="notifications.js"></script>
      <script>
     // ========== FIREBASE INITIALIZATION ==========
     const firebaseConfig = {
@@ -1210,6 +1209,77 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
+
+    const MAINTENANCE_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbz0hTPuKdoRRNiV73rFLcAG1AbtolRL05lJa_wKcWo1c2WJs5YqNcpHJEJ-xKL4pkRL/exec';
+    
+    async function sendMaintenanceToExcel(taskData, action = 'create') {
+        try {
+            let payload = {};
+            
+            if (action === 'create') {
+                payload = {
+                    action: 'create_maintenance',
+                    taskId: taskData.id,
+                    title: taskData.title,
+                    category: taskData.category,
+                    provider: taskData.provider,
+                    status: taskData.status,
+                    startDate: taskData.startDate,
+                    endDate: taskData.endDate,
+                    description: taskData.description,
+                    notes: taskData.notes,
+                    createdBy: taskData.createdBy,
+                    dateCreated: new Date().toLocaleString('id-ID'),
+                    timestamp: new Date().toLocaleString('id-ID')
+                };
+            } else if (action === 'update') {
+                payload = {
+                    action: 'update_maintenance_status',
+                    taskId: taskData.id,
+                    status: taskData.status,
+                    updatedBy: taskData.updatedBy,
+                    timestamp: new Date().toLocaleString('id-ID')
+                };
+            } else if (action === 'delete') {
+                payload = {
+                    action: 'delete_maintenance',
+                    taskId: taskData.id,
+                    deletedBy: taskData.deletedBy,
+                    timestamp: new Date().toLocaleString('id-ID')
+                };
+            } else if (action === 'complete') {
+                payload = {
+                    action: 'complete_maintenance',
+                    taskId: taskData.id,
+                    status: 'completed',
+                    completedBy: taskData.completedBy,
+                    timestamp: new Date().toLocaleString('id-ID')
+                };
+            }
+            
+            console.log(`📤 Sending ${action} request for task ${taskData.id}...`);
+            console.log('Payload:', payload);
+            
+            // Kirim request ke Google Sheets
+await fetch(MAINTENANCE_WEBHOOK_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload)
+});
+
+console.log('✅ Data sent to Google Sheets');
+
+return true;
+
+} catch (error) {
+
+    console.error('❌ Failed to send:', error);
+    return false;
+}
+    }
 
     // Deklarasi variabel global
     let currentUser = null;
@@ -1792,8 +1862,19 @@
     }
 
     // Complete task - DIMODIFIKASI untuk memindahkan data
+       // Complete task - DIMODIFIKASI untuk update Google Sheets
     async function completeTask(taskId) {
         try {
+            // Dapatkan data task
+            const task = maintenanceTasks.find(t => t.id === taskId);
+            const userName = currentUser ? (currentUser.displayName || currentUser.email) : 'System';
+            
+            // Kirim update ke Google Sheets terlebih dahulu
+sendMaintenanceToExcel({
+    id: taskId,
+    completedBy: userName
+}, 'complete').catch(err => console.error(err));
+            
             // Pindahkan task ke solvedMaintenance
             const success = await moveToSolvedMaintenance(taskId);
             
@@ -1832,6 +1913,7 @@
     }
 
     // Delete task
+    // Delete task - MODIFIED untuk update Google Sheets
     async function deleteTask(taskId) {
         const confirmed = window.confirm(`Are you sure you want to delete task ${taskId}?`);
         if (!confirmed) return;
@@ -1845,6 +1927,14 @@
                 showNotification('Task not found or already deleted.', 'error');
                 return;
             }
+            
+            const userName = currentUser ? (currentUser.displayName || currentUser.email) : 'System';
+
+            // Kirim notifikasi delete ke Google Sheets
+            await sendMaintenanceToExcel({
+                id: taskId,
+                deletedBy: userName
+            }, 'delete');
 
             await taskRef.delete();
             maintenanceTasks = maintenanceTasks.filter(task => task.id !== taskId);
@@ -1858,6 +1948,7 @@
     }
 
     // Save task (add or update) - MODIFIED untuk menyimpan provider dan createdBy
+       // Save task (add or update) - MODIFIED untuk mengirim ke Google Sheets
     async function saveTask() {
         const taskId = document.getElementById('taskId').value;
         const title = document.getElementById('taskTitle').value;
@@ -1902,10 +1993,17 @@
                     dateUpdated: new Date()
                 });
                 
+                // Kirim update ke Google Sheets
+                await sendMaintenanceToExcel({
+                    id: taskId,
+                    status: status,
+                    updatedBy: userName
+                }, 'update');
+                
                 showNotification('Task updated successfully!', 'success');
             } else {
                 // Add new task with createdBy info
-                await db.collection('maintenanceReports').add({
+                const docRef = await db.collection('maintenanceReports').add({
                     title,
                     category,
                     provider,
@@ -1919,6 +2017,20 @@
                     dateCreated: new Date(),
                     dateUpdated: new Date()
                 });
+                
+                // Kirim data baru ke Google Sheets
+                await sendMaintenanceToExcel({
+                    id: docRef.id,
+                    title: title,
+                    category: category,
+                    provider: provider,
+                    status: status,
+                    startDate: startDate,
+                    endDate: endDate,
+                    description: description,
+                    notes: notes,
+                    createdBy: userName
+                }, 'create');
                 
                 showNotification('Task added successfully!', 'success');
             }
