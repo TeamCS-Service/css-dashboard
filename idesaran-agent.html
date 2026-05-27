@@ -1994,6 +1994,58 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        // Ganti dengan Web App URL dari Google Apps Script Anda
+        const EXCEL_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwA4WrZTF0c4cgK82i4OdQgzdWIjyt8JTK5nL0EktpKNk95m1sTrhG3tlD_DSgs4cO6/exec';
+
+        // Fungsi untuk mengirim data ke Google Sheets
+        // Perbaiki fungsi sendToExcel di HTML
+async function sendToExcel(reportData, action = 'create') {
+    try {
+        // Buat payload sesuai yang diharapkan Apps Script
+        const payload = {
+            action: action === 'create' ? 'addReport' : 'updateReport',
+            spreadsheetId: '1AUBdcjX7YuXk3eLn28Jf33fJwK2dyTtD0zvGPTt7B3c',
+            report: {
+                id: reportData.id,
+                timestamp: new Date().toISOString(),
+                title: reportData.title,
+                brand: reportData.brand,
+                status: reportData.status,
+                description: reportData.description || '',
+                resolution: reportData.resolution || '',
+                imageUrl: reportData.imageUrl || '',
+                createdBy: reportData.createdBy || '',
+                userEmail: reportData.userEmail || '',
+                dateCreated: reportData.dateCreated || new Date().toISOString(),
+                dateUpdated: new Date().toISOString()
+            }
+        };
+
+        console.log('📤 Sending to Google Sheets:', payload);
+
+        // Kirim sebagai application/json, BUKAN FormData!
+        const response = await fetch(EXCEL_WEBHOOK_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `data=${JSON.stringify(payload)}`
+        });
+
+        const result = await response.json();
+        console.log('✅ Response:', result);
+        
+        if (!result.success) {
+            throw new Error(result.error);
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('❌ Failed to send to Google Sheets:', error);
+        return false;
+    }
+}
+
         const brandList = [
             "CERIASLOT99 (D-GAMING)", "RAJASCATTER88 (D-GAMING)", "MAHJONGJP88 (D-GAMING)",
             "NAGAHOKI88 (D-GAMING)", "SPACEMAN88 (D-GAMING)", "RAJAPANEN (D-GAMING)",
@@ -2475,49 +2527,71 @@
             document.getElementById('reportModal').classList.remove('active');
         }
 
-        async function saveReport() {
-            const title = document.getElementById('reportTitle').value.trim();
-            const brand = document.getElementById('reportBrand').value;
-            const status = document.getElementById('reportStatus').value;
-            const description = document.getElementById('reportDescription').value.trim();
-            const resolution = document.getElementById('reportResolution').value.trim();
-            const imageUrl = document.getElementById('reportImageUrl').value.trim();
-            const lang = getLang();
+               async function saveReport() {
+    const title = document.getElementById('reportTitle').value.trim();
+    const brand = document.getElementById('reportBrand').value;
+    const status = document.getElementById('reportStatus').value;
+    const description = document.getElementById('reportDescription').value.trim();
+    const resolution = document.getElementById('reportResolution').value.trim();
+    const imageUrl = document.getElementById('reportImageUrl').value.trim();
+    const lang = getLang();
 
-            if (!title || !brand) {
-                showToast(lang.fillRequired, 'error');
-                return;
-            }
+    if (!title || !brand) {
+        showToast(lang.fillRequired, 'error');
+        return;
+    }
 
+    try {
+        let reportId;
+        
+        if (currentEditId) {
+            // UPDATE existing report
+            await db.collection('reports').doc(currentEditId).update({
+                title, brand, status, description, resolution, imageUrl,
+                dateUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            reportId = currentEditId;
+            showToast(lang.reportUpdated, 'success');
+        } else {
+            // CREATE new report
             const reportData = {
-                title,
-                brand,
-                status,
-                description: description || '',
-                resolution: resolution || '',
-                imageUrl: imageUrl || '',
+                title, brand, status, description, resolution, imageUrl,
+                userId: currentUser.uid,
+                userEmail: currentUser.email || 'Unknown',
+                userName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
+                projectcss: 'pengshui',
+                dateCreated: firebase.firestore.FieldValue.serverTimestamp(),
                 dateUpdated: firebase.firestore.FieldValue.serverTimestamp()
             };
-
-            try {
-                if (currentEditId) {
-                    await db.collection('reports').doc(currentEditId).update(reportData);
-                    showToast(lang.reportUpdated, 'success');
-                } else {
-                    reportData.userId = currentUser.uid;
-                    reportData.userEmail = currentUser.email || 'Unknown';
-                    reportData.userName = currentUser.displayName || currentUser.email?.split('@')[0] || 'User';
-                    reportData.projectcss = 'pengshui';
-                    reportData.dateCreated = firebase.firestore.FieldValue.serverTimestamp();
-                    await db.collection('reports').add(reportData);
-                    showToast(lang.reportAdded, 'success');
-                }
-                closeModal();
-            } catch (error) {
-                console.error("Error saving report:", error);
-                showToast(lang.errorSaving, 'error');
-            }
+            const docRef = await db.collection('reports').add(reportData);
+            reportId = docRef.id;
+            showToast(lang.reportAdded, 'success');
         }
+        
+        closeModal();
+
+        // Kirim ke Google Sheets dengan data yang lengkap
+        const excelPayload = {
+            id: reportId,
+            title: title,
+            brand: brand,
+            status: status,
+            description: description || '',
+            resolution: resolution || '',
+            imageUrl: imageUrl || '',
+            createdBy: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
+            userEmail: currentUser.email || 'Unknown',
+            dateCreated: currentEditId ? undefined : new Date().toISOString(),
+            dateUpdated: new Date().toISOString()
+        };
+        
+        await sendToExcel(excelPayload, currentEditId ? 'update' : 'create');
+
+    } catch (error) {
+        console.error("Error saving report:", error);
+        showToast(lang.errorSaving, 'error');
+    }
+}
 
         async function deleteReport(id) {
             const report = reports.find(r => r.id === id);
