@@ -125,7 +125,7 @@
     color: var(--purple);
 }
 
-.stat-icon.brem {
+.stat-icon.vortex {
     background-color: rgba(156, 163, 175, 0.1);
     color: var(--text-secondary);
 }
@@ -728,6 +728,45 @@ body.admin-mode .masteragent-history-table td:nth-child(7) {
         gap: var(--space-sm);
     }
 }
+/* Tombol Hapus Semua Data */
+.btn-danger-all {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    border: none;
+}
+
+.btn-danger-all:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.btn-danger-all i {
+    margin-right: 6px;
+}
+
+/* Modal Konfirmasi Hapus Semua */
+.modal-danger .modal-header {
+    border-bottom-color: #dc2626;
+}
+
+.modal-danger .modal-title {
+    color: #dc2626;
+}
+
+.modal-danger .btn-danger {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+}
+
+.modal-warning-text {
+    color: #dc2626;
+    font-weight: bold;
+    margin-top: var(--space-md);
+    padding: var(--space-sm);
+    background-color: rgba(220, 38, 38, 0.1);
+    border-radius: var(--radius-md);
+    text-align: center;
+}
     </style>
 </head>
 <body>
@@ -857,7 +896,7 @@ body.admin-mode .masteragent-history-table td:nth-child(7) {
                     <option value="">Select Category</option>
                     <option value="D-GAMING">D-GAMING</option>
                     <option value="GACHA">GACHA</option>
-                    <option value="BREM">BREM</option>
+                    <option value="VORTEX">VORTEX</option>
                     <option value="CBWL">CBWL</option>
                     <option value="89ENGINE">89ENGINE</option>
                     <option value="LUXION">LUXION</option>
@@ -983,6 +1022,31 @@ body.admin-mode .masteragent-history-table td:nth-child(7) {
         </div>
     </div>
 </div>
+<!-- Modal Konfirmasi Hapus Semua Data untuk Super Admin -->
+<div id="deleteAllModal" class="modal-overlay">
+    <div class="modal modal-danger">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Hapus Semua Data</h3>
+            <button class="modal-close" onclick="closeDeleteAllModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p><strong>PERINGATAN!</strong> Tindakan ini akan menghapus SEMUA data berikut:</p>
+            <ul style="margin: var(--space-md) 0; padding-left: var(--space-lg);">
+                <li>Semua riwayat Top Up Regular (<span id="regularCount">0</span> data)</li>
+                <li>Semua riwayat Top Up Masteragent (<span id="masteragentCount">0</span> data)</li>
+            </ul>
+            <p>Data yang dihapus <strong>TIDAK DAPAT DIKEMBALIKAN</strong>.</p>
+            <div class="modal-warning-text">
+                <i class="fas fa-lock"></i> Konfirmasi dengan mengetik "HAPUS SEMUA" di bawah
+            </div>
+            <input type="text" id="confirmDeleteAllInput" class="form-input" style="margin-top: var(--space-md);" placeholder="Ketik 'HAPUS SEMUA'">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeDeleteAllModal()">Batal</button>
+            <button class="btn btn-danger-all" id="confirmDeleteAllBtn" disabled>Hapus Semua Data</button>
+        </div>
+    </div>
+</div>
     <script src="sidebar-loader.js"></script>
     <script src="user-profile.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -1040,11 +1104,11 @@ body.admin-mode .masteragent-history-table td:nth-child(7) {
                 "SUPERMASTER (GACHA)"
             ]
         },
-        "BREM": {
+        "VORTEX": {
             credit: 155000000,
             brands: [
-                "UJANGBET (BREM)",
-                "SUPERMASTER (BREM)"
+                "VORTEX (VORTEX)",
+                "SUPERMASTER (VORTEX)"
             ]
         },
         "CBWL": {
@@ -2440,8 +2504,23 @@ if (exportMasteragentBtn) {
             };
             
             // Simpan ke Firestore
-            await db.collection('masteragentHistory').add(historyEntry);
-            
+            const masterDocRef = await db.collection('masteragentHistory').add(historyEntry);
+
+            // ========== KIRIM KE GOOGLE SHEETS ==========
+            sendTopupToExcel({
+                date: historyEntry.date,
+                user: historyEntry.user,
+                userEmail: historyEntry.userEmail,
+                brand: category + ' (Master Agent)',
+                category: category,
+                amount: historyEntry.amount,
+                before: historyEntry.before,
+                after: historyEntry.after,
+                topupId: masterDocRef.id,
+                type: 'Terima'
+            });
+            // ========== SAMPAI SINI ==========
+
             // Update UI
             updateCreditStats();
             
@@ -2460,6 +2539,24 @@ if (exportMasteragentBtn) {
     }
 });
         
+        // ========== KONFIGURASI EXCEL WEBHOOK ==========
+        const TOPUP_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyyVOkvaKVSx6ivciefi4cMYef_BVlSitJr1lPqtSFunqsghHYnYSittqCDRj4z-yr_yQ/exec';
+
+        async function sendTopupToExcel(topupData) {
+            try {
+                await fetch(TOPUP_WEBHOOK_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(topupData)
+                });
+                console.log('✅ Top up data sent to Google Sheets:', topupData.brand);
+            } catch (error) {
+                console.error('❌ Failed to send to Google Sheets:', error);
+            }
+        }
+        // ========== SAMPAI SINI ==========
+
         document.getElementById('topupForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -2500,7 +2597,23 @@ const amount = parseInt(
             };
             
             // Simpan ke Firestore
-            await db.collection('topupHistory').add(historyEntry);
+            // Simpan ke Firestore
+            const docRef = await db.collection('topupHistory').add(historyEntry);
+            
+            // ========== KIRIM KE GOOGLE SHEETS ==========
+            sendTopupToExcel({
+                date: historyEntry.date,
+                user: historyEntry.user,
+                userEmail: historyEntry.userEmail,
+                brand: historyEntry.brand,
+                category: category,
+                amount: historyEntry.amount,
+                before: historyEntry.before,
+                after: historyEntry.after,
+                topupId: docRef.id,
+                type: 'Kirim'
+            });
+            // ========== SAMPAI SINI ==========
             
             // Update UI
             updateCreditStats();
@@ -2623,7 +2736,7 @@ const topupCreditTranslations = {
         // Credit Statistics
         "dGamingCredit": "D-GAMING Credit",
         "gachaCredit": "GACHA Credit", 
-        "bremCredit": "BREM Credit",
+        "vortexCredit": "VORTEX Credit",
         "cbwlCredit": "CBWL Credit",
         "engine89Credit": "89ENGINE Credit",
         "luxionCredit": "LUXION Credit",
@@ -2738,7 +2851,7 @@ const topupCreditTranslations = {
         // Credit Statistics
         "dGamingCredit": "D-GAMING Credit",
         "gachaCredit": "GACHA Credit",
-        "bremCredit": "BREM Credit",
+        "vortexCredit": "VORTEX Credit",
         "cbwlCredit": "CBWL Credit",
         "engine89Credit": "89ENGINE Credit",
         "luxionCredit": "LUXION Credit",
@@ -2853,7 +2966,7 @@ const topupCreditTranslations = {
         // Credit Statistics
         "dGamingCredit": "D-GAMING クレジット",
         "gachaCredit": "GACHA クレジット",
-        "bremCredit": "BREM クレジット",
+        "vortexCredit": "VORTEX クレジット",
         "cbwlCredit": "CBWL クレジット",
         "engine89Credit": "89ENGINE クレジット",
         "luxionCredit": "LUXION クレジット",
@@ -2968,7 +3081,7 @@ const topupCreditTranslations = {
         // Credit Statistics
         "dGamingCredit": "D-GAMING 信用额",
         "gachaCredit": "GACHA 信用额",
-        "bremCredit": "BREM 信用额",
+        "vortexCredit": "VORTEX 信用额",
         "cbwlCredit": "CBWL 信用额",
         "engine89Credit": "89ENGINE 信用额",
         "luxionCredit": "LUXION 信用额",
@@ -3367,8 +3480,8 @@ function updateTopupCreditStatsTranslations(language) {
                 title.textContent = lang.dGamingCredit;
             } else if (titleText.includes('GACHA') && lang.gachaCredit) {
                 title.textContent = lang.gachaCredit;
-            } else if (titleText.includes('BREM') && lang.bremCredit) {
-                title.textContent = lang.bremCredit;
+            } else if (titleText.includes('VORTEX') && lang.vortexCredit) {
+                title.textContent = lang.vortexCredit;
             } else if (titleText.includes('CBWL') && lang.cbwlCredit) {
                 title.textContent = lang.cbwlCredit;
             } else if (titleText.includes('89ENGINE') && lang.engine89Credit) {
@@ -4083,9 +4196,253 @@ function exportToExcel(data, filename, columnHeaders, columns) {
         showToast('Gagal mengekspor data: ' + error.message, 'error');
     }
 }
+// ========== FUNGSI HAPUS SEMUA DATA UNTUK SUPER ADMIN ==========
+
+// Tampilkan modal konfirmasi hapus semua data
+async function showDeleteAllModal() {
+    if (!isSuperAdminUser) {
+        showToast('Hanya Super Admin yang dapat menghapus semua data', 'error');
+        return;
+    }
+    
+    const modal = document.getElementById('deleteAllModal');
+    const regularCountSpan = document.getElementById('regularCount');
+    const masteragentCountSpan = document.getElementById('masteragentCount');
+    const confirmInput = document.getElementById('confirmDeleteAllInput');
+    const confirmBtn = document.getElementById('confirmDeleteAllBtn');
+    
+    if (!modal) {
+        console.error('Delete all modal not found');
+        showToast('Error: Modal tidak ditemukan', 'error');
+        return;
+    }
+    
+    // Update jumlah data yang akan dihapus
+    if (regularCountSpan) {
+        regularCountSpan.textContent = topupHistory.length;
+    }
+    if (masteragentCountSpan) {
+        masteragentCountSpan.textContent = masteragentHistory.length;
+    }
+    
+    // Reset input dan button
+    if (confirmInput) {
+        confirmInput.value = '';
+        confirmInput.disabled = false;
+        setTimeout(() => confirmInput.focus(), 100);
+    }
+    if (confirmBtn) {
+        confirmBtn.disabled = true;
+    }
+    
+    // Setup event listener untuk input konfirmasi
+    const handleConfirmInput = function() {
+        if (confirmInput && confirmBtn) {
+            confirmBtn.disabled = confirmInput.value !== 'HAPUS SEMUA';
+        }
+    };
+    
+    // Hapus listener lama dan tambahkan yang baru
+    confirmInput.removeEventListener('input', handleConfirmInput);
+    confirmInput.addEventListener('input', handleConfirmInput);
+    
+    // Tampilkan modal
+    modal.classList.add('active');
+}
+
+// Tutup modal hapus semua data
+function closeDeleteAllModal() {
+    const modal = document.getElementById('deleteAllModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+    const confirmInput = document.getElementById('confirmDeleteAllInput');
+    if (confirmInput) {
+        confirmInput.value = '';
+    }
+}
+
+// Fungsi untuk menghapus semua data
+async function deleteAllData() {
+    if (!isSuperAdminUser) {
+        showToast('Hanya Super Admin yang dapat menghapus semua data', 'error');
+        return;
+    }
+    
+    // Validasi ulang konfirmasi
+    const confirmInput = document.getElementById('confirmDeleteAllInput');
+    if (!confirmInput || confirmInput.value !== 'HAPUS SEMUA') {
+        showToast('Konfirmasi tidak valid. Ketik "HAPUS SEMUA" untuk melanjutkan.', 'error');
+        return;
+    }
+    
+    const regularCount = topupHistory.length;
+    const masteragentCount = masteragentHistory.length;
+    
+    if (regularCount === 0 && masteragentCount === 0) {
+        showToast('Tidak ada data yang perlu dihapus', 'info');
+        closeDeleteAllModal();
+        return;
+    }
+    
+    // Tampilkan loading state
+    const confirmBtn = document.getElementById('confirmDeleteAllBtn');
+    const originalBtnText = confirmBtn ? confirmBtn.innerHTML : '';
+    if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
+    }
+    
+    try {
+        console.log('🗑️ Starting delete all data process...');
+        
+        // HAPUS SEMUA RIWAYAT REGULAR
+        if (regularCount > 0) {
+            const regularSnapshot = await db.collection('topupHistory').get();
+            
+            if (!regularSnapshot.empty) {
+                const regularBatch = db.batch();
+                regularSnapshot.forEach(doc => {
+                    regularBatch.delete(doc.ref);
+                });
+                await regularBatch.commit();
+                console.log(`✅ Deleted ${regularSnapshot.size} regular history records`);
+            }
+        }
+        
+        // HAPUS SEMUA RIWAYAT MASTERAGENT
+        if (masteragentCount > 0) {
+            const masteragentSnapshot = await db.collection('masteragentHistory').get();
+            
+            if (!masteragentSnapshot.empty) {
+                const masteragentBatch = db.batch();
+                masteragentSnapshot.forEach(doc => {
+                    masteragentBatch.delete(doc.ref);
+                });
+                await masteragentBatch.commit();
+                console.log(`✅ Deleted ${masteragentSnapshot.size} masteragent history records`);
+            }
+        }
+        
+        // Reset data lokal
+        topupHistory = [];
+        masteragentHistory = [];
+        currentRegularPage = 1;
+        currentMasteragentPage = 1;
+        
+        // Update UI
+        updateHistoryTable();
+        updateMasteragentHistoryTable();
+        
+        // Tutup modal
+        closeDeleteAllModal();
+        
+        showToast(`Berhasil menghapus ${regularCount} data regular dan ${masteragentCount} data masteragent`, 'success');
+        
+    } catch (error) {
+        console.error('❌ Error deleting all data:', error);
+        showToast('Gagal menghapus data: ' + (error.message || 'Terjadi kesalahan'), 'error');
+    } finally {
+        // Reset button state
+        if (confirmBtn && originalBtnText) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = originalBtnText;
+        }
+    }
+}
+
+// Tambahkan tombol Hapus Semua Data ke UI Admin (modifikasi fungsi setupAdminUI yang sudah ada)
+// Simpan referensi fungsi asli
+const originalSetupAdminUI = setupAdminUI;
+
+// Override fungsi setupAdminUI untuk menambahkan tombol hapus semua
+setupAdminUI = function(isAdmin) {
+    // Panggil fungsi asli terlebih dahulu
+    if (typeof originalSetupAdminUI === 'function') {
+        originalSetupAdminUI(isAdmin);
+    }
+    
+    const headerActions = document.querySelector('.header-actions');
+    if (!headerActions) return;
+    
+    // Cek apakah tombol hapus semua sudah ada
+    const existingDeleteAllButton = document.querySelector('.delete-all-btn');
+    if (existingDeleteAllButton) return;
+    
+    // Cari container tombol admin yang sudah ada
+    let adminButtons = document.querySelector('.admin-buttons');
+    
+    if (isAdmin) {
+        // Jika container admin buttons belum ada, buat
+        if (!adminButtons) {
+            adminButtons = document.createElement('div');
+            adminButtons.className = 'admin-buttons';
+            
+            // Cari tombol edit credit yang sudah ada
+            const editButton = document.querySelector('.edit-credit-btn');
+            if (editButton) {
+                // Pindahkan tombol edit ke dalam container
+                editButton.remove();
+                adminButtons.appendChild(editButton);
+            }
+            
+            // Tambahkan tombol hapus semua
+            const deleteAllButton = document.createElement('button');
+            deleteAllButton.className = 'btn btn-danger-all delete-all-btn';
+            deleteAllButton.innerHTML = '<i class="fas fa-trash-alt"></i> Hapus Semua Data';
+            deleteAllButton.onclick = showDeleteAllModal;
+            adminButtons.appendChild(deleteAllButton);
+            
+            // Masukkan container ke header actions
+            headerActions.insertBefore(adminButtons, headerActions.firstChild);
+        } else {
+            // Cek apakah tombol hapus semua sudah ada di container
+            if (!adminButtons.querySelector('.delete-all-btn')) {
+                const deleteAllButton = document.createElement('button');
+                deleteAllButton.className = 'btn btn-danger-all delete-all-btn';
+                deleteAllButton.innerHTML = '<i class="fas fa-trash-alt"></i> Hapus Semua Data';
+                deleteAllButton.onclick = showDeleteAllModal;
+                adminButtons.appendChild(deleteAllButton);
+            }
+        }
+    } else {
+        // Jika bukan admin, hapus container jika ada dan kosong
+        if (adminButtons && adminButtons.children.length === 0) {
+            adminButtons.remove();
+        }
+    }
+};
+
+// Event listener untuk tombol konfirmasi hapus setelah DOM siap
+document.addEventListener('DOMContentLoaded', function() {
+    // Tunggu sebentar untuk memastikan elemen sudah ada
+    setTimeout(() => {
+        const confirmDeleteBtn = document.getElementById('confirmDeleteAllBtn');
+        if (confirmDeleteBtn) {
+            // Hapus listener lama jika ada
+            const newConfirmBtn = confirmDeleteBtn.cloneNode(true);
+            confirmDeleteBtn.parentNode.replaceChild(newConfirmBtn, confirmDeleteBtn);
+            newConfirmBtn.addEventListener('click', deleteAllData);
+        }
+        
+        // Event listener untuk close modal via X button
+        const modalCloseButtons = document.querySelectorAll('#deleteAllModal .modal-close');
+        modalCloseButtons.forEach(btn => {
+            btn.removeEventListener('click', closeDeleteAllModal);
+            btn.addEventListener('click', closeDeleteAllModal);
+        });
+        
+        // Tutup modal saat klik di luar
+        const modalOverlay = document.getElementById('deleteAllModal');
+        if (modalOverlay) {
+            modalOverlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeDeleteAllModal();
+                }
+            });
+        }
+    }, 500);
+});
 </script>
 </body>
 </html>
-
-
-
