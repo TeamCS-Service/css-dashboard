@@ -2187,19 +2187,21 @@
         const analytics = firebase.analytics();
 
         // ========== KONFIGURASI EXCEL WEBHOOK ==========
-        const EXCEL_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyVB7Vtysf2eL6Z-K8ez-13fzugM1dyWtV90_AEmASzaCCOwxxaNU2_RAIkDjbBwUYD/exec';   
+        // GANTI BALIK KE URL LAMA
+const EXCEL_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwKFoHPuv6FkxnpaHe8_5H9BLG8nmQ-A8wsiMkqytOPC-o5ON6l2lg06G1zDkod-Qw/exec';   
 
         // Fungsi untuk mengirim data ke Google Sheets
-        async function sendToExcel(reportData) {
-            try {
-                await fetch(EXCEL_WEBHOOK_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(reportData)
-                });
+        // SESUDAH
+async function sendToExcel(reportData) {
+    try {
+        await fetch(EXCEL_WEBHOOK_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'text/plain',
+            },
+            body: JSON.stringify(reportData)
+        });
                 console.log('✅ Data sent to Google Sheets:', reportData.reportId);
                 return true;
             } catch (error) {
@@ -2725,12 +2727,13 @@ const updateData = {
 
 // Kirim update ke Google Sheets
 try {
-    await fetch(EXCEL_WEBHOOK_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updateData)
-    });
+    // SESUDAH
+await fetch(EXCEL_WEBHOOK_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(updateData)
+});
     console.log('✅ Status updated in Google Sheets for:', currentReportId);
 } catch (err) {
     console.error('❌ Failed to update Google Sheets:', err);
