@@ -1159,6 +1159,203 @@ body.admin-mode .masteragent-history-table td:nth-child(7) {
     let filteredRegularHistory = [];
     let filteredMasteragentHistory = [];
 
+    // ========== ACTIVITY LOG FUNCTIONS FOR TOPUP CREDIT ==========
+
+/**
+ * Log aktivitas edit credit (mengubah nominal credit kategori)
+ */
+async function logEditCreditActivity(category, oldValue, newValue) {
+    try {
+        if (window.activityLog && typeof window.activityLog.logActivity === 'function') {
+            await window.activityLog.logActivity('EDIT_CREDIT', {
+                category: category,
+                oldValue: oldValue,
+                newValue: newValue,
+                difference: newValue - oldValue
+            });
+            console.log('✅ Activity log: EDIT CREDIT', category, `${oldValue} → ${newValue}`);
+        } else {
+            console.warn('⚠️ Activity log system not available for edit credit');
+            saveTopupLogToLocalBackup('EDIT_CREDIT', {
+                category: category,
+                oldValue: oldValue,
+                newValue: newValue
+            });
+        }
+    } catch (error) {
+        console.error('Error logging edit credit activity:', error);
+    }
+}
+
+/**
+ * Log aktivitas edit history (mengubah riwayat top up)
+ */
+async function logEditHistoryActivity(historyType, historyId, changes, oldData) {
+    try {
+        const changesSummary = {};
+        for (const [key, change] of Object.entries(changes)) {
+            changesSummary[key] = { from: change.from, to: change.to };
+        }
+        
+        if (window.activityLog && typeof window.activityLog.logActivity === 'function') {
+            await window.activityLog.logActivity('EDIT_HISTORY', {
+                historyType: historyType, // 'regular' atau 'masteragent'
+                historyId: historyId,
+                changes: changesSummary,
+                oldData: {
+                    amount: oldData.amount,
+                    before: oldData.before,
+                    after: oldData.after,
+                    brand: oldData.brand || oldData.category
+                }
+            });
+            console.log('✅ Activity log: EDIT HISTORY', historyType, historyId);
+        } else {
+            console.warn('⚠️ Activity log system not available for edit history');
+            saveTopupLogToLocalBackup('EDIT_HISTORY', {
+                historyType: historyType,
+                historyId: historyId,
+                changes: changesSummary
+            });
+        }
+    } catch (error) {
+        console.error('Error logging edit history activity:', error);
+    }
+}
+
+/**
+ * Log aktivitas delete single history
+ */
+async function logDeleteHistoryActivity(historyType, historyId, historyData) {
+    try {
+        if (window.activityLog && typeof window.activityLog.logDelete === 'function') {
+            await window.activityLog.logDelete('TopupHistory', historyId, `${historyType} - ${historyData.brand || historyData.category}`);
+            console.log('✅ Activity log: DELETE HISTORY', historyType, historyId);
+        } else if (window.activityLog && typeof window.activityLog.logActivity === 'function') {
+            await window.activityLog.logActivity('DELETE_HISTORY', {
+                historyType: historyType,
+                historyId: historyId,
+                amount: historyData.amount,
+                brand: historyData.brand || historyData.category,
+                date: historyData.date
+            });
+            console.log('✅ Activity log: DELETE HISTORY', historyType, historyId);
+        } else {
+            console.warn('⚠️ Activity log system not available for delete history');
+            saveTopupLogToLocalBackup('DELETE_HISTORY', {
+                historyType: historyType,
+                historyId: historyId,
+                amount: historyData.amount
+            });
+        }
+    } catch (error) {
+        console.error('Error logging delete history activity:', error);
+    }
+}
+
+/**
+ * Log aktivitas delete all data (mass delete)
+ */
+async function logMassDeleteTopupActivity(regularCount, masteragentCount, topupTitles = [], masteragentTitles = []) {
+    try {
+        if (window.activityLog && typeof window.activityLog.logActivity === 'function') {
+            await window.activityLog.logActivity('MASS_DELETE_TOPUP', {
+                deletedCount: {
+                    regular: regularCount,
+                    masteragent: masteragentCount,
+                    total: regularCount + masteragentCount
+                },
+                location: 'topup-credit',
+                sampleRegular: topupTitles.slice(0, 3),
+                sampleMasteragent: masteragentTitles.slice(0, 3)
+            });
+            console.log('✅ Activity log: MASS DELETE TOPUP', regularCount, 'regular,', masteragentCount, 'masteragent');
+        } else {
+            console.warn('⚠️ Activity log system not available for mass delete');
+            saveTopupLogToLocalBackup('MASS_DELETE_TOPUP', {
+                deletedCount: { regular: regularCount, masteragent: masteragentCount }
+            });
+        }
+    } catch (error) {
+        console.error('Error logging mass delete activity:', error);
+    }
+}
+
+/**
+ * Log aktivitas top up regular (pengurangan credit)
+ */
+async function logTopupRegularActivity(brand, category, amount, before, after) {
+    try {
+        if (window.activityLog && typeof window.activityLog.logActivity === 'function') {
+            await window.activityLog.logActivity('TOPUP_REGULAR', {
+                brand: brand,
+                category: category,
+                amount: amount,
+                creditBefore: before,
+                creditAfter: after,
+                type: 'Kirim (Pengurangan Credit)'
+            });
+            console.log('✅ Activity log: TOPUP REGULAR', brand, `-${amount}`);
+        } else {
+            console.warn('⚠️ Activity log system not available');
+            saveTopupLogToLocalBackup('TOPUP_REGULAR', {
+                brand: brand,
+                amount: amount
+            });
+        }
+    } catch (error) {
+        console.error('Error logging topup regular activity:', error);
+    }
+}
+
+/**
+ * Log aktivitas top up masteragent (penambahan credit)
+ */
+async function logTopupMasteragentActivity(category, amount, before, after) {
+    try {
+        if (window.activityLog && typeof window.activityLog.logActivity === 'function') {
+            await window.activityLog.logActivity('TOPUP_MASTERAGENT', {
+                category: category,
+                amount: amount,
+                creditBefore: before,
+                creditAfter: after,
+                type: 'Terima (Penambahan Credit)'
+            });
+            console.log('✅ Activity log: TOPUP MASTERAGENT', category, `+${amount}`);
+        } else {
+            console.warn('⚠️ Activity log system not available');
+            saveTopupLogToLocalBackup('TOPUP_MASTERAGENT', {
+                category: category,
+                amount: amount
+            });
+        }
+    } catch (error) {
+        console.error('Error logging topup masteragent activity:', error);
+    }
+}
+
+/**
+ * Fallback function jika activity log tidak tersedia
+ */
+function saveTopupLogToLocalBackup(activity, details) {
+    try {
+        let backups = JSON.parse(localStorage.getItem('activity_logs_backup') || '[]');
+        backups.unshift({
+            activity: activity,
+            details: details,
+            timestamp: new Date().toISOString(),
+            userEmail: firebase.auth().currentUser?.email || 'unknown',
+            userName: localStorage.getItem('adminName') || 'Unknown',
+            userRole: 'super_admin'
+        });
+        if (backups.length > 100) backups = backups.slice(0, 100);
+        localStorage.setItem('activity_logs_backup', JSON.stringify(backups));
+        console.log('📝 Topup log saved to backup:', activity);
+    } catch (error) {
+        console.error('Failed to save backup log:', error);
+    }
+}
+
     // ========== FUNGSI SUPER ADMIN ==========
 
     // Fungsi untuk memeriksa dan setup super admin
@@ -1796,87 +1993,93 @@ async function getCurrentUserData() {
     }
 
     // Fungsi untuk menyimpan perubahan credit
-    async function saveCreditChanges() {
-        console.log('💾 Saving credit changes...');
-        
-        if (!isSuperAdminUser) {
-            showToast('Hanya Super Admin yang dapat mengedit credit', 'error');
-            return;
-        }
-        
-        // Kumpulkan semua perubahan
-        const changes = {};
-        let hasChanges = false;
-        
-        for (const [category, data] of Object.entries(creditData)) {
-            const input = document.getElementById(`edit-${category}`);
-            if (input) {
-                const newValue = parseInt(input.value) || 0;
-                const oldValue = data.credit;
-                
-                if (newValue >= 0 && newValue !== oldValue) {
-                    changes[category] = {
-                        oldValue: oldValue,
-                        newValue: newValue
-                    };
-                    hasChanges = true;
-                    console.log(`📝 ${category}: ${oldValue} → ${newValue}`);
-                }
+    // ========== UPDATE FUNGSI SAVE CREDIT CHANGES DENGAN LOGGING ==========
+async function saveCreditChanges() {
+    console.log('💾 Saving credit changes...');
+    
+    if (!isSuperAdminUser) {
+        showToast('Hanya Super Admin yang dapat mengedit credit', 'error');
+        return;
+    }
+    
+    // Kumpulkan semua perubahan
+    const changes = {};
+    let hasChanges = false;
+    
+    for (const [category, data] of Object.entries(creditData)) {
+        const input = document.getElementById(`edit-${category}`);
+        if (input) {
+            const newValue = parseInt(input.value) || 0;
+            const oldValue = data.credit;
+            
+            if (newValue >= 0 && newValue !== oldValue) {
+                changes[category] = {
+                    oldValue: oldValue,
+                    newValue: newValue
+                };
+                hasChanges = true;
+                console.log(`📝 ${category}: ${oldValue} → ${newValue}`);
             }
         }
+    }
+    
+    if (!hasChanges) {
+        showToast('Tidak ada perubahan yang dilakukan', 'info');
+        return;
+    }
+    
+    try {
+        console.log('💾 Applying credit changes to local data...');
         
-        if (!hasChanges) {
-            showToast('Tidak ada perubahan yang dilakukan', 'info');
-            return;
+        // ========== LOG EDIT CREDIT ACTIVITY ==========
+        for (const [category, change] of Object.entries(changes)) {
+            await logEditCreditActivity(category, change.oldValue, change.newValue);
         }
         
+        // Update data lokal
+        for (const [category, change] of Object.entries(changes)) {
+            creditData[category].credit = change.newValue;
+        }
+        
+        console.log('🔥 Saving to Firestore...');
+        // Simpan ke Firestore
+        await db.collection('creditData').doc('brands').set(creditData);
+        
+        // Update UI
+        updateCreditStats();
+        updateBrandDropdown();
+        
+        // Tutup modal
+        const modal = document.getElementById('editCreditModal');
+        if (modal) {
+            modal.classList.remove('active');
+        }
+        
+        showToast('Nominal credit berhasil diperbarui!', 'success');
+        console.log('✅ Credit changes saved successfully');
+        
+    } catch (error) {
+        console.error("❌ Error saving credit changes:", error);
+        showToast("Gagal menyimpan perubahan ke server", "error");
+        
+        // Fallback ke localStorage
         try {
-            console.log('💾 Applying credit changes to local data...');
-            
-            // Update data lokal
-            for (const [category, change] of Object.entries(changes)) {
-                creditData[category].credit = change.newValue;
-            }
-            
-            console.log('🔥 Saving to Firestore...');
-            // Simpan ke Firestore
-            await db.collection('creditData').doc('brands').set(creditData);
-            
-            // Update UI
+            localStorage.setItem('creditData', JSON.stringify(creditData));
             updateCreditStats();
             updateBrandDropdown();
             
-            // Tutup modal
             const modal = document.getElementById('editCreditModal');
             if (modal) {
                 modal.classList.remove('active');
             }
             
-            showToast('Nominal credit berhasil diperbarui!', 'success');
-            console.log('✅ Credit changes saved successfully');
-            
-        } catch (error) {
-            console.error("❌ Error saving credit changes:", error);
-            showToast("Gagal menyimpan perubahan ke server", "error");
-            
-            // Fallback ke localStorage
-            try {
-                localStorage.setItem('creditData', JSON.stringify(creditData));
-                updateCreditStats();
-                updateBrandDropdown();
-                
-                const modal = document.getElementById('editCreditModal');
-                if (modal) {
-                    modal.classList.remove('active');
-                }
-                
-                showToast('Nominal credit berhasil diperbarui (offline mode)', 'success');
-            } catch (fallbackError) {
-                console.error("❌ Fallback also failed:", fallbackError);
-                showToast("Gagal menyimpan perubahan", "error");
-            }
+            showToast('Nominal credit berhasil diperbarui (offline mode)', 'success');
+        } catch (fallbackError) {
+            console.error("❌ Fallback also failed:", fallbackError);
+            showToast("Gagal menyimpan perubahan", "error");
         }
     }
+}
 
     // ========== FUNGSI EDIT HISTORY ==========
 
@@ -2102,7 +2305,8 @@ async function getOldHistoryAmount(historyId, historyType) {
 }
 
     // Fungsi untuk menyimpan perubahan riwayat
-    async function saveHistoryChanges() {
+    // ========== UPDATE FUNGSI SAVE HISTORY CHANGES DENGAN LOGGING ==========
+async function saveHistoryChanges() {
     if (!isSuperAdminUser) {
         showToast('Hanya Super Admin yang dapat mengedit riwayat', 'error');
         return;
@@ -2118,7 +2322,7 @@ async function getOldHistoryAmount(historyId, historyType) {
     }
     
     try {
-        // 🔴 DAPATKAN OLD DATA SEBELUM UPDATE
+        // Dapatkan OLD DATA sebelum update
         const oldAmount = await getOldHistoryAmount(historyId, historyType);
         
         // Ambil nilai dari input (gunakan raw value jika ada)
@@ -2128,32 +2332,55 @@ async function getOldHistoryAmount(historyId, historyType) {
                    parseInt(input.value.replace(/[^\d]/g, '')) || 0;
         };
         
-// ✅ KODE BARU (BENAR):
-// Dapatkan data history item yang akan diupdate
-const historyData = historyType === 'regular' ? topupHistory : masteragentHistory;
-const historyItem = historyData.find(item => item.id === historyId);
-
-if (!historyItem) {
-    showToast('Data riwayat tidak ditemukan', 'error');
-    return;
-}
-
-const updatedData = {
-    date: document.getElementById('edit-history-date').value,
-    user: historyItem.user, // ✅ PERTAHANKAN NAMA USER YANG SUDAH ADA
-    userEmail: historyItem.userEmail,
-    userId: historyItem.userId,
-    amount: getRawValue('edit-history-amount'),
-    before: getRawValue('edit-history-before'),
-    after: getRawValue('edit-history-after'),
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-};
+        // Dapatkan data history item yang akan diupdate
+        const historyData = historyType === 'regular' ? topupHistory : masteragentHistory;
+        const historyItem = historyData.find(item => item.id === historyId);
         
-        // Validasi data
-        if (!updatedData.date || !updatedData.amount || !updatedData.before || !updatedData.after) {
-            showToast('Semua field harus diisi dengan benar', 'error');
+        if (!historyItem) {
+            showToast('Data riwayat tidak ditemukan', 'error');
             return;
         }
+        
+        const newAmount = getRawValue('edit-history-amount');
+        const newBefore = getRawValue('edit-history-before');
+        const newAfter = getRawValue('edit-history-after');
+        const newDate = document.getElementById('edit-history-date').value;
+        
+        // Kumpulkan perubahan
+        const changes = {};
+        if (historyItem.amount !== newAmount) changes.amount = { from: historyItem.amount, to: newAmount };
+        if (historyItem.before !== newBefore) changes.before = { from: historyItem.before, to: newBefore };
+        if (historyItem.after !== newAfter) changes.after = { from: historyItem.after, to: newAfter };
+        if (historyItem.date !== newDate) changes.date = { from: historyItem.date, to: newDate };
+        
+        if (historyType === 'regular') {
+            const newBrand = document.getElementById('edit-history-brand').value;
+            if (historyItem.brand !== newBrand) changes.brand = { from: historyItem.brand, to: newBrand };
+        } else {
+            const newCategory = document.getElementById('edit-history-category').value;
+            if (historyItem.category !== newCategory) changes.category = { from: historyItem.category, to: newCategory };
+        }
+        
+        // Jika tidak ada perubahan
+        if (Object.keys(changes).length === 0) {
+            showToast('Tidak ada perubahan yang dilakukan', 'info');
+            modal.classList.remove('active');
+            return;
+        }
+        
+        // ========== LOG EDIT HISTORY ACTIVITY ==========
+        await logEditHistoryActivity(historyType, historyId, changes, historyItem);
+        
+        const updatedData = {
+            date: newDate,
+            user: historyItem.user,
+            userEmail: historyItem.userEmail,
+            userId: historyItem.userId,
+            amount: newAmount,
+            before: newBefore,
+            after: newAfter,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
         
         // Tambahkan field khusus berdasarkan tipe
         if (historyType === 'regular') {
@@ -2170,25 +2397,21 @@ const updatedData = {
             }
         }
         
-        console.log('📝 History update data:', {
-            oldAmount,
-            newAmount: updatedData.amount,
-            difference: updatedData.amount - oldAmount
-        });
+        console.log('📝 History update data:', { changes });
         
         const collectionName = historyType === 'regular' ? 'topupHistory' : 'masteragentHistory';
         
-        // ✅ 1. UPDATE CREDIT DULU berdasarkan perubahan amount
+        // 1. UPDATE CREDIT DULU berdasarkan perubahan amount
         await updateCreditFromHistoryChange(historyId, historyType, updatedData);
         
-        // ✅ 2. BARU UPDATE HISTORY
+        // 2. BARU UPDATE HISTORY
         await db.collection(collectionName).doc(historyId).update(updatedData);
         
         showToast('Riwayat berhasil diperbarui', 'success');
         modal.classList.remove('active');
         
         // Refresh semua UI
-        updateCreditStats(); // ✅ Update top bar
+        updateCreditStats();
         if (historyType === 'regular') {
             updateHistoryTable();
         } else {
@@ -2204,44 +2427,51 @@ const updatedData = {
     // ========== FUNGSI DELETE HISTORY ==========
 
     // Fungsi untuk menghapus item riwayat
-    async function deleteHistoryItem(historyId, historyType) {
-        if (!isSuperAdminUser) {
-            showToast('Hanya Super Admin yang dapat menghapus riwayat', 'error');
-            return;
-        }
-        
-        const confirmation = confirm('Apakah Anda yakin ingin menghapus riwayat ini?');
-        if (!confirmation) return;
-        
-        try {
-            const collectionName = historyType === 'regular' ? 'topupHistory' : 'masteragentHistory';
-            
-            // Dapatkan data sebelum menghapus untuk update credit
-            const historyDoc = await db.collection(collectionName).doc(historyId).get();
-            if (historyDoc.exists) {
-                const historyData = historyDoc.data();
-                
-                // Kembalikan credit ke keadaan semula
-                await revertCreditFromHistory(historyData, historyType);
-            }
-            
-            // Hapus dari Firestore
-            await db.collection(collectionName).doc(historyId).delete();
-            
-            showToast('Riwayat berhasil dihapus', 'success');
-            
-            // Refresh tabel
-            if (historyType === 'regular') {
-                updateHistoryTable();
-            } else {
-                updateMasteragentHistoryTable();
-            }
-            
-        } catch (error) {
-            console.error('Error deleting history:', error);
-            showToast('Gagal menghapus riwayat', 'error');
-        }
+    // ========== UPDATE FUNGSI DELETE HISTORY ITEM DENGAN LOGGING ==========
+async function deleteHistoryItem(historyId, historyType) {
+    if (!isSuperAdminUser) {
+        showToast('Hanya Super Admin yang dapat menghapus riwayat', 'error');
+        return;
     }
+    
+    const confirmation = confirm('Apakah Anda yakin ingin menghapus riwayat ini?');
+    if (!confirmation) return;
+    
+    try {
+        const collectionName = historyType === 'regular' ? 'topupHistory' : 'masteragentHistory';
+        
+        // Dapatkan data sebelum menghapus untuk logging
+        const historyDoc = await db.collection(collectionName).doc(historyId).get();
+        if (historyDoc.exists) {
+            const historyData = historyDoc.data();
+            
+            // ========== LOG DELETE HISTORY ACTIVITY ==========
+            await logDeleteHistoryActivity(historyType, historyId, historyData);
+            
+            // Kembalikan credit ke keadaan semula
+            await revertCreditFromHistory(historyData, historyType);
+        }
+        
+        // Hapus dari Firestore
+        await db.collection(collectionName).doc(historyId).delete();
+        
+        showToast('Riwayat berhasil dihapus', 'success');
+        
+        // Refresh tabel
+        if (historyType === 'regular') {
+            updateHistoryTable();
+        } else {
+            updateMasteragentHistoryTable();
+        }
+        
+        // Refresh credit stats
+        updateCreditStats();
+        
+    } catch (error) {
+        console.error('Error deleting history:', error);
+        showToast('Gagal menghapus riwayat', 'error');
+    }
+}
 
     // Fungsi untuk mengembalikan credit saat menghapus history
     // Fungsi untuk mengembalikan credit saat menghapus history - VERSI DIPERBAIKI
@@ -2567,30 +2797,25 @@ if (exportMasteragentBtn) {
     const brandSelect = document.getElementById('brandSelect');
     const brand = brandSelect.value;
     const category = brandSelect.options[brandSelect.selectedIndex]?.dataset.category;
-const amount = parseInt(
-    document.getElementById('topupAmount').value.replace(/\./g, '')
-);
+    const amount = parseInt(document.getElementById('topupAmount').value.replace(/\./g, ''));
     
     if (!brand || !category || isNaN(amount) || amount <= 0) {
         showToast('Semua field harus diisi dengan benar', 'error');
         return;
     }
     
-    // Kurangi credit dari kategori yang dipilih
     if (creditData[category].credit >= amount) {
         const currentCredit = creditData[category].credit;
         creditData[category].credit -= amount;
         
         try {
-            // Simpan ke Firestore
             await db.collection('creditData').doc('brands').set(creditData);
             
-            // Tambahkan ke history - GUNAKAN FUNGSI YANG SUDAH DIPERBAIKI
             const userData = await getCurrentUserData();
             
             const historyEntry = {
                 date: new Date().toLocaleString('id-ID'),
-                user: userData.name, // ✅ INI AKAN MENGAMBIL NAMA DARI FIRESTORE
+                user: userData.name,
                 userEmail: userData.email,
                 userId: userData.uid,
                 brand: brand,
@@ -2600,11 +2825,12 @@ const amount = parseInt(
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
             
-            // Simpan ke Firestore
-            // Simpan ke Firestore
             const docRef = await db.collection('topupHistory').add(historyEntry);
             
-            // ========== KIRIM KE GOOGLE SHEETS ==========
+            // ========== TAMBAHKAN LOGGING DI SINI ==========
+            await logTopupRegularActivity(brand, category, amount, currentCredit, currentCredit - amount);
+            // ========== SAMPAI SINI ==========
+            
             sendTopupToExcel({
                 date: historyEntry.date,
                 user: historyEntry.user,
@@ -2617,12 +2843,8 @@ const amount = parseInt(
                 topupId: docRef.id,
                 type: 'Kirim'
             });
-            // ========== SAMPAI SINI ==========
             
-            // Update UI
             updateCreditStats();
-            
-            // Reset form
             this.reset();
             document.getElementById('currentCredit').value = '';
             document.getElementById('newCredit').value = '';
@@ -4267,6 +4489,7 @@ function closeDeleteAllModal() {
 }
 
 // Fungsi untuk menghapus semua data
+// ========== UPDATE FUNGSI DELETE ALL DATA DENGAN LOGGING ==========
 async function deleteAllData() {
     if (!isSuperAdminUser) {
         showToast('Hanya Super Admin yang dapat menghapus semua data', 'error');
@@ -4289,6 +4512,10 @@ async function deleteAllData() {
         return;
     }
     
+    // Ambil sample titles untuk logging
+    const regularTitles = topupHistory.slice(0, 3).map(item => `${item.brand}: ${formatNumber(item.amount)}`);
+    const masteragentTitles = masteragentHistory.slice(0, 3).map(item => `${item.category}: ${formatNumber(item.amount)}`);
+    
     // Tampilkan loading state
     const confirmBtn = document.getElementById('confirmDeleteAllBtn');
     const originalBtnText = confirmBtn ? confirmBtn.innerHTML : '';
@@ -4300,16 +4527,35 @@ async function deleteAllData() {
     try {
         console.log('🗑️ Starting delete all data process...');
         
+        // ========== LOG MASS DELETE ACTIVITY ==========
+        await logMassDeleteTopupActivity(regularCount, masteragentCount, regularTitles, masteragentTitles);
+        
         // HAPUS SEMUA RIWAYAT REGULAR
         if (regularCount > 0) {
             const regularSnapshot = await db.collection('topupHistory').get();
             
             if (!regularSnapshot.empty) {
-                const regularBatch = db.batch();
-                regularSnapshot.forEach(doc => {
-                    regularBatch.delete(doc.ref);
-                });
-                await regularBatch.commit();
+                // Hapus batch per 500 dokumen
+                const batches = [];
+                let batch = db.batch();
+                let count = 0;
+                
+                for (const doc of regularSnapshot.docs) {
+                    batch.delete(doc.ref);
+                    count++;
+                    
+                    if (count === 500) {
+                        batches.push(batch.commit());
+                        batch = db.batch();
+                        count = 0;
+                    }
+                }
+                
+                if (count > 0) {
+                    batches.push(batch.commit());
+                }
+                
+                await Promise.all(batches);
                 console.log(`✅ Deleted ${regularSnapshot.size} regular history records`);
             }
         }
@@ -4319,11 +4565,26 @@ async function deleteAllData() {
             const masteragentSnapshot = await db.collection('masteragentHistory').get();
             
             if (!masteragentSnapshot.empty) {
-                const masteragentBatch = db.batch();
-                masteragentSnapshot.forEach(doc => {
-                    masteragentBatch.delete(doc.ref);
-                });
-                await masteragentBatch.commit();
+                const batches = [];
+                let batch = db.batch();
+                let count = 0;
+                
+                for (const doc of masteragentSnapshot.docs) {
+                    batch.delete(doc.ref);
+                    count++;
+                    
+                    if (count === 500) {
+                        batches.push(batch.commit());
+                        batch = db.batch();
+                        count = 0;
+                    }
+                }
+                
+                if (count > 0) {
+                    batches.push(batch.commit());
+                }
+                
+                await Promise.all(batches);
                 console.log(`✅ Deleted ${masteragentSnapshot.size} masteragent history records`);
             }
         }
