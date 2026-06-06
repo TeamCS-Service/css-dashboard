@@ -1946,6 +1946,110 @@ let currentReportId = null;
 let currentPage = 1;
 const reportsPerPage = 10;
 
+// ========== ACTIVITY LOG FUNCTIONS FOR SOLVED REPORTS ==========
+// Tambahkan fungsi-fungsi ini setelah deklarasi variabel global
+
+/**
+ * Log aktivitas reopen report
+ */
+async function logReopenReportActivity(reportId, reportTitle, reportData = {}) {
+    try {
+        if (window.activityLog && typeof window.activityLog.logActivity === 'function') {
+            await window.activityLog.logActivity('REOPEN_REPORT', {
+                reportId: reportId,
+                reportTitle: reportTitle,
+                previousStatus: 'completed',
+                newStatus: 'pending',
+                category: reportData.category || 'N/A',
+                brand: reportData.brand || 'N/A'
+            });
+            console.log('✅ Activity log: REOPEN Report', reportId, reportTitle);
+        } else {
+            console.warn('⚠️ Activity log system not available for reopen');
+            saveReportLogToLocalBackup('REOPEN_REPORT', {
+                reportId: reportId,
+                reportTitle: reportTitle,
+                previousStatus: 'completed',
+                newStatus: 'pending'
+            });
+        }
+    } catch (error) {
+        console.error('Error logging reopen activity:', error);
+    }
+}
+
+/**
+ * Log aktivitas delete single report
+ */
+async function logDeleteReportActivity(reportId, reportTitle) {
+    try {
+        if (window.activityLog && typeof window.activityLog.logDelete === 'function') {
+            await window.activityLog.logDelete('Report', reportId, reportTitle);
+            console.log('✅ Activity log: DELETE Report', reportId, reportTitle);
+        } else if (window.activityLog && typeof window.activityLog.logActivity === 'function') {
+            await window.activityLog.logActivity('DELETE_REPORT', {
+                reportId: reportId,
+                reportTitle: reportTitle
+            });
+            console.log('✅ Activity log: DELETE Report', reportId);
+        } else {
+            console.warn('⚠️ Activity log system not available for delete');
+            saveReportLogToLocalBackup('DELETE_REPORT', {
+                reportId: reportId,
+                reportTitle: reportTitle
+            });
+        }
+    } catch (error) {
+        console.error('Error logging delete activity:', error);
+    }
+}
+
+/**
+ * Log aktivitas delete all reports
+ */
+async function logMassDeleteReportsActivity(count, reportTitles = []) {
+    try {
+        if (window.activityLog && typeof window.activityLog.logActivity === 'function') {
+            await window.activityLog.logActivity('MASS_DELETE_REPORTS', {
+                deletedCount: count,
+                location: 'solved-reports',
+                sampleTitles: reportTitles.slice(0, 5)
+            });
+            console.log('✅ Activity log: MASS DELETE', count, 'reports');
+        } else {
+            console.warn('⚠️ Activity log system not available for mass delete');
+            saveReportLogToLocalBackup('MASS_DELETE_REPORTS', {
+                deletedCount: count,
+                location: 'solved-reports'
+            });
+        }
+    } catch (error) {
+        console.error('Error logging mass delete activity:', error);
+    }
+}
+
+/**
+ * Fallback function jika activity log tidak tersedia
+ */
+function saveReportLogToLocalBackup(activity, details) {
+    try {
+        let backups = JSON.parse(localStorage.getItem('activity_logs_backup') || '[]');
+        backups.unshift({
+            activity: activity,
+            details: details,
+            timestamp: new Date().toISOString(),
+            userEmail: auth.currentUser?.email || 'unknown',
+            userName: localStorage.getItem('adminName') || 'Unknown',
+            userRole: 'super_admin'
+        });
+        if (backups.length > 100) backups = backups.slice(0, 100);
+        localStorage.setItem('activity_logs_backup', JSON.stringify(backups));
+        console.log('📝 Report log saved to backup:', activity);
+    } catch (error) {
+        console.error('Failed to save backup log:', error);
+    }
+}
+
 // ========== FUNGSI SCREENSHOT ==========
 
 // Fungsi untuk membuka modal gambar
@@ -2231,19 +2335,34 @@ async function deleteReport(reportId) {
         // Cek lagi apakah user adalah super admin
         const isAdmin = await isSuperAdmin();
         if (!isAdmin) {
-            showToast("Access denied: Only super admin can delete reports", "error");
+            showToast(getSolvedTranslation('accessDenied'), "error");
             return;
         }
         
+        // Ambil data report sebelum dihapus untuk logging
+        const reportDoc = await db.collection('solvedReports').doc(reportId).get();
+        
+        if (!reportDoc.exists) {
+            showToast("Report not found", "error");
+            return;
+        }
+        
+        const reportData = reportDoc.data();
+        const reportTitle = reportData.title || 'Untitled';
+        
+        // ========== LOG DELETE ACTIVITY ==========
+        console.log('📝 Logging delete activity for report:', reportId, reportTitle);
+        await logDeleteReportActivity(reportId, reportTitle);
+        
         await db.collection('solvedReports').doc(reportId).delete();
-        showToast("Report deleted successfully", "success");
+        showToast(getSolvedTranslation('deleteSuccess'), "success");
         
         // Refresh data
         setupSolvedReportsListener();
         
     } catch (error) {
         console.error("Error deleting report:", error);
-        showToast("Error deleting report", "error");
+        showToast(getSolvedTranslation('deleteError'), "error");
     }
 }
 
@@ -2756,35 +2875,48 @@ async function reopenReport(reportId) {
     const solvedReportRef = db.collection('solvedReports').doc(reportId);
     const pendingReportRef = db.collection('pendingReports').doc(reportId);
 
-    // Pertama, ambil data dari solvedReports
-    solvedReportRef.get().then((doc) => {
-        if (doc.exists) {
-            const reportData = doc.data();
-            
-            // Pindahkan ke pendingReports dengan status pending
-            pendingReportRef.set({
-                ...reportData,
-                status: 'pending',
-                dateSolved: null,
-                resolution: null,
-                completedBy: null,
-                dateUpdated: new Date()
-            })
-            .then(() => {
-                // Hapus dari solvedReports
-                return solvedReportRef.delete();
-            })
-            .then(() => {
-                showToast("Report reopened successfully", "success");
-                document.getElementById('reopenConfirmModal').classList.remove('active');
-                document.getElementById('reportDetailsModal').classList.remove('active');
-            })
-            .catch(error => {
-                console.error("Error reopening report:", error);
-                showToast("Error reopening report", "error");
-            });
+    try {
+        // Ambil data report terlebih dahulu untuk logging
+        const solvedDoc = await solvedReportRef.get();
+        
+        if (!solvedDoc.exists) {
+            showToast("Report not found", "error");
+            document.getElementById('reopenConfirmModal').classList.remove('active');
+            return;
         }
-    });
+        
+        const reportData = solvedDoc.data();
+        const reportTitle = reportData.title || 'Untitled';
+        
+        // ========== LOG REOPEN ACTIVITY ==========
+        console.log('📝 Logging reopen activity for report:', reportId, reportTitle);
+        await logReopenReportActivity(reportId, reportTitle, reportData);
+        
+        // Pindahkan ke pendingReports dengan status pending
+        await pendingReportRef.set({
+            ...reportData,
+            status: 'pending',
+            dateSolved: null,
+            resolution: null,
+            completedBy: null,
+            completedByName: null,
+            dateUpdated: new Date()
+        });
+        
+        // Hapus dari solvedReports
+        await solvedReportRef.delete();
+        
+        showToast(getSolvedTranslation('reopenSuccess'), "success");
+        document.getElementById('reopenConfirmModal').classList.remove('active');
+        document.getElementById('reportDetailsModal').classList.remove('active');
+        
+        // Refresh data
+        setupSolvedReportsListener();
+        
+    } catch (error) {
+        console.error("Error reopening report:", error);
+        showToast(getSolvedTranslation('reopenError'), "error");
+    }
 }
 
 function showToast(message, type = "info") {
@@ -3642,7 +3774,7 @@ async function deleteAllReports() {
     // Cek apakah user adalah super admin
     const isAdmin = await isSuperAdmin();
     if (!isAdmin) {
-        showToast("Access denied: Only super admin can delete all reports", "error");
+        showToast(getSolvedTranslation('accessDenied'), "error");
         return;
     }
     
@@ -3656,56 +3788,65 @@ async function deleteAllReports() {
     try {
         showToast(`Deleting ${totalReports} reports...`, "info");
         
-        // Gunakan batch delete untuk efisiensi
-        const batch = db.batch();
-        let batchCount = 0;
-        let deletedCount = 0;
+        // Ambil daftar judul report untuk logging
+        const reportTitles = solvedReports.map(report => report.title || 'Untitled');
         
-        // Firestore batch memiliki batas 500 operasi per batch
-        for (let i = 0; i < solvedReports.length; i++) {
-            const report = solvedReports[i];
-            const reportRef = db.collection('solvedReports').doc(report.id);
-            batch.delete(reportRef);
-            batchCount++;
+        // ========== LOG MASS DELETE ACTIVITY ==========
+        console.log('📝 Logging mass delete activity for:', totalReports, 'reports');
+        await logMassDeleteReportsActivity(totalReports, reportTitles);
+        
+        let deletedCount = 0;
+        let errorCount = 0;
+        
+        // Hapus batch per 10 dokumen untuk performa lebih baik
+        const batchSize = 10;
+        
+        for (let i = 0; i < solvedReports.length; i += batchSize) {
+            const batch = db.batch();
+            const batchReports = solvedReports.slice(i, i + batchSize);
             
-            // Commit batch setiap 500 operasi
-            if (batchCount === 500) {
+            batchReports.forEach(report => {
+                const docRef = db.collection('solvedReports').doc(report.id);
+                batch.delete(docRef);
+            });
+            
+            try {
                 await batch.commit();
-                deletedCount += batchCount;
-                batchCount = 0;
-                // Buat batch baru untuk sisa data
-                if (i < solvedReports.length - 1) {
-                    const newBatch = db.batch();
-                    // Lanjutkan dengan batch baru
-                    for (let j = i + 1; j < solvedReports.length; j++) {
-                        const nextReport = solvedReports[j];
-                        const nextRef = db.collection('solvedReports').doc(nextReport.id);
-                        newBatch.delete(nextRef);
-                        if ((j - (i + 1) + 1) % 500 === 0 || j === solvedReports.length - 1) {
-                            await newBatch.commit();
-                            deletedCount += (j - (i + 1) + 1);
-                            break;
-                        }
+                deletedCount += batchReports.length;
+                console.log(`✅ Deleted batch ${Math.floor(i / batchSize) + 1}: ${batchReports.length} reports`);
+            } catch (batchError) {
+                console.error('Batch delete error:', batchError);
+                errorCount++;
+                // Fallback: hapus satu per satu
+                for (const report of batchReports) {
+                    try {
+                        await db.collection('solvedReports').doc(report.id).delete();
+                        deletedCount++;
+                    } catch (singleError) {
+                        console.error(`Error deleting report ${report.id}:`, singleError);
+                        errorCount++;
                     }
-                    break;
                 }
+            }
+            
+            // Update progress setiap 20 report
+            if (deletedCount % 20 === 0 || deletedCount === totalReports) {
+                showToast(`Deleting: ${deletedCount}/${totalReports} reports...`, "info");
             }
         }
         
-        // Commit batch terakhir jika ada
-        if (batchCount > 0) {
-            await batch.commit();
-            deletedCount += batchCount;
+        if (errorCount > 0) {
+            showToast(`Deleted ${deletedCount} reports, ${errorCount} errors`, "warning");
+        } else {
+            showToast(getSolvedTranslation('deleteAllSuccess').replace('{count}', deletedCount), "success");
         }
-        
-        showToast(`Successfully deleted ${deletedCount} reports`, "success");
         
         // Refresh data
         setupSolvedReportsListener();
         
     } catch (error) {
         console.error("Error deleting all reports:", error);
-        showToast("Error deleting reports: " + error.message, "error");
+        showToast(getSolvedTranslation('deleteAllError'), "error");
     }
 }
 
