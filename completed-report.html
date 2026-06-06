@@ -1414,6 +1414,57 @@
         align-items: flex-start;
         gap: 12px;
     }
+    /* Tambahkan CSS ini untuk loading indicator saat delete massal */
+.delete-progress-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+    backdrop-filter: blur(4px);
+}
+
+.delete-progress-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    min-width: 300px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.delete-progress-card i {
+    font-size: 3rem;
+    color: var(--danger);
+    margin-bottom: 15px;
+}
+
+.delete-progress-card .progress-text {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 15px 0;
+}
+
+.delete-progress-card .progress-bar {
+    height: 8px;
+    background: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 15px;
+}
+
+.delete-progress-card .progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 4px;
+}
 }
 
 </style>
@@ -1972,73 +2023,114 @@ async function isSuperAdmin() {
         }
     });
 }
-// ========== ACTIVITY LOG FUNCTIONS FOR COMPLETED MAINTENANCE ==========
-// Mengikuti pola yang sama seperti di maintenance.html dan pending-reports.html
+// ========== TAMBAHKAN FUNGSI LOG UNTUK REOPEN ==========
+// Pastikan fungsi ini sudah ada di activity-log.js, jika belum tambahkan:
 
 // Fungsi untuk log Reopen Task
 async function logReopenActivity(taskId, taskTitle, oldData = {}) {
-    if (typeof logActivity !== 'undefined') {
-        logActivity('REOPEN_MAINTENANCE', {
+    if (window.activityLog && typeof window.activityLog.logActivity === 'function') {
+        await window.activityLog.logActivity('REOPEN_MAINTENANCE', {
             taskId: taskId,
             taskTitle: taskTitle,
             previousStatus: 'completed',
             newStatus: 'pending',
             category: oldData.category || 'N/A',
-            provider: oldData.provider || oldData.brand || 'N/A',
-            reopenedBy: currentUser ? (currentUser.displayName || currentUser.email) : 'System'
+            provider: oldData.provider || oldData.brand || 'N/A'
         });
         console.log('✅ Activity log: REOPEN MaintenanceTask', taskId, taskTitle);
     } else {
-        console.warn('⚠️ logActivity function not available');
+        console.warn('⚠️ Activity log system not available');
+        // Fallback: simpan ke localStorage
+        saveLogToLocalBackup('REOPEN_MAINTENANCE', {
+            taskId: taskId,
+            taskTitle: taskTitle,
+            previousStatus: 'completed',
+            newStatus: 'pending'
+        });
     }
 }
 
 // Fungsi untuk log Edit Task
 async function logEditActivity(taskId, taskTitle, changes, oldData) {
-    if (typeof logUpdate !== 'undefined') {
-        logUpdate('MaintenanceTask', taskId, changes);
+    if (window.activityLog && typeof window.activityLog.logUpdate === 'function') {
+        await window.activityLog.logUpdate('MaintenanceTask', taskId, changes);
         console.log('✅ Activity log: UPDATE MaintenanceTask', taskId, changes);
-    } else if (typeof logActivity !== 'undefined') {
-        logActivity('EDIT_MAINTENANCE', {
+    } else if (window.activityLog && typeof window.activityLog.logActivity === 'function') {
+        await window.activityLog.logActivity('EDIT_MAINTENANCE', {
             taskId: taskId,
             taskTitle: taskTitle,
             changes: changes,
-            editedBy: currentUser ? (currentUser.displayName || currentUser.email) : 'System'
+            oldData: {
+                category: oldData.category,
+                provider: oldData.provider || oldData.brand,
+                assignedTo: oldData.assignedTo
+            }
         });
         console.log('✅ Activity log: EDIT MaintenanceTask', taskId);
     } else {
-        console.warn('⚠️ logUpdate/logActivity function not available');
+        console.warn('⚠️ Activity log system not available');
+        saveLogToLocalBackup('EDIT_MAINTENANCE', {
+            taskId: taskId,
+            taskTitle: taskTitle,
+            changes: changes
+        });
     }
 }
 
 // Fungsi untuk log Delete Single Task
 async function logDeleteActivity(taskId, taskTitle) {
-    if (typeof logDelete !== 'undefined') {
-        logDelete('MaintenanceTask', taskId, taskTitle);
+    if (window.activityLog && typeof window.activityLog.logDelete === 'function') {
+        await window.activityLog.logDelete('MaintenanceTask', taskId, taskTitle);
         console.log('✅ Activity log: DELETE MaintenanceTask', taskId, taskTitle);
-    } else if (typeof logActivity !== 'undefined') {
-        logActivity('DELETE_MAINTENANCE', {
+    } else if (window.activityLog && typeof window.activityLog.logActivity === 'function') {
+        await window.activityLog.logActivity('DELETE_MAINTENANCE', {
             taskId: taskId,
-            taskTitle: taskTitle,
-            deletedBy: currentUser ? (currentUser.displayName || currentUser.email) : 'System'
+            taskTitle: taskTitle
         });
         console.log('✅ Activity log: DELETE MaintenanceTask', taskId);
     } else {
-        console.warn('⚠️ logDelete/logActivity function not available');
+        console.warn('⚠️ Activity log system not available');
+        saveLogToLocalBackup('DELETE_MAINTENANCE', {
+            taskId: taskId,
+            taskTitle: taskTitle
+        });
     }
 }
 
 // Fungsi untuk log Mass Delete
-async function logMassDeleteActivity(count) {
-    if (typeof logActivity !== 'undefined') {
-        logActivity('MASS_DELETE_MAINTENANCE', {
+async function logMassDeleteActivity(count, taskTitles = []) {
+    if (window.activityLog && typeof window.activityLog.logActivity === 'function') {
+        await window.activityLog.logActivity('MASS_DELETE_MAINTENANCE', {
             deletedCount: count,
             location: 'completed-maintenance',
-            deletedBy: currentUser ? (currentUser.displayName || currentUser.email) : 'System'
+            sampleTitles: taskTitles.slice(0, 5) // Simpan 5 judul pertama sebagai contoh
         });
         console.log('✅ Activity log: MASS DELETE', count, 'tasks');
     } else {
-        console.warn('⚠️ logActivity function not available');
+        console.warn('⚠️ Activity log system not available');
+        saveLogToLocalBackup('MASS_DELETE_MAINTENANCE', {
+            deletedCount: count,
+            location: 'completed-maintenance'
+        });
+    }
+}
+
+// Fallback function jika activity log tidak tersedia
+function saveLogToLocalBackup(activity, details) {
+    try {
+        let backups = JSON.parse(localStorage.getItem('activity_logs_backup') || '[]');
+        backups.unshift({
+            activity: activity,
+            details: details,
+            timestamp: new Date().toISOString(),
+            userEmail: auth.currentUser?.email || 'unknown',
+            userName: localStorage.getItem('adminName') || 'Unknown'
+        });
+        if (backups.length > 100) backups = backups.slice(0, 100);
+        localStorage.setItem('activity_logs_backup', JSON.stringify(backups));
+        console.log('📝 Log saved to backup:', activity);
+    } catch (error) {
+        console.error('Failed to save backup log:', error);
     }
 }
 // ========== FUNGSI PARSE TIME ==========
@@ -2102,11 +2194,12 @@ function showMaintenanceDetails(maintenanceId) {
 }
 
 // ========== FUNGSI REOPEN MAINTENANCE ==========
+// ========== PERBAIKI FUNGSI REOPEN MAINTENANCE ==========
 async function reopenMaintenanceTask(maintenanceId) {
     const isAdmin = await isSuperAdmin();
     if (!isAdmin) {
         showToast("Access denied: Only super admin can reopen tasks", "error");
-        return;
+        return false;
     }
     
     const solvedMaintenanceRef = db.collection('solvedMaintenance').doc(maintenanceId);
@@ -2117,13 +2210,14 @@ async function reopenMaintenanceTask(maintenanceId) {
         
         if (!solvedDoc.exists) {
             showToast("Maintenance task not found", "error");
-            return;
+            return false;
         }
 
         const maintenanceData = solvedDoc.data();
         const maintenanceTitle = maintenanceData.title || 'Untitled';
         
-        // ========== LOG REOPEN (TAMBAHKAN INI) ==========
+        // ========== LOG REOPEN (PASTIKAN INI DIPANGGIL) ==========
+        console.log('📝 Logging reopen activity for:', maintenanceId, maintenanceTitle);
         await logReopenActivity(maintenanceId, maintenanceTitle, maintenanceData);
         
         const pendingData = {
@@ -2158,37 +2252,55 @@ async function reopenMaintenanceTask(maintenanceId) {
         await solvedMaintenanceRef.delete();
         
         showToast(`Task "${maintenanceTitle}" reopened successfully`, "success");
+        
+        // Refresh data
         setupSolvedMaintenanceListener();
+        return true;
         
     } catch (error) {
         console.error("Error reopening maintenance task:", error);
         showToast("Error reopening task: " + error.message, "error");
+        return false;
     }
 }
 
 // ========== FUNGSI DELETE MAINTENANCE ==========
+// ========== PERBAIKI FUNGSI DELETE MAINTENANCE ==========
 async function deleteMaintenanceTask(maintenanceId) {
     const isAdmin = await isSuperAdmin();
     if (!isAdmin) {
         showToast("Access denied: Only super admin can delete tasks", "error");
-        return;
+        return false;
     }
     
     try {
         // Ambil data task sebelum dihapus untuk logging
         const taskDoc = await db.collection('solvedMaintenance').doc(maintenanceId).get();
+        
+        if (!taskDoc.exists) {
+            showToast("Task not found", "error");
+            return false;
+        }
+        
         const taskData = taskDoc.data();
         const taskTitle = taskData?.title || 'Untitled';
         
-        // ========== LOG DELETE (TAMBAHKAN INI) ==========
+        // ========== LOG DELETE ACTIVITY ==========
+        console.log('📝 Logging delete activity for:', maintenanceId, taskTitle);
         await logDeleteActivity(maintenanceId, taskTitle);
         
         await db.collection('solvedMaintenance').doc(maintenanceId).delete();
+        
         showToast(`Task "${taskTitle}" deleted successfully`, "success");
+        
+        // Refresh data
         setupSolvedMaintenanceListener();
+        return true;
+        
     } catch (error) {
         console.error("Error deleting maintenance task:", error);
         showToast("Error deleting task: " + error.message, "error");
+        return false;
     }
 }
 
@@ -2365,35 +2477,84 @@ function openEditModal(maintenance) {
 }
 
 // ========== FUNGSI SAVE EDITED TASK ==========
+// ========== PERBAIKI FUNGSI SAVE EDITED TASK ==========
 async function saveEditedTask(taskId) {
     const isAdmin = await isSuperAdmin();
     if (!isAdmin) {
         showToast("Access denied: Only super admin can edit tasks", "error");
-        return;
+        return false;
     }
     
     try {
+        // Ambil data lama terlebih dahulu untuk logging
+        const oldTaskDoc = await db.collection('solvedMaintenance').doc(taskId).get();
+        const oldData = oldTaskDoc.data();
+        
+        if (!oldData) {
+            showToast("Task not found", "error");
+            return false;
+        }
+        
+        const oldTitle = oldData.title || 'Untitled';
+        
+        // Kumpulkan perubahan yang terjadi
+        const newTitle = document.getElementById('editTitle').value;
+        const newCategory = document.getElementById('editCategory').value;
+        const newProvider = document.getElementById('editProvider').value.trim();
+        const newAssignedTo = document.getElementById('editAssignedTo').value;
+        const newDescription = document.getElementById('editDescription').value;
+        const newNotes = document.getElementById('editNotes').value;
+        const newEstimatedTime = document.getElementById('editEstimatedTime').value;
+        const newActualTime = document.getElementById('editActualTime').value;
+        
+        const changes = {};
+        
+        if (oldData.title !== newTitle) changes.title = { from: oldData.title, to: newTitle };
+        if (oldData.category !== newCategory) changes.category = { from: oldData.category, to: newCategory };
+        if ((oldData.provider || oldData.brand) !== newProvider) changes.provider = { from: oldData.provider || oldData.brand, to: newProvider };
+        if (getAssignedReporter(oldData) !== newAssignedTo) changes.assignedTo = { from: getAssignedReporter(oldData), to: newAssignedTo };
+        if (oldData.description !== newDescription) changes.description = { from: oldData.description?.substring(0, 100) + '...', to: newDescription?.substring(0, 100) + '...' };
+        if (oldData.notes !== newNotes) changes.notes = { from: oldData.notes?.substring(0, 100) + '...', to: newNotes?.substring(0, 100) + '...' };
+        if (oldData.estimatedTime !== newEstimatedTime) changes.estimatedTime = { from: oldData.estimatedTime, to: newEstimatedTime };
+        if (oldData.actualTime !== newActualTime) changes.actualTime = { from: oldData.actualTime, to: newActualTime };
+        
+        // Jika tidak ada perubahan
+        if (Object.keys(changes).length === 0) {
+            showToast("No changes detected", "info");
+            document.getElementById('editModal').classList.remove('active');
+            return false;
+        }
+        
+        // ========== LOG EDIT ACTIVITY ==========
+        console.log('📝 Logging edit activity for:', taskId, changes);
+        await logEditActivity(taskId, oldTitle, changes, oldData);
+        
+        // Update data ke Firestore
         const updatedData = {
-            title: document.getElementById('editTitle').value,
-            category: document.getElementById('editCategory').value,
-            provider: document.getElementById('editProvider').value.trim(),
-            assignedTo: document.getElementById('editAssignedTo').value,
-            description: document.getElementById('editDescription').value,
-            notes: document.getElementById('editNotes').value,
-            estimatedTime: document.getElementById('editEstimatedTime').value,
-            actualTime: document.getElementById('editActualTime').value,
+            title: newTitle,
+            category: newCategory,
+            provider: newProvider,
+            assignedTo: newAssignedTo,
+            description: newDescription,
+            notes: newNotes,
+            estimatedTime: newEstimatedTime,
+            actualTime: newActualTime,
             dateUpdated: new Date()
         };
         
         await db.collection('solvedMaintenance').doc(taskId).update(updatedData);
         
-        showToast("Task updated successfully", "success");
+        showToast(`Task "${oldTitle}" updated successfully`, "success");
         document.getElementById('editModal').classList.remove('active');
         
+        // Refresh data
         setTimeout(() => setupSolvedMaintenanceListener(), 500);
+        return true;
+        
     } catch (error) {
         console.error("Error updating task:", error);
         showToast("Error updating task: " + error.message, "error");
+        return false;
     }
 }
 
@@ -3881,41 +4042,66 @@ function showDeleteAllMaintenanceConfirmation() {
 /**
  * Menghapus semua data di collection solvedMaintenance
  */
+// ========== PERBAIKI FUNGSI DELETE ALL ==========
 async function deleteAllMaintenanceTasks() {
     const isAdmin = await isSuperAdmin();
     if (!isAdmin) {
         showToast("Access denied: Only super admin can delete all tasks", "error");
-        return;
+        return false;
     }
     
     const totalTasks = solvedMaintenance.length;
     
     if (totalTasks === 0) {
         showToast("No data to delete", "error");
-        return;
+        return false;
     }
     
     try {
         showToast(`Deleting ${totalTasks} tasks...`, "info");
         
-        // ========== LOG MASS DELETE (TAMBAHKAN INI) ==========
-        await logMassDeleteActivity(totalTasks);
+        // Ambil daftar judul task untuk logging
+        const taskTitles = solvedMaintenance.map(task => task.title || 'Untitled');
+        
+        // ========== LOG MASS DELETE ACTIVITY ==========
+        console.log('📝 Logging mass delete activity for:', totalTasks, 'tasks');
+        await logMassDeleteActivity(totalTasks, taskTitles);
         
         let deletedCount = 0;
         let errorCount = 0;
         
-        for (let i = 0; i < solvedMaintenance.length; i++) {
-            const task = solvedMaintenance[i];
+        // Hapus batch per 10 dokumen untuk performa lebih baik
+        const batchSize = 10;
+        for (let i = 0; i < solvedMaintenance.length; i += batchSize) {
+            const batch = db.batch();
+            const batchTasks = solvedMaintenance.slice(i, i + batchSize);
+            
+            batchTasks.forEach(task => {
+                const docRef = db.collection('solvedMaintenance').doc(task.id);
+                batch.delete(docRef);
+            });
+            
             try {
-                await db.collection('solvedMaintenance').doc(task.id).delete();
-                deletedCount++;
-                
-                if (deletedCount % 10 === 0 || deletedCount === totalTasks) {
-                    showToast(`Deleting: ${deletedCount}/${totalTasks} tasks...`, "info");
+                await batch.commit();
+                deletedCount += batchTasks.length;
+                console.log(`✅ Deleted batch ${Math.floor(i / batchSize) + 1}: ${batchTasks.length} tasks`);
+            } catch (batchError) {
+                console.error('Batch delete error:', batchError);
+                // Fallback: hapus satu per satu
+                for (const task of batchTasks) {
+                    try {
+                        await db.collection('solvedMaintenance').doc(task.id).delete();
+                        deletedCount++;
+                    } catch (singleError) {
+                        console.error(`Error deleting task ${task.id}:`, singleError);
+                        errorCount++;
+                    }
                 }
-            } catch (err) {
-                console.error(`Error deleting task ${task.id}:`, err);
-                errorCount++;
+            }
+            
+            // Update progress
+            if (deletedCount % 20 === 0 || deletedCount === totalTasks) {
+                showToast(`Deleting: ${deletedCount}/${totalTasks} tasks...`, "info");
             }
         }
         
@@ -3925,11 +4111,14 @@ async function deleteAllMaintenanceTasks() {
             showToast(`Successfully deleted ${deletedCount} tasks`, "success");
         }
         
+        // Refresh data
         setupSolvedMaintenanceListener();
+        return true;
         
     } catch (error) {
         console.error("Error deleting all maintenance tasks:", error);
         showToast("Error deleting tasks: " + error.message, "error");
+        return false;
     }
 }
 
