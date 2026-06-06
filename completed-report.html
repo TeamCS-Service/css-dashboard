@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="global.css">
     <script src="global-time.js"></script>
     <script src="solved.translation.js"></script>
+    <script src="activity-log.js"></script>
 
     <style>
             /* ========== VARIABEL CSS YANG DIPERLUKAN ========== */
@@ -1971,7 +1972,75 @@ async function isSuperAdmin() {
         }
     });
 }
+// ========== ACTIVITY LOG FUNCTIONS FOR COMPLETED MAINTENANCE ==========
+// Mengikuti pola yang sama seperti di maintenance.html dan pending-reports.html
 
+// Fungsi untuk log Reopen Task
+async function logReopenActivity(taskId, taskTitle, oldData = {}) {
+    if (typeof logActivity !== 'undefined') {
+        logActivity('REOPEN_MAINTENANCE', {
+            taskId: taskId,
+            taskTitle: taskTitle,
+            previousStatus: 'completed',
+            newStatus: 'pending',
+            category: oldData.category || 'N/A',
+            provider: oldData.provider || oldData.brand || 'N/A',
+            reopenedBy: currentUser ? (currentUser.displayName || currentUser.email) : 'System'
+        });
+        console.log('✅ Activity log: REOPEN MaintenanceTask', taskId, taskTitle);
+    } else {
+        console.warn('⚠️ logActivity function not available');
+    }
+}
+
+// Fungsi untuk log Edit Task
+async function logEditActivity(taskId, taskTitle, changes, oldData) {
+    if (typeof logUpdate !== 'undefined') {
+        logUpdate('MaintenanceTask', taskId, changes);
+        console.log('✅ Activity log: UPDATE MaintenanceTask', taskId, changes);
+    } else if (typeof logActivity !== 'undefined') {
+        logActivity('EDIT_MAINTENANCE', {
+            taskId: taskId,
+            taskTitle: taskTitle,
+            changes: changes,
+            editedBy: currentUser ? (currentUser.displayName || currentUser.email) : 'System'
+        });
+        console.log('✅ Activity log: EDIT MaintenanceTask', taskId);
+    } else {
+        console.warn('⚠️ logUpdate/logActivity function not available');
+    }
+}
+
+// Fungsi untuk log Delete Single Task
+async function logDeleteActivity(taskId, taskTitle) {
+    if (typeof logDelete !== 'undefined') {
+        logDelete('MaintenanceTask', taskId, taskTitle);
+        console.log('✅ Activity log: DELETE MaintenanceTask', taskId, taskTitle);
+    } else if (typeof logActivity !== 'undefined') {
+        logActivity('DELETE_MAINTENANCE', {
+            taskId: taskId,
+            taskTitle: taskTitle,
+            deletedBy: currentUser ? (currentUser.displayName || currentUser.email) : 'System'
+        });
+        console.log('✅ Activity log: DELETE MaintenanceTask', taskId);
+    } else {
+        console.warn('⚠️ logDelete/logActivity function not available');
+    }
+}
+
+// Fungsi untuk log Mass Delete
+async function logMassDeleteActivity(count) {
+    if (typeof logActivity !== 'undefined') {
+        logActivity('MASS_DELETE_MAINTENANCE', {
+            deletedCount: count,
+            location: 'completed-maintenance',
+            deletedBy: currentUser ? (currentUser.displayName || currentUser.email) : 'System'
+        });
+        console.log('✅ Activity log: MASS DELETE', count, 'tasks');
+    } else {
+        console.warn('⚠️ logActivity function not available');
+    }
+}
 // ========== FUNGSI PARSE TIME ==========
 function parseTimeToHours(timeString) {
     if (!timeString || timeString === 'N/A') return 0;
@@ -2052,6 +2121,10 @@ async function reopenMaintenanceTask(maintenanceId) {
         }
 
         const maintenanceData = solvedDoc.data();
+        const maintenanceTitle = maintenanceData.title || 'Untitled';
+        
+        // ========== LOG REOPEN (TAMBAHKAN INI) ==========
+        await logReopenActivity(maintenanceId, maintenanceTitle, maintenanceData);
         
         const pendingData = {
             title: maintenanceData.title || '',
@@ -2084,7 +2157,7 @@ async function reopenMaintenanceTask(maintenanceId) {
         await pendingMaintenanceRef.set(pendingData);
         await solvedMaintenanceRef.delete();
         
-        showToast("Task reopened successfully", "success");
+        showToast(`Task "${maintenanceTitle}" reopened successfully`, "success");
         setupSolvedMaintenanceListener();
         
     } catch (error) {
@@ -2102,8 +2175,16 @@ async function deleteMaintenanceTask(maintenanceId) {
     }
     
     try {
+        // Ambil data task sebelum dihapus untuk logging
+        const taskDoc = await db.collection('solvedMaintenance').doc(maintenanceId).get();
+        const taskData = taskDoc.data();
+        const taskTitle = taskData?.title || 'Untitled';
+        
+        // ========== LOG DELETE (TAMBAHKAN INI) ==========
+        await logDeleteActivity(maintenanceId, taskTitle);
+        
         await db.collection('solvedMaintenance').doc(maintenanceId).delete();
-        showToast("Task deleted successfully", "success");
+        showToast(`Task "${taskTitle}" deleted successfully`, "success");
         setupSolvedMaintenanceListener();
     } catch (error) {
         console.error("Error deleting maintenance task:", error);
@@ -3801,7 +3882,6 @@ function showDeleteAllMaintenanceConfirmation() {
  * Menghapus semua data di collection solvedMaintenance
  */
 async function deleteAllMaintenanceTasks() {
-    // Cek apakah user adalah super admin
     const isAdmin = await isSuperAdmin();
     if (!isAdmin) {
         showToast("Access denied: Only super admin can delete all tasks", "error");
@@ -3818,7 +3898,9 @@ async function deleteAllMaintenanceTasks() {
     try {
         showToast(`Deleting ${totalTasks} tasks...`, "info");
         
-        // Hapus satu per satu karena Firestore batch memiliki batasan
+        // ========== LOG MASS DELETE (TAMBAHKAN INI) ==========
+        await logMassDeleteActivity(totalTasks);
+        
         let deletedCount = 0;
         let errorCount = 0;
         
@@ -3828,7 +3910,6 @@ async function deleteAllMaintenanceTasks() {
                 await db.collection('solvedMaintenance').doc(task.id).delete();
                 deletedCount++;
                 
-                // Update progress setiap 10 item
                 if (deletedCount % 10 === 0 || deletedCount === totalTasks) {
                     showToast(`Deleting: ${deletedCount}/${totalTasks} tasks...`, "info");
                 }
@@ -3844,7 +3925,6 @@ async function deleteAllMaintenanceTasks() {
             showToast(`Successfully deleted ${deletedCount} tasks`, "success");
         }
         
-        // Refresh data
         setupSolvedMaintenanceListener();
         
     } catch (error) {
