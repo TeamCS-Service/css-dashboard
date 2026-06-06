@@ -9,11 +9,12 @@
     <link rel="stylesheet" href="global.css">
     <link rel="stylesheet" href="stylemobile.css">
     
+    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-auth-compat.js"></script>
-
+<script src="activity-log.js"></script>
     <style>
         /* ========== VARIABEL CSS MODERN ========== */
         :root {
@@ -2050,7 +2051,7 @@ async function sendToExcel(reportData, action = 'create') {
             "CERIASLOT99 (D-GAMING)", "RAJASCATTER88 (D-GAMING)", "MAHJONGJP88 (D-GAMING)",
             "NAGAHOKI88 (D-GAMING)", "SPACEMAN88 (D-GAMING)", "RAJAPANEN (D-GAMING)",
             "BROTO88 (D-GAMING)", "WOY99 (D-GAMING)", "NAGAHITAM88 (D-GAMING)",
-            "MEYOLX (D-GAMING)", "AYOPLAY77 (D-GAMING)", "NEX178 (D-GAMING)", "MEDUSA88 (GACHA)", "ATHENA168 (GACHA)",
+            "MEYOLX (D-GAMING)", "AYOPLAY77 (D-GAMING)", "NEX178 (D-GAMING)", "WANGIWIN (D-GAMING)", "MEDUSA88 (GACHA)", "ATHENA168 (GACHA)",
             "ARES GACOR (GACHA)", "RAJA MAHJONG (GACHA)", "OLYMPUS1000 (GACHA)",
             "CBWL (GACHA)", "RAJA COVID (GACHA)", "BANG GACOR 88 (GACHA)",
             "GACHA99 (GACHA)", "RAJAOLYMPUS (GACHA)", "7PLAYASIA (VORTEX)",
@@ -2245,9 +2246,21 @@ async function sendToExcel(reportData, action = 'create') {
             document.getElementById('totalCount').textContent = reports.length;
         }
 
-        function openDetailModal(report) {
-            const lang = getLang();
-            const modalBody = document.getElementById('detailModalBody');
+function openDetailModal(report) {
+    // ========== LOG VIEW ==========
+    if (typeof logActivity !== 'undefined') {
+        logActivity('VIEW_IDE_REPORT', {
+            reportId: report.id,
+            reportTitle: report.title,
+            brand: report.brand,
+            status: report.status,
+            viewedBy: currentUser?.displayName || currentUser?.email || 'Unknown'
+        });
+        console.log('✅ Activity log: VIEW IdeaReport', report.id);
+    }
+    
+    const lang = getLang();
+    const modalBody = document.getElementById('detailModalBody');
             const date = report.dateCreated?.toDate ? 
                 new Date(report.dateCreated.toDate()).toLocaleString(currentLanguage === 'id' ? 'id-ID' : currentLanguage === 'ja' ? 'ja-JP' : currentLanguage === 'zh' ? 'zh-CN' : 'en-US') : 
                 new Date(report.dateCreated).toLocaleString(currentLanguage === 'id' ? 'id-ID' : currentLanguage === 'ja' ? 'ja-JP' : currentLanguage === 'zh' ? 'zh-CN' : 'en-US');
@@ -2545,12 +2558,37 @@ async function sendToExcel(reportData, action = 'create') {
         let reportId;
         
         if (currentEditId) {
+            // ========== UPDATE: Catat perubahan sebelum update ==========
+            const oldReport = reports.find(r => r.id === currentEditId);
+            const changes = {};
+            
+            if (oldReport.title !== title) changes.title = { old: oldReport.title, new: title };
+            if (oldReport.brand !== brand) changes.brand = { old: oldReport.brand, new: brand };
+            if (oldReport.status !== status) changes.status = { old: oldReport.status, new: status };
+            if ((oldReport.description || '') !== description) changes.description = { old: (oldReport.description || '').substring(0, 50), new: description.substring(0, 50) };
+            if ((oldReport.resolution || '') !== resolution) changes.resolution = { old: (oldReport.resolution || '').substring(0, 50), new: resolution.substring(0, 50) };
+            if ((oldReport.imageUrl || '') !== imageUrl) changes.imageUrl = { old: oldReport.imageUrl || 'none', new: imageUrl || 'none' };
+            
             // UPDATE existing report
             await db.collection('reports').doc(currentEditId).update({
                 title, brand, status, description, resolution, imageUrl,
                 dateUpdated: firebase.firestore.FieldValue.serverTimestamp()
             });
             reportId = currentEditId;
+            
+            // ========== LOG UPDATE ==========
+            if (typeof logUpdate !== 'undefined' && Object.keys(changes).length > 0) {
+                logUpdate('IdeaReport', reportId, changes);
+                console.log('✅ Activity log: UPDATE IdeaReport', reportId, changes);
+            } else if (typeof logActivity !== 'undefined') {
+                logActivity('UPDATE_IDE_REPORT', {
+                    reportId: reportId,
+                    reportTitle: title,
+                    changes: changes,
+                    updatedBy: currentUser?.displayName || currentUser?.email || 'Unknown'
+                });
+            }
+            
             showToast(lang.reportUpdated, 'success');
         } else {
             // CREATE new report
@@ -2565,12 +2603,33 @@ async function sendToExcel(reportData, action = 'create') {
             };
             const docRef = await db.collection('reports').add(reportData);
             reportId = docRef.id;
+            
+            // ========== LOG CREATE ==========
+            if (typeof logCreate !== 'undefined') {
+                logCreate('IdeaReport', {
+                    id: reportId,
+                    name: title,
+                    brand: brand,
+                    status: status,
+                    description: description.substring(0, 100)
+                });
+                console.log('✅ Activity log: CREATE IdeaReport', reportId, title);
+            } else if (typeof logActivity !== 'undefined') {
+                logActivity('CREATE_IDE_REPORT', {
+                    reportId: reportId,
+                    reportTitle: title,
+                    brand: brand,
+                    status: status,
+                    createdBy: currentUser?.displayName || currentUser?.email || 'Unknown'
+                });
+            }
+            
             showToast(lang.reportAdded, 'success');
         }
         
         closeModal();
 
-        // Kirim ke Google Sheets dengan data yang lengkap
+        // Kirim ke Google Sheets
         const excelPayload = {
             id: reportId,
             title: title,
@@ -2594,20 +2653,34 @@ async function sendToExcel(reportData, action = 'create') {
 }
 
         async function deleteReport(id) {
-            const report = reports.find(r => r.id === id);
-            const lang = getLang();
-            if (!report) return;
+    const report = reports.find(r => r.id === id);
+    const lang = getLang();
+    if (!report) return;
 
-            if (confirm(lang.deleteConfirm.replace('{title}', report.title))) {
-                try {
-                    await db.collection('reports').doc(id).delete();
-                    showToast(lang.reportDeleted, 'success');
-                } catch (error) {
-                    console.error("Error deleting report:", error);
-                    showToast(lang.errorDeleting, 'error');
-                }
+    if (confirm(lang.deleteConfirm.replace('{title}', report.title))) {
+        try {
+            // ========== LOG DELETE (sebelum menghapus) ==========
+            if (typeof logDelete !== 'undefined') {
+                logDelete('IdeaReport', id, report.title);
+                console.log('✅ Activity log: DELETE IdeaReport', id, report.title);
+            } else if (typeof logActivity !== 'undefined') {
+                logActivity('DELETE_IDE_REPORT', {
+                    reportId: id,
+                    reportTitle: report.title,
+                    brand: report.brand,
+                    status: report.status,
+                    deletedBy: currentUser?.displayName || currentUser?.email || 'Unknown'
+                });
             }
+            
+            await db.collection('reports').doc(id).delete();
+            showToast(lang.reportDeleted, 'success');
+        } catch (error) {
+            console.error("Error deleting report:", error);
+            showToast(lang.errorDeleting, 'error');
         }
+    }
+}
 
         function setupEventListeners() {
             document.getElementById('statusFilter')?.addEventListener('change', filterReports);
