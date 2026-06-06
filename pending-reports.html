@@ -10,6 +10,8 @@
         <link rel="stylesheet" href="global.css">
             <link rel="stylesheet" href="stylemobile.css">
         <script src="global-time.js"></script>
+        <script src="activity-log.js"></script>
+
 
         
         <!-- Firebase SDK -->
@@ -2391,78 +2393,88 @@ async function sendToExcel(reportData) {
 
                 // Fungsi untuk menambahkan laporan baru
         async function addNewReport() {
-            const title = document.getElementById('reportTitle').value;
-            const category = document.getElementById('reportCategory').value;
-            const brand = document.getElementById('reportBrand').value;
-            const dueDate = document.getElementById('reportDueDate').value;
-            const description = document.getElementById('reportDescription').value;
-            const screenshotUrl = document.getElementById('reportScreenshotUrl').value;
-            
-            if (!title || !category || !brand || !dueDate || !description) {
-                showToast('Please fill all fields!', 'error');
-                return;
-            }
-            
-            try {
-                const docRef = await db.collection('pendingReports').add({
-                    title,
-                    category,
-                    brand,
-                    dueDate,
-                    description,
-                    screenshotUrl: screenshotUrl || null,
-                    userId: currentUser.uid,
-                    status: 'pending',
-                    dateCreated: new Date(),
-                    dateUpdated: new Date(),
-                    // Tambahkan field untuk konsistensi
-                    priority: 'medium',
-                    reportedBy: currentUser.displayName || 'Unknown'
-                });
-                
-                // ========== KIRIM DATA KE GOOGLE SHEETS ==========
-                const excelData = {
-                    reportId: docRef.id,
-                    title: title,
-                    category: category,
-                    brand: brand,
-                    description: description,
-                    screenshotUrl: screenshotUrl || '',
-                    status: 'pending',
-                    dueDate: dueDate,
-                    userId: currentUser.uid,
-                    reportedBy: currentUser.displayName || currentUser.email || 'Unknown',
-                    dateCreated: new Date().toISOString(),
-                    timestamp: new Date().toLocaleString('id-ID')
-                };
-                
-                // Kirim ke Google Sheets (tidak perlu menunggu)
-                sendToExcel(excelData);
-                // ========== SAMPAI SINI ==========
-                
-                showToast('Report added successfully!');
-                
-                // Tambahkan notifikasi
-                addNotification({
-                    type: 'new_report',
-                    message: `New report "${title}" has been created`,
-                    reportId: docRef.id
-                });
-                
-                // Tutup modal dan reset form
-                document.getElementById('addReportModal').classList.remove('active');
-                document.getElementById('reportForm').reset();
-                document.getElementById('screenshotPreview').style.display = 'none';
-                document.body.style.overflow = '';
-                
-                // Perbarui daftar laporan
-                renderReportCards();
-                
-            } catch (error) {
-                console.error("Error adding report:", error);
-                showToast('Error adding report', 'error');
-            }
+    const title = document.getElementById('reportTitle').value;
+    const category = document.getElementById('reportCategory').value;
+    const brand = document.getElementById('reportBrand').value;
+    const dueDate = document.getElementById('reportDueDate').value;
+    const description = document.getElementById('reportDescription').value;
+    const screenshotUrl = document.getElementById('reportScreenshotUrl').value;
+    
+    if (!title || !category || !brand || !dueDate || !description) {
+        showToast('Please fill all fields!', 'error');
+        return;
+    }
+    
+    try {
+        const docRef = await db.collection('pendingReports').add({
+            title,
+            category,
+            brand,
+            dueDate,
+            description,
+            screenshotUrl: screenshotUrl || null,
+            userId: currentUser.uid,
+            status: 'pending',
+            dateCreated: new Date(),
+            dateUpdated: new Date(),
+            priority: 'medium',
+            reportedBy: currentUser.displayName || 'Unknown'
+        });
+        
+        // ========== TAMBAHKAN KODE INI ==========
+        // Cek apakah fungsi logCreate tersedia
+        if (typeof logCreate !== 'undefined') {
+            logCreate('Report', {
+                id: docRef.id,
+                name: title,
+                category: category,
+                brand: brand,
+                dueDate: dueDate
+            });
+            console.log('✅ Activity log: CREATE report', docRef.id);
+        } else {
+            console.warn('⚠️ logCreate function not available');
         }
+        // ========== SAMPAI SINI ==========
+        
+        // Kirim ke Google Sheets
+        const excelData = {
+            reportId: docRef.id,
+            title: title,
+            category: category,
+            brand: brand,
+            description: description,
+            screenshotUrl: screenshotUrl || '',
+            status: 'pending',
+            dueDate: dueDate,
+            userId: currentUser.uid,
+            reportedBy: currentUser.displayName || currentUser.email || 'Unknown',
+            dateCreated: new Date().toISOString(),
+            timestamp: new Date().toLocaleString('id-ID')
+        };
+        
+        sendToExcel(excelData);
+        
+        showToast('Report added successfully!');
+        
+        addNotification({
+            type: 'new_report',
+            message: `New report "${title}" has been created`,
+            reportId: docRef.id
+        });
+        
+        document.getElementById('addReportModal').classList.remove('active');
+        document.getElementById('reportForm').reset();
+        document.getElementById('screenshotPreview').style.display = 'none';
+        document.body.style.overflow = '';
+        
+        renderReportCards();
+        
+    } catch (error) {
+        console.error("Error adding report:", error);
+        showToast('Error adding report', 'error');
+    }
+}
 
         // Fungsi untuk membuka modal edit
         async function openEditModal(reportId) {
@@ -2507,79 +2519,119 @@ async function sendToExcel(reportData) {
 
         // Fungsi untuk memperbarui laporan
         async function updateReport() {
-            const reportId = document.getElementById('editReportId').value;
-            const title = document.getElementById('editReportTitle').value;
-            const category = document.getElementById('editReportCategory').value;
-            const brand = document.getElementById('editReportBrand').value;
-            const dueDate = document.getElementById('editReportDueDate').value;
-            const description = document.getElementById('editReportDescription').value;
-            const screenshotUrl = document.getElementById('editReportScreenshotUrl').value;
-            
-            if (!reportId || !title || !category || !brand || !dueDate || !description) {
-                showToast('Please fill all fields!', 'error');
-                return;
-            }
-            
-            try {
-                await db.collection('pendingReports').doc(reportId).update({
-                    title,
-                    category,
-                    brand,
-                    dueDate,
-                    description,
-                    screenshotUrl: screenshotUrl || null,
-                    dateUpdated: new Date()
-                });
-                
-                showToast('Report updated successfully!');
-                
-                // Tambahkan notifikasi
-                addNotification({
-                    type: 'report_updated',
-                    message: `Report "${title}" has been updated`,
-                    reportId: reportId
-                });
-                
-                // Tutup modal edit
-                document.getElementById('editReportModal').classList.remove('active');
-                document.getElementById('editScreenshotPreview').style.display = 'none';
-                document.body.style.overflow = '';
-                
-                // Perbarui daftar laporan
-                renderReportCards();
-                
-            } catch (error) {
-                console.error("Error updating report:", error);
-                showToast('Error updating report', 'error');
-            }
+    const reportId = document.getElementById('editReportId').value;
+    const title = document.getElementById('editReportTitle').value;
+    const category = document.getElementById('editReportCategory').value;
+    const brand = document.getElementById('editReportBrand').value;
+    const dueDate = document.getElementById('editReportDueDate').value;
+    const description = document.getElementById('editReportDescription').value;
+    const screenshotUrl = document.getElementById('editReportScreenshotUrl').value;
+    
+    if (!reportId || !title || !category || !brand || !dueDate || !description) {
+        showToast('Please fill all fields!', 'error');
+        return;
+    }
+    
+    try {
+        // Dapatkan data lama untuk mencatat perubahan
+        const oldDoc = await db.collection('pendingReports').doc(reportId).get();
+        const oldData = oldDoc.data();
+        
+        // Catat perubahan yang terjadi
+        const changes = {};
+        if (oldData.title !== title) changes.title = { old: oldData.title, new: title };
+        if (oldData.category !== category) changes.category = { old: oldData.category, new: category };
+        if (oldData.brand !== brand) changes.brand = { old: oldData.brand, new: brand };
+        if (oldData.dueDate !== dueDate) changes.dueDate = { old: oldData.dueDate, new: dueDate };
+        if (oldData.description !== description) changes.description = { old: oldData.description.substring(0, 50) + '...', new: description.substring(0, 50) + '...' };
+        
+        await db.collection('pendingReports').doc(reportId).update({
+            title,
+            category,
+            brand,
+            dueDate,
+            description,
+            screenshotUrl: screenshotUrl || null,
+            dateUpdated: new Date()
+        });
+        
+        // ========== TAMBAHKAN KODE INI ==========
+        // Hanya catat jika ada perubahan
+        if (typeof logUpdate !== 'undefined' && Object.keys(changes).length > 0) {
+            logUpdate('Report', reportId, changes);
+            console.log('✅ Activity log: UPDATE report', reportId, changes);
+        } else if (typeof logUpdate !== 'undefined') {
+            console.log('ℹ️ No changes detected, skip logging');
+        } else {
+            console.warn('⚠️ logUpdate function not available');
         }
+        // ========== SAMPAI SINI ==========
+        
+        showToast('Report updated successfully!');
+        
+        addNotification({
+            type: 'report_updated',
+            message: `Report "${title}" has been updated`,
+            reportId: reportId
+        });
+        
+        document.getElementById('editReportModal').classList.remove('active');
+        document.getElementById('editScreenshotPreview').style.display = 'none';
+        document.body.style.overflow = '';
+        
+        renderReportCards();
+        
+    } catch (error) {
+        console.error("Error updating report:", error);
+        showToast('Error updating report', 'error');
+    }
+}
 
         // Fungsi untuk menghapus laporan
         async function deleteExistingReport(reportId) {
-            try {
-                // Dapatkan data laporan untuk notifikasi
-                const doc = await db.collection('pendingReports').doc(reportId).get();
-                const report = doc.data();
-                
-                await db.collection('pendingReports').doc(reportId).delete();
-                
-                showToast('Report deleted successfully!');
-                
-                // Tambahkan notifikasi
-                addNotification({
-                    type: 'report_deleted',
-                    message: `Report "${report.title}" has been deleted`,
-                    reportId: reportId
-                });
-                
-                // Perbarui daftar laporan
-                renderReportCards();
-                
-            } catch (error) {
-                console.error("Error deleting report:", error);
-                showToast('Error deleting report', 'error');
-            }
+    try {
+        // Dapatkan data laporan SEBELUM dihapus
+        const doc = await db.collection('pendingReports').doc(reportId).get();
+        const report = doc.data();
+        
+        if (!report) {
+            showToast('Report not found!', 'error');
+            return;
         }
+        
+        await db.collection('pendingReports').doc(reportId).delete();
+        
+        // ========== TAMBAHKAN KODE INI ==========
+        if (typeof logDelete !== 'undefined') {
+            logDelete('Report', reportId, report.title);
+            console.log('✅ Activity log: DELETE report', reportId, report.title);
+        } else {
+            console.warn('⚠️ logDelete function not available');
+        }
+        // ========== SAMPAI SINI ==========
+        
+        showToast('Report deleted successfully!');
+        
+        addNotification({
+            type: 'report_deleted',
+            message: `Report "${report.title}" has been deleted`,
+            reportId: reportId
+        });
+        
+        renderReportCards();
+        
+        // Tutup modal jika terbuka
+        const reportModal = document.getElementById('reportModal');
+        if (reportModal) {
+            reportModal.classList.remove('active');
+        }
+        document.body.style.overflow = '';
+        
+    } catch (error) {
+        console.error("Error deleting report:", error);
+        showToast('Error deleting report', 'error');
+    }
+}
 
         // Fungsi untuk menampilkan detail laporan
         async function viewReportDetails(reportId) {
@@ -2637,135 +2689,157 @@ async function sendToExcel(reportData) {
         }
 
         // Fungsi untuk membuka modal mark complete
-        function openMarkCompleteModal(reportId) {
-            currentReportId = reportId;
-            
-            // Reset form
-            document.getElementById('resolutionDescription').value = '';
-            
-            // Tutup modal detail jika terbuka
-            const reportModal = document.getElementById('reportModal');
-            if (reportModal) {
-                reportModal.classList.remove('active');
-            }
-            
-            // Buka modal mark complete
-            const markCompleteModal = document.getElementById('markCompleteModal');
-            if (markCompleteModal) {
-                markCompleteModal.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        // ========== FUNGSI UTAMA: Transfer Data ke Solved Reports ==========
-        async function markReportAsComplete() {
-            const resolutionDescription = document.getElementById('resolutionDescription').value;
-            
-            if (!resolutionDescription) {
-                showToast('Please provide resolution details!', 'error');
-                return;
-            }
-            
-            if (!currentReportId) {
-                showToast('No report selected!', 'error');
-                return;
-            }
-            
-            try {
-                // Dapatkan data laporan dari pendingReports
-                const doc = await db.collection('pendingReports').doc(currentReportId).get();
-                
-                if (!doc.exists) {
-                    showToast('Report not found!', 'error');
-                    return;
-                }
-                
-                const reportData = doc.data();
-                
-                // Buat data untuk solvedReports dengan semua field yang diperlukan
-                const solvedReportData = {
-                    title: reportData.title,
-                    category: reportData.category,
-                    brand: reportData.brand,
-                    description: reportData.description,
-                    screenshotUrl: reportData.screenshotUrl || null,
-                    userId: reportData.userId,
-                    reportedBy: reportData.reportedBy || currentUser.displayName || 'Unknown',
-                    priority: reportData.priority || 'medium',
-                    status: 'completed',
-                    dateCreated: reportData.dateCreated,
-                    dateSolved: new Date(),
-                    dateUpdated: new Date(),
-                    resolution: resolutionDescription,
-                    completedBy: currentUser.uid || null,
-                    completedByName: currentUser.displayName || currentUser.email || 'Unknown',
-                    dueDate: reportData.dueDate,
-                    originalReportId: currentReportId
-                };
-                
-                // Gunakan batch write untuk operasi atomik
-                const batch = db.batch();
-                
-                // Tambahkan ke solvedReports
-                const solvedReportRef = db.collection('solvedReports').doc(currentReportId);
-                batch.set(solvedReportRef, solvedReportData);
-                
-                // Hapus dari pendingReports
-                const pendingReportRef = db.collection('pendingReports').doc(currentReportId);
-                batch.delete(pendingReportRef);
-                
-                // Commit batch operation
-                await batch.commit();
-                // ========== UPDATE STATUS DI GOOGLE SHEETS ==========
-// ========== UPDATE STATUS DI GOOGLE SHEETS ==========
-const updateData = {
-    action: 'update_status',
-    reportId: currentReportId,
-    status: 'completed',
-    resolvedBy: currentUser.displayName || currentUser.email || 'Unknown',
-    resolution: resolutionDescription,
-    timestamp: new Date().toLocaleString('id-ID')
-};
-
-// Kirim update ke Google Sheets
-try {
-    // SESUDAH
-await fetch(EXCEL_WEBHOOK_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify(updateData)
-});
-    console.log('✅ Status updated in Google Sheets for:', currentReportId);
-} catch (err) {
-    console.error('❌ Failed to update Google Sheets:', err);
+        // Fungsi untuk membuka modal mark complete
+function openMarkCompleteModal(reportId) {
+    currentReportId = reportId;
+    
+    // Reset form
+    document.getElementById('resolutionDescription').value = '';
+    
+    // Tutup modal detail jika terbuka
+    const reportModal = document.getElementById('reportModal');
+    if (reportModal) {
+        reportModal.classList.remove('active');
+    }
+    
+    // Buka modal mark complete
+    const markCompleteModal = document.getElementById('markCompleteModal');
+    if (markCompleteModal) {
+        markCompleteModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
 }
 
-// ========== SAMPAI SINI ==========    
-                // Tambahkan notifikasi
-                addNotification({
-                    type: 'report_solved',
-                    message: `Report "${reportData.title}" has been marked as completed`,
-                    reportId: currentReportId
-                });
-                
-                showToast('Report marked as completed successfully!');
-                
-                // Tutup modal
-                const markCompleteModal = document.getElementById('markCompleteModal');
-                if (markCompleteModal) {
-                    markCompleteModal.classList.remove('active');
-                }
-                document.body.style.overflow = '';
-                
-                // Perbarui daftar laporan
-                renderReportCards();
-                
-            } catch (error) {
-                console.error("Error marking report as complete:", error);
-                showToast('Error marking report as complete', 'error');
-            }
+// ========== FUNGSI YANG SUDAH DITAMBAH ACTIVITY LOG ==========
+async function markReportAsComplete() {
+    const resolutionDescription = document.getElementById('resolutionDescription').value;
+    
+    if (!resolutionDescription) {
+        showToast('Please provide resolution details!', 'error');
+        return;
+    }
+    
+    if (!currentReportId) {
+        showToast('No report selected!', 'error');
+        return;
+    }
+    
+    try {
+        // Dapatkan data laporan dari pendingReports
+        const doc = await db.collection('pendingReports').doc(currentReportId).get();
+        
+        if (!doc.exists) {
+            showToast('Report not found!', 'error');
+            return;
         }
+        
+        const reportData = doc.data();
+        
+        // Buat data untuk solvedReports
+        const solvedReportData = {
+            title: reportData.title,
+            category: reportData.category,
+            brand: reportData.brand,
+            description: reportData.description,
+            screenshotUrl: reportData.screenshotUrl || null,
+            userId: reportData.userId,
+            reportedBy: reportData.reportedBy || currentUser.displayName || 'Unknown',
+            priority: reportData.priority || 'medium',
+            status: 'completed',
+            dateCreated: reportData.dateCreated,
+            dateSolved: new Date(),
+            dateUpdated: new Date(),
+            resolution: resolutionDescription,
+            completedBy: currentUser.uid || null,
+            completedByName: currentUser.displayName || currentUser.email || 'Unknown',
+            dueDate: reportData.dueDate,
+            originalReportId: currentReportId
+        };
+        
+        // Gunakan batch write untuk operasi atomik
+        const batch = db.batch();
+        
+        // Tambahkan ke solvedReports
+        const solvedReportRef = db.collection('solvedReports').doc(currentReportId);
+        batch.set(solvedReportRef, solvedReportData);
+        
+        // Hapus dari pendingReports
+        const pendingReportRef = db.collection('pendingReports').doc(currentReportId);
+        batch.delete(pendingReportRef);
+        
+        // Commit batch operation
+        await batch.commit();
+        
+        // ========== TAMBAHKAN KODE ACTIVITY LOG DI SINI ==========
+        // Cek apakah fungsi logActivity tersedia
+        if (typeof logActivity !== 'undefined') {
+            logActivity('COMPLETE_REPORT', {
+                reportId: currentReportId,
+                reportTitle: reportData.title,
+                reportCategory: reportData.category,
+                reportBrand: reportData.brand,
+                resolution: resolutionDescription.substring(0, 200),
+                previousStatus: reportData.status,
+                completedBy: currentUser.displayName || currentUser.email || 'Unknown'
+            });
+            console.log('✅ Activity log: Report completed -', currentReportId, reportData.title);
+        } else {
+            console.warn('⚠️ logActivity function not available - check if activity-log.js is loaded');
+        }
+        // ========== SAMPAI SINI ==========
+        
+        // Update status di Google Sheets
+        const updateData = {
+            action: 'update_status',
+            reportId: currentReportId,
+            status: 'completed',
+            resolvedBy: currentUser.displayName || currentUser.email || 'Unknown',
+            resolution: resolutionDescription,
+            timestamp: new Date().toLocaleString('id-ID')
+        };
+        
+        try {
+            await fetch(EXCEL_WEBHOOK_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify(updateData)
+            });
+            console.log('✅ Google Sheets updated for:', currentReportId);
+        } catch (err) {
+            console.error('Failed to update Google Sheets:', err);
+        }
+        
+        // Tambahkan notifikasi
+        addNotification({
+            type: 'report_solved',
+            message: `Report "${reportData.title}" has been marked as completed`,
+            reportId: currentReportId
+        });
+        
+        showToast('Report marked as completed successfully!');
+        
+        // Tutup modal
+        const markCompleteModal = document.getElementById('markCompleteModal');
+        if (markCompleteModal) {
+            markCompleteModal.classList.remove('active');
+        }
+        document.body.style.overflow = '';
+        
+        // Perbarui daftar laporan
+        renderReportCards();
+        
+        // Optional: Tutup modal detail jika terbuka
+        const reportModal = document.getElementById('reportModal');
+        if (reportModal) {
+            reportModal.classList.remove('active');
+        }
+        
+    } catch (error) {
+        console.error("Error marking report as complete:", error);
+        showToast('Error marking report as complete', 'error');
+    }
+}
 
         // Fungsi untuk menampilkan kartu laporan
         async function renderReportCards() {
