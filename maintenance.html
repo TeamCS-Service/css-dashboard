@@ -9,11 +9,13 @@
     <link rel="stylesheet" href="global.css">
         <link rel="stylesheet" href="stylemobile.css">
         <script src="global-time.js"></script>
+        
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="activity-log.js"></script> 
 
     <style>
              /* ========== VARIABEL CSS YANG DIPERLUKAN ========== */
@@ -1671,6 +1673,17 @@ return true;
         const task = maintenanceTasks.find(t => t.id === taskId);
         
         if (task) {
+            if (typeof logActivity !== 'undefined') {
+            logActivity('VIEW_MAINTENANCE', {
+                taskId: task.id,
+                taskTitle: task.title,
+                category: task.category,
+                provider: task.provider,
+                status: task.status,
+                viewedBy: currentUser ? (currentUser.displayName || currentUser.email) : 'Unknown'
+            });
+            console.log('✅ Activity log: VIEW MaintenanceTask', task.id);
+        }
             // Create detailed view modal
             const assignedBy = task.createdBy || task.assignedBy || (currentUser ? (currentUser.displayName || currentUser.email) : 'System');
             
@@ -1863,30 +1876,56 @@ return true;
 
     // Complete task - DIMODIFIKASI untuk memindahkan data
        // Complete task - DIMODIFIKASI untuk update Google Sheets
-    async function completeTask(taskId) {
-        try {
-            // Dapatkan data task
-            const task = maintenanceTasks.find(t => t.id === taskId);
-            const userName = currentUser ? (currentUser.displayName || currentUser.email) : 'System';
-            
-            // Kirim update ke Google Sheets terlebih dahulu
-sendMaintenanceToExcel({
-    id: taskId,
-    completedBy: userName
-}, 'complete').catch(err => console.error(err));
-            
-            // Pindahkan task ke solvedMaintenance
-            const success = await moveToSolvedMaintenance(taskId);
-            
-            if (success) {
-                showNotification('Task completed dan dipindahkan ke arsip!', 'success');
-            }
-            
-        } catch (error) {
-            console.error("Error completing task:", error);
-            showNotification('Error completing task', 'error');
+    // Complete task - WITH ACTIVITY LOG
+async function completeTask(taskId) {
+    try {
+        // Dapatkan data task
+        const task = maintenanceTasks.find(t => t.id === taskId);
+        if (!task) {
+            showNotification('Task not found!', 'error');
+            return;
         }
+        
+        const userName = currentUser ? (currentUser.displayName || currentUser.email) : 'System';
+        
+        // ========== LOG COMPLETE/SOLVED ==========
+        if (typeof logActivity !== 'undefined') {
+            logActivity('COMPLETE_MAINTENANCE', {
+                taskId: taskId,
+                taskTitle: task.title,
+                category: task.category,
+                provider: task.provider,
+                previousStatus: task.status,
+                completedBy: userName,
+                startDate: task.startDate,
+                endDate: task.endDate
+            });
+            console.log('✅ Activity log: COMPLETE MaintenanceTask', taskId, task.title);
+        } else if (typeof logUpdate !== 'undefined') {
+            logUpdate('MaintenanceTask', taskId, { 
+                status: { old: task.status, new: 'completed' },
+                completedBy: userName
+            });
+        }
+        
+        // Kirim update ke Google Sheets
+        await sendMaintenanceToExcel({
+            id: taskId,
+            completedBy: userName
+        }, 'complete');
+        
+        // Pindahkan task ke solvedMaintenance
+        const success = await moveToSolvedMaintenance(taskId);
+        
+        if (success) {
+            showNotification('Task completed and moved to archive!', 'success');
+        }
+        
+    } catch (error) {
+        console.error("Error completing task:", error);
+        showNotification('Error completing task', 'error');
     }
+}
 
     function setupTableActionDelegation() {
         const tableBody = document.getElementById('maintenanceTableBody');
@@ -1914,135 +1953,197 @@ sendMaintenanceToExcel({
 
     // Delete task
     // Delete task - MODIFIED untuk update Google Sheets
-    async function deleteTask(taskId) {
-        const confirmed = window.confirm(`Are you sure you want to delete task ${taskId}?`);
-        if (!confirmed) return;
-
-        try {
-            console.log('Deleting task:', taskId);
-            const taskRef = db.collection('maintenanceReports').doc(taskId);
-            const taskSnap = await taskRef.get();
-
-            if (!taskSnap.exists) {
-                showNotification('Task not found or already deleted.', 'error');
-                return;
-            }
-            
-            const userName = currentUser ? (currentUser.displayName || currentUser.email) : 'System';
-
-            // Kirim notifikasi delete ke Google Sheets
-            await sendMaintenanceToExcel({
-                id: taskId,
-                deletedBy: userName
-            }, 'delete');
-
-            await taskRef.delete();
-            maintenanceTasks = maintenanceTasks.filter(task => task.id !== taskId);
-            renderMaintenanceTable();
-            updateMaintenanceStats();
-            showNotification('Task deleted successfully!', 'success');
-        } catch (error) {
-            console.error('Error deleting task:', error);
-            showNotification(`Error deleting task: ${error.message || 'Unknown error'}`, 'error');
-        }
+    // Delete task - WITH ACTIVITY LOG
+async function deleteTask(taskId) {
+    const task = maintenanceTasks.find(t => t.id === taskId);
+    if (!task) {
+        showNotification('Task not found!', 'error');
+        return;
     }
+    
+    const confirmed = window.confirm(`Are you sure you want to delete task "${task.title}"?`);
+    if (!confirmed) return;
+
+    try {
+        const userName = currentUser ? (currentUser.displayName || currentUser.email) : 'System';
+        
+        // ========== LOG DELETE ==========
+        if (typeof logDelete !== 'undefined') {
+            logDelete('MaintenanceTask', taskId, task.title);
+            console.log('✅ Activity log: DELETE MaintenanceTask', taskId, task.title);
+        } else if (typeof logActivity !== 'undefined') {
+            logActivity('DELETE_MAINTENANCE', {
+                taskId: taskId,
+                taskTitle: task.title,
+                category: task.category,
+                provider: task.provider,
+                status: task.status,
+                deletedBy: userName
+            });
+        }
+        
+        // Kirim notifikasi delete ke Google Sheets
+        await sendMaintenanceToExcel({
+            id: taskId,
+            deletedBy: userName
+        }, 'delete');
+        
+        await db.collection('maintenanceReports').doc(taskId).delete();
+        maintenanceTasks = maintenanceTasks.filter(t => t.id !== taskId);
+        renderMaintenanceTable();
+        updateMaintenanceStats();
+        showNotification('Task deleted successfully!', 'success');
+    } catch (error) {
+        console.error('Error deleting task:', error);
+        showNotification(`Error deleting task: ${error.message || 'Unknown error'}`, 'error');
+    }
+}
 
     // Save task (add or update) - MODIFIED untuk menyimpan provider dan createdBy
        // Save task (add or update) - MODIFIED untuk mengirim ke Google Sheets
-    async function saveTask() {
-        const taskId = document.getElementById('taskId').value;
-        const title = document.getElementById('taskTitle').value;
-        const category = document.getElementById('taskCategory').value;
-        const provider = normalizeProviderValue(document.getElementById('taskProvider').value);
-        const status = document.getElementById('taskStatus').value;
-        const startDate = document.getElementById('taskStartDate').value;
-        const endDate = document.getElementById('taskEndDate').value;
-        const description = document.getElementById('taskDescription').value;
-        const notes = document.getElementById('taskNotes').value;
+    // Save task (add or update) - WITH ACTIVITY LOG
+async function saveTask() {
+    const taskId = document.getElementById('taskId').value;
+    const title = document.getElementById('taskTitle').value;
+    const category = document.getElementById('taskCategory').value;
+    const provider = normalizeProviderValue(document.getElementById('taskProvider').value);
+    const status = document.getElementById('taskStatus').value;
+    const startDate = document.getElementById('taskStartDate').value;
+    const endDate = document.getElementById('taskEndDate').value;
+    const description = document.getElementById('taskDescription').value;
+    const notes = document.getElementById('taskNotes').value;
+    
+    // Basic validation
+    if (!title || !category || !provider || !status || !startDate || !endDate) {
+        showNotification('Please fill in all required fields.', 'error');
+        return;
+    }
+    
+    // Validate date range
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (start >= end) {
+        showNotification('End date must be after start date.', 'error');
+        return;
+    }
+    
+    try {
+        // Get current user display name
+        const userName = currentUser ? (currentUser.displayName || currentUser.email) : 'System';
         
-        // Basic validation
-        if (!title || !category || !provider || !status || !startDate || !endDate) {
-            showNotification('Please fill in all required fields.', 'error');
-            return;
-        }
-        
-        // Validate date range
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        
-        if (start >= end) {
-            showNotification('End date must be after start date.', 'error');
-            return;
-        }
-        
-        try {
-            // Get current user display name
-            const userName = currentUser ? (currentUser.displayName || currentUser.email) : 'System';
+        if (taskId) {
+            // ========== UPDATE: Catat perubahan sebelum update ==========
+            const oldTask = maintenanceTasks.find(t => t.id === taskId);
+            const changes = {};
             
-            if (taskId) {
-                // Update existing task
-                await db.collection('maintenanceReports').doc(taskId).update({
-                    title,
-                    category,
-                    provider,
-                    status,
-                    startDate,
-                    endDate,
-                    description,
-                    notes,
-                    dateUpdated: new Date()
-                });
-                
-                // Kirim update ke Google Sheets
-                await sendMaintenanceToExcel({
-                    id: taskId,
-                    status: status,
+            if (oldTask.title !== title) changes.title = { old: oldTask.title, new: title };
+            if (oldTask.category !== category) changes.category = { old: oldTask.category, new: category };
+            if ((oldTask.provider || '') !== provider) changes.provider = { old: oldTask.provider || 'none', new: provider };
+            if (oldTask.status !== status) changes.status = { old: oldTask.status, new: status };
+            if (oldTask.startDate !== startDate) changes.startDate = { old: oldTask.startDate, new: startDate };
+            if (oldTask.endDate !== endDate) changes.endDate = { old: oldTask.endDate, new: endDate };
+            if ((oldTask.description || '') !== description) changes.description = { old: (oldTask.description || '').substring(0, 50), new: description.substring(0, 50) };
+            
+            // UPDATE existing task
+            await db.collection('maintenanceReports').doc(taskId).update({
+                title,
+                category,
+                provider,
+                status,
+                startDate,
+                endDate,
+                description,
+                notes,
+                dateUpdated: new Date()
+            });
+            
+            // ========== LOG UPDATE ==========
+            if (typeof logUpdate !== 'undefined' && Object.keys(changes).length > 0) {
+                logUpdate('MaintenanceTask', taskId, changes);
+                console.log('✅ Activity log: UPDATE MaintenanceTask', taskId, changes);
+            } else if (typeof logActivity !== 'undefined') {
+                logActivity('UPDATE_MAINTENANCE', {
+                    taskId: taskId,
+                    taskTitle: title,
+                    changes: changes,
                     updatedBy: userName
-                }, 'update');
-                
-                showNotification('Task updated successfully!', 'success');
-            } else {
-                // Add new task with createdBy info
-                const docRef = await db.collection('maintenanceReports').add({
-                    title,
-                    category,
-                    provider,
-                    status,
-                    startDate,
-                    endDate,
-                    description,
-                    notes,
-                    createdBy: userName,
-                    assignedBy: userName,
-                    dateCreated: new Date(),
-                    dateUpdated: new Date()
                 });
-                
-                // Kirim data baru ke Google Sheets
-                await sendMaintenanceToExcel({
+            }
+            
+            // Kirim update ke Google Sheets
+            await sendMaintenanceToExcel({
+                id: taskId,
+                status: status,
+                updatedBy: userName
+            }, 'update');
+            
+            showNotification('Task updated successfully!', 'success');
+        } else {
+            // CREATE new task
+            const docRef = await db.collection('maintenanceReports').add({
+                title,
+                category,
+                provider,
+                status,
+                startDate,
+                endDate,
+                description,
+                notes,
+                createdBy: userName,
+                assignedBy: userName,
+                dateCreated: new Date(),
+                dateUpdated: new Date()
+            });
+            
+            // ========== LOG CREATE ==========
+            if (typeof logCreate !== 'undefined') {
+                logCreate('MaintenanceTask', {
                     id: docRef.id,
-                    title: title,
+                    name: title,
                     category: category,
                     provider: provider,
                     status: status,
                     startDate: startDate,
-                    endDate: endDate,
-                    description: description,
-                    notes: notes,
+                    endDate: endDate
+                });
+                console.log('✅ Activity log: CREATE MaintenanceTask', docRef.id, title);
+            } else if (typeof logActivity !== 'undefined') {
+                logActivity('CREATE_MAINTENANCE', {
+                    taskId: docRef.id,
+                    taskTitle: title,
+                    category: category,
+                    provider: provider,
+                    status: status,
                     createdBy: userName
-                }, 'create');
-                
-                showNotification('Task added successfully!', 'success');
+                });
             }
             
-            // Close the modal
-            closeMaintenanceModal();
+            // Kirim data baru ke Google Sheets
+            await sendMaintenanceToExcel({
+                id: docRef.id,
+                title: title,
+                category: category,
+                provider: provider,
+                status: status,
+                startDate: startDate,
+                endDate: endDate,
+                description: description,
+                notes: notes,
+                createdBy: userName
+            }, 'create');
             
-        } catch (error) {
-            console.error("Error saving task:", error);
-            showNotification('Error saving task', 'error');
+            showNotification('Task added successfully!', 'success');
         }
+        
+        // Close the modal
+        closeMaintenanceModal();
+        
+    } catch (error) {
+        console.error("Error saving task:", error);
+        showNotification('Error saving task', 'error');
     }
+}
 
     // Open add task modal - MODIFIED untuk default provider kosong
     function openAddTaskModal() {
