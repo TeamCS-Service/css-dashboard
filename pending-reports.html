@@ -1468,7 +1468,7 @@
     <div class="header-actions">
                     <div class="search-bar">
                         <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Search solved reports..." id="dashboardSearch">
+                        <input type="text" placeholder="Search by ID, title, brand, or description..." id="dashboardSearch">
                     </div>
                     
     <button class="menu-toggle">
@@ -2865,7 +2865,7 @@ async function markReportAsComplete() {
                 reportCard.className = 'report-card fade-in';
                 reportCard.innerHTML = `
                     <div class="report-card-header">
-                        <span class="report-id">${report.id.substring(0, 8)}...</span>
+                        <span class="report-id" title="Report ID: ${report.id}">${report.id}</span>
                         <span class="status ${isOverdue ? 'status-overdue' : 'status-pending'}">
                             ${isOverdue ? 'Overdue' : report.status}
                         </span>
@@ -2942,13 +2942,14 @@ async function markReportAsComplete() {
             
             // Filter berdasarkan pencarian
             if (searchTerm) {
-                filteredReports = filteredReports.filter(report => 
-                    report.title.toLowerCase().includes(searchTerm) ||
-                    report.description.toLowerCase().includes(searchTerm) ||
-                    report.brand.toLowerCase().includes(searchTerm) ||
-                    report.category.toLowerCase().includes(searchTerm)
-                );
-            }
+    filteredReports = filteredReports.filter(report => 
+        (report.id && report.id.toLowerCase().includes(searchTerm)) ||  // <-- BARU
+        report.title.toLowerCase().includes(searchTerm) ||
+        report.description.toLowerCase().includes(searchTerm) ||
+        report.brand.toLowerCase().includes(searchTerm) ||
+        report.category.toLowerCase().includes(searchTerm)
+    );
+}
             
             // Filter berdasarkan status
             if (statusFilterValue) {
