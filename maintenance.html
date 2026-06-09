@@ -15,7 +15,28 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-    <script src="activity-log.js"></script> 
+    <script>
+// Load activity-log.js dengan aman setelah DOM siap
+(function() {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadActivityLog);
+    } else {
+        loadActivityLog();
+    }
+    
+    function loadActivityLog() {
+        // Cek apakah sudah ada
+        if (document.querySelector('script[src="activity-log.js"]')) return;
+        
+        var script = document.createElement('script');
+        script.src = 'activity-log.js';
+        script.onerror = function() {
+            console.warn('Activity log failed to load');
+        };
+        document.head.appendChild(script);
+    }
+})();
+</script>
 
     <style>
              /* ========== VARIABEL CSS YANG DIPERLUKAN ========== */
@@ -971,6 +992,7 @@
         <option value="all">All Categories</option>
         <option value="server">Server Maintenance</option>
         <option value="database">Database</option>
+        <option value="other">Other</option>
     </select>
 </div>
 
@@ -1014,6 +1036,8 @@
         <option value="IDEAL GAMING">IDEAL GAMING</option>
         <option value="PLAYTECH">PLAYTECH</option>
         <option value="YELLOW BAT">YELLOW BAT</option>
+        <option value="ION SLOT">ION SLOT</option>
+        <option value="COSMO PLAY">COSMO PLAY</option>
     </select>
 </div>
 
@@ -1104,6 +1128,7 @@
                 <option value="">Select Category</option>
                 <option value="server">Server Maintenance</option>
                 <option value="database">Database</option>
+                <option value="other">Other</option>
             </select>
         </div>
     </div>
@@ -1115,40 +1140,42 @@
             <select id="taskProvider" class="form-select" required>
                 <option value="">Select Provider</option>
                 <option value="PG SOFT">PG SOFT</option>
-                <option value="PRAGMATIC PLAY">PRAGMATIC PLAY</option>
-                <option value="JOKER">JOKER</option>
-                <option value="AWC">AWC</option>
-                <option value="ADVANT PLAY">ADVANT PLAY</option>
-                <option value="MICROGAMING">MICROGAMING</option>
-                <option value="PS STAR">PS STAR</option>
-                <option value="JILI">JILI</option>
-                <option value="HABANERO">HABANERO</option>
-                <option value="CQ9">CQ9</option>
-                <option value="JDB">JDB</option>
-                <option value="GG SOFT">GG SOFT</option>
-                <option value="KING MAKER">KING MAKER</option>
-                <option value="FA CHAI">FA CHAI</option>
-                <option value="FAST SPIN">FAST SPIN</option>
-                <option value="SPADE GAMING">SPADE GAMING</option>
-                <option value="NETENT">NETENT</option>
-                <option value="NOLIMIT CITY">NOLIMIT CITY</option>
-                <option value="RED TIGER">RED TIGER</option>
-                <option value="OCTOPLAY">OCTOPLAY</option>
-                <option value="HACKSAW GAMING">HACKSAW GAMING</option>
-                <option value="FAT PANDA">FAT PANDA</option>
-                <option value="RTG SLOT">RTG SLOT</option>
-                <option value="SIMPLEPLAY">SIMPLEPLAY</option>
-                <option value="SEXY GAME">SEXY GAME</option>
-                <option value="ION CASINO">ION CASINO</option>
-                <option value="SBOBET">SBOBET</option>
-                <option value="EVOLUTION">EVOLUTION</option>
-                <option value="SA GAMING">SA GAMING</option>
-                <option value="UG SPORT">UG SPORT</option>
-                <option value="SABA SPORT">SABA SPORT</option>
-                <option value="MASCOT GAMING">MASCOT GAMING</option>
-                <option value="IDEAL GAMING">IDEAL GAMING</option>
-                <option value="PLAYTECH">PLAYTECH</option>
-                <option value="YELLOW BAT">YELLOW BAT</option>
+        <option value="PRAGMATIC PLAY">PRAGMATIC PLAY</option>
+        <option value="JOKER">JOKER</option>
+        <option value="AWC">AWC</option>
+        <option value="ADVANT PLAY">ADVANT PLAY</option>
+        <option value="MICROGAMING">MICROGAMING</option>
+        <option value="PS STAR">PS STAR</option>
+        <option value="JILI">JILI</option>
+        <option value="HABANERO">HABANERO</option>
+        <option value="CQ9">CQ9</option>
+        <option value="JDB">JDB</option>
+        <option value="GG SOFT">GG SOFT</option>
+        <option value="KING MAKER">KING MAKER</option>
+        <option value="FA CHAI">FA CHAI</option>
+        <option value="FAST SPIN">FAST SPIN</option>
+        <option value="SPADE GAMING">SPADE GAMING</option>
+        <option value="NETENT">NETENT</option>
+        <option value="NOLIMIT CITY">NOLIMIT CITY</option>
+        <option value="RED TIGER">RED TIGER</option>
+        <option value="OCTOPLAY">OCTOPLAY</option>
+        <option value="HACKSAW GAMING">HACKSAW GAMING</option>
+        <option value="FAT PANDA">FAT PANDA</option>
+        <option value="RTG SLOT">RTG SLOT</option>
+        <option value="SIMPLEPLAY">SIMPLEPLAY</option>
+        <option value="SEXY GAME">SEXY GAME</option>
+        <option value="ION CASINO">ION CASINO</option>
+        <option value="SBOBET">SBOBET</option>
+        <option value="EVOLUTION">EVOLUTION</option>
+        <option value="SA GAMING">SA GAMING</option>
+        <option value="UG SPORT">UG SPORT</option>
+        <option value="SABA SPORT">SABA SPORT</option>
+        <option value="MASCOT GAMING">MASCOT GAMING</option>
+        <option value="IDEAL GAMING">IDEAL GAMING</option>
+        <option value="PLAYTECH">PLAYTECH</option>
+        <option value="YELLOW BAT">YELLOW BAT</option>
+        <option value="ION SLOT">ION SLOT</option>
+        <option value="COSMO PLAY">COSMO PLAY</option>
             </select>
         </div>
         
@@ -1459,6 +1486,7 @@ return true;
         switch(category) {
             case 'server': return 'Server Maintenance';
             case 'database': return 'Database';
+            case 'other': return 'Database';
             default: return category;
         }
     }
@@ -1618,6 +1646,9 @@ return true;
                     break;
                 case 'database':
                     categoryText = 'Database';
+                    break;
+                    case 'other':
+                    categoryText = 'Other';
                     break;
                 default:
                     categoryText = task.category;
@@ -2442,6 +2473,7 @@ async function saveTask() {
             if (lang.allCategories) categoryFilter.options[0].text = lang.allCategories;
             if (lang.serverMaintenance) categoryFilter.options[1].text = lang.serverMaintenance;
             if (lang.database) categoryFilter.options[2].text = lang.database;
+            if (lang.other) categoryFilter.options[3].text = lang.other;
         }
         
         // Provider filter
@@ -2933,6 +2965,7 @@ function applyMaintenanceTranslations(language) {
         if (categoryFilter.options[0]) categoryFilter.options[0].text = lang.allCategories;
         if (categoryFilter.options[1]) categoryFilter.options[1].text = lang.serverMaintenance;
         if (categoryFilter.options[2]) categoryFilter.options[2].text = lang.database;
+        if (categoryFilter.options[3]) categoryFilter.options[2].text = lang.other;
     }
     
     // Filter options - Provider
@@ -3162,6 +3195,7 @@ window.getCategoryText = function(category) {
     switch(category) {
         case 'server': return lang.serverMaintenance;
         case 'database': return lang.database;
+        case 'other': return lang.other;
         default: return category;
     }
 };
