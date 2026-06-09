@@ -16,886 +16,1245 @@
     <script src="activity-log.js"></script>
     
     <style>
-        /* ===== CUSTOM STYLE UNTUK STAFF ACCOUNT ===== */
-        /* Tetap menggunakan variabel dari global.css */
-        
-        .main-content {
-            padding: var(--space-lg);
-            background-color: var(--bg-secondary);
-            min-height: 100vh;
-        }
-
-        .header {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: var(--space-xl);
-            margin-bottom: var(--space-lg);
-            box-shadow: var(--card-shadow);
-            border: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            width: 100%;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 6px;
-            height: 100%;
-            background: var(--primary-gradient);
-        }
-
-        .header h1 {
-            font-size: var(--text-2xl);
-            font-weight: var(--font-bold);
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: var(--space-sm);
-            margin: 0;
-        }
-
-        .header h1 i {
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* Search bar */
-        .search-bar {
-            position: relative;
-            min-width: 280px;
-        }
-
-        .search-bar i {
-            position: absolute;
-            left: var(--space-md);
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-tertiary);
-            font-size: var(--text-sm);
-        }
-
-        .search-bar input {
-            width: 100%;
-            padding: var(--space-sm) var(--space-md) var(--space-sm) 40px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            background-color: var(--input-bg);
-            color: var(--text-primary);
-            font-size: var(--text-sm);
-            transition: all var(--transition-fast);
-            height: 42px;
-        }
-
-        .search-bar input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        .search-bar input::placeholder {
-            color: var(--text-tertiary);
-        }
-
-        /* Staff container */
-        .staff-container {
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            padding: var(--space-lg);
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-color);
-            margin-bottom: var(--space-xl);
-        }
-
-        /* Section header */
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--space-lg);
-            padding-bottom: var(--space-md);
-            border-bottom: 1px solid var(--border-color);
-            flex-wrap: wrap;
-            gap: var(--space-md);
-        }
-
-        .section-title {
-            font-size: var(--text-xl);
-            font-weight: var(--font-semibold);
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: var(--space-sm);
-            margin: 0;
-        }
-
-        .section-title i {
-            color: var(--primary);
-        }
-
-        /* Filter controls */
-        .filter-controls {
-            display: flex;
-            align-items: center;
-            gap: var(--space-md);
-            flex-wrap: wrap;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-xs);
-        }
-
-        .filter-label {
-            font-size: var(--text-xs);
-            font-weight: var(--font-semibold);
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .filter-input {
-            padding: var(--space-sm) var(--space-md);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            background-color: var(--input-bg);
-            color: var(--text-primary);
-            font-size: var(--text-sm);
-            transition: all var(--transition-fast);
-            height: 42px;
-            min-width: 160px;
-        }
-
-        .filter-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        /* Button styles */
-        .btn {
-            padding: var(--space-sm) var(--space-lg);
-            border-radius: var(--radius-md);
-            font-size: var(--text-sm);
-            font-weight: var(--font-semibold);
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: var(--space-xs);
-            height: 42px;
-        }
-
-        .btn-primary {
-            background: var(--primary-gradient);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-outline:hover {
-            background: var(--hover-color);
-            color: var(--text-primary);
-        }
-
-        .btn-success {
-            background: var(--success-gradient);
-            color: white;
-        }
-
-        .btn-warning {
-            background: var(--warning-gradient);
-            color: white;
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, var(--danger) 0%, #a41623 100%);
-            color: white;
-        }
-
-        .btn-sm {
-            padding: var(--space-xs) var(--space-md);
-            font-size: var(--text-xs);
-            height: 36px;
-        }
-
-        /* Staff list - menggunakan grid */
-        .staff-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-            gap: var(--space-lg);
-            margin-top: var(--space-lg);
-        }
-
-        /* Staff item card */
-        .staff-item {
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            padding: var(--space-lg);
-            border: 1px solid var(--border-color);
-            transition: all var(--transition-fast);
-            box-shadow: var(--shadow-xs);
-            position: relative;
-            overflow: hidden;
-            animation: fadeIn 0.5s ease forwards;
-        }
-
-        .staff-item:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateY(-4px);
-            border-color: var(--primary-light);
-        }
-
-        .staff-item.suspended {
-            background-color: rgba(107, 114, 128, 0.03);
-            border-left: 4px solid var(--text-tertiary);
-        }
-
-        .staff-item.super-admin {
-            border-left: 4px solid #f59e0b;
-            background: linear-gradient(to right, rgba(245, 158, 11, 0.02), transparent);
-        }
-
-        /* Staff header */
-        .staff-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: var(--space-md);
-        }
-
-        .staff-info {
-            display: flex;
-            align-items: center;
-            gap: var(--space-md);
-        }
-
-        .staff-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: var(--radius-md);
-            object-fit: cover;
-            border: 2px solid var(--primary-light);
-            transition: all var(--transition-fast);
-        }
-
-        .staff-item:hover .staff-avatar {
-            transform: scale(1.05);
-        }
-
-        .staff-details h3 {
-            font-weight: var(--font-semibold);
-            font-size: var(--text-md);
-            color: var(--text-primary);
-            margin: 0 0 var(--space-xs) 0;
-        }
-
-        .staff-details p {
-            font-size: var(--text-sm);
-            color: var(--text-secondary);
-            margin: 0;
-        }
-
-        /* Staff status badge */
-        .staff-status {
-            padding: var(--space-xs) var(--space-sm);
-            border-radius: var(--radius-full);
-            font-size: var(--text-xs);
-            font-weight: var(--font-semibold);
-            display: inline-flex;
-            align-items: center;
-            gap: var(--space-xs);
-            white-space: nowrap;
-        }
-
-        .status-active {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-
-        .status-suspended {
-            background: rgba(107, 114, 128, 0.1);
-            color: var(--text-secondary);
-            border: 1px solid rgba(107, 114, 128, 0.2);
-        }
-
-        .status-pending {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-            border: 1px solid rgba(245, 158, 11, 0.2);
-        }
-
-        .status-super-admin {
-            background: rgba(245, 158, 11, 0.15);
-            color: #f59e0b;
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
-        /* Staff meta information */
-        .staff-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--space-sm);
-            margin: var(--space-md) 0;
-            padding: var(--space-sm) 0;
-            border-top: 1px solid var(--border-color-light);
-            border-bottom: 1px solid var(--border-color-light);
-        }
-
-        .staff-role, .staff-email, .staff-joined {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--space-xs);
-            padding: var(--space-xs) var(--space-sm);
-            background: var(--bg-secondary);
-            border-radius: var(--radius-full);
-            font-size: var(--text-xs);
-            font-weight: var(--font-medium);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-        }
-
-        .staff-role i, .staff-email i, .staff-joined i {
-            color: var(--primary);
-            font-size: var(--text-xs);
-        }
-
-        /* Staff actions */
-        .staff-actions {
-            display: flex;
-            gap: var(--space-xs);
-            flex-wrap: wrap;
-            margin-top: var(--space-md);
-        }
-
-        .staff-actions .btn {
-            flex: 1;
-            min-width: 80px;
-            justify-content: center;
-        }
-
-        /* Empty state */
-        .empty-state {
-            text-align: center;
-            padding: var(--space-xxl) var(--space-lg);
-            background-color: var(--card-bg);
-            border-radius: var(--radius-lg);
-            border: 2px dashed var(--border-color);
-            margin: var(--space-lg) 0;
-        }
-
-        .empty-state i {
-            font-size: 3rem;
-            color: var(--text-tertiary);
-            margin-bottom: var(--space-md);
-        }
-
-        .empty-state h3 {
-            font-size: var(--text-lg);
-            font-weight: var(--font-semibold);
-            color: var(--text-primary);
-            margin-bottom: var(--space-xs);
-        }
-
-        .empty-state p {
-            font-size: var(--text-sm);
-            color: var(--text-secondary);
-            margin-bottom: var(--space-lg);
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* Modal actions */
-        .modal-actions {
-            display: flex !important;
-            gap: 16px !important;
-            margin-top: 24px !important;
-            padding-top: 16px !important;
-            border-top: 1px solid var(--border-color) !important;
-            width: 100% !important;
-        }
-
-        .modal-actions-right {
-            justify-content: flex-end !important;
-        }
-
-        .modal-actions-center {
-            justify-content: center !important;
-        }
-
-        .modal-actions .btn {
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            min-width: 120px !important;
-            padding: 10px 20px !important;
-            margin: 0 !important;
-            font-size: 14px !important;
-            font-weight: 500 !important;
-            border-radius: 8px !important;
-            cursor: pointer !important;
-            transition: all 0.2s ease !important;
-            border: none !important;
-            line-height: 1.5 !important;
-            box-sizing: border-box !important;
-        }
-
-        .modal-actions .btn-primary {
-            background: var(--primary-gradient) !important;
-            color: white !important;
-        }
-
-        .modal-actions .btn-primary:hover {
-            opacity: 0.9 !important;
-            transform: translateY(-2px) !important;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3) !important;
-        }
-
-        .modal-actions .btn-outline {
-            background: transparent !important;
-            color: var(--text-secondary) !important;
-            border: 1px solid var(--border-color) !important;
-        }
-
-        .modal-actions .btn-outline:hover {
-            background: var(--hover-color) !important;
-            color: var(--text-primary) !important;
-        }
-
-        .modal-actions .btn-danger {
-            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
-            color: white !important;
-        }
-
-        .modal-actions-center {
-            gap: 24px !important;
-        }
-
-        .modal-actions-center .btn {
-            min-width: 140px !important;
-        }
-
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: var(--space-lg);
-        }
-
-        .modal.active {
-            display: flex;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal-content {
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            padding: var(--space-xl);
-            max-width: 500px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border-color);
-            animation: slideInUp 0.3s ease;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--space-lg);
-            padding-bottom: var(--space-md);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .modal-title {
-            font-size: var(--text-lg);
-            font-weight: var(--font-semibold);
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: var(--space-sm);
-            margin: 0;
-        }
-
-        .modal-title i {
-            color: var(--primary);
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: var(--text-lg);
-            color: var(--text-secondary);
-            cursor: pointer;
-            padding: var(--space-xs);
-            border-radius: var(--radius-sm);
-            transition: all var(--transition-fast);
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-close:hover {
-            background: var(--hover-color);
-            color: var(--text-primary);
-            transform: rotate(90deg);
-        }
-
-        /* Form styles */
-        .form-group {
-            margin-bottom: var(--space-lg);
-        }
-
-        .form-label {
-            display: block;
-            font-size: var(--text-sm);
-            font-weight: var(--font-semibold);
-            color: var(--text-primary);
-            margin-bottom: var(--space-xs);
-        }
-
-        .form-input {
-            width: 100%;
-            padding: var(--space-sm) var(--space-md);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            background-color: var(--input-bg);
-            color: var(--text-primary);
-            font-size: var(--text-sm);
-            transition: all var(--transition-fast);
-            box-sizing: border-box;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        /* Staff detail modal */
-        .staff-detail-view {
-            padding: var(--space-sm);
-        }
-
-        .staff-detail-header {
-            display: flex;
-            align-items: center;
-            gap: var(--space-lg);
-            margin-bottom: var(--space-lg);
-            padding-bottom: var(--space-md);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .staff-detail-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: var(--radius-md);
-            object-fit: cover;
-            border: 3px solid var(--primary-light);
-        }
-
-        .staff-detail-info h3 {
-            margin: 0 0 var(--space-xs) 0;
-            font-size: var(--text-lg);
-            color: var(--text-primary);
-        }
-
-        .staff-detail-info p {
-            margin: 0 0 var(--space-sm) 0;
-            color: var(--text-secondary);
-        }
-
-        .staff-detail-meta {
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-sm);
-        }
-
-        .detail-item {
-            display: flex;
-            justify-content: space-between;
-            padding: var(--space-sm) 0;
-            border-bottom: 1px solid var(--border-color-light);
-        }
-
-        .detail-item label {
-            font-weight: var(--font-medium);
-            color: var(--text-primary);
-        }
-
-        .detail-item span {
-            color: var(--text-secondary);
-        }
-
-        /* Notification */
-        .notification-container {
-            position: fixed;
-            top: var(--space-lg);
-            right: var(--space-lg);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-sm);
-        }
-
-        .notification {
-            padding: var(--space-sm) var(--space-lg);
-            border-radius: var(--radius-md);
-            background: var(--card-bg);
-            border-left: 4px solid var(--primary);
-            box-shadow: var(--shadow-md);
-            display: flex;
-            align-items: center;
-            gap: var(--space-sm);
-            min-width: 300px;
-            animation: slideInRight 0.3s ease;
-            border: 1px solid var(--border-color);
-        }
-
-        .notification.success {
-            border-left-color: var(--success);
-        }
-
-        .notification.error {
-            border-left-color: var(--danger);
-        }
-
-        .notification.info {
-            border-left-color: var(--info);
-        }
-
-        .notification-close {
-            margin-left: auto;
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-tertiary);
-            padding: var(--space-xs);
-            border-radius: var(--radius-sm);
-            transition: all var(--transition-fast);
-        }
-
-        .notification-close:hover {
-            background: var(--hover-color);
-            color: var(--text-primary);
-        }
-
-        .notification.hiding {
-            animation: slideOutRight 0.3s ease forwards;
-        }
-
-        /* Super Admin Badge */
-        .super-admin-badge {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: white;
-            padding: 2px 8px;
-            border-radius: var(--radius-full);
-            font-size: 10px;
-            font-weight: 600;
-            margin-left: 8px;
-            display: inline-block;
-            vertical-align: middle;
-        }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes slideOutRight {
-            from {
-                opacity: 1;
-                transform: translateX(0);
-            }
-            to {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .staff-list {
-                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .header-actions {
-                flex-direction: column;
-                gap: var(--space-md);
-            }
-
-            .search-bar {
-                min-width: 100%;
-            }
-
-            .user-profile {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .section-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .filter-controls {
-                flex-direction: column;
-            }
-
-            .filter-input {
-                width: 100%;
-            }
-
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .staff-list {
-                grid-template-columns: 1fr;
-            }
-
-            .staff-actions {
-                flex-direction: column;
-            }
-
-            .modal-content {
-                padding: var(--space-lg);
-            }
-
-            .modal-actions {
-                flex-direction: column !important;
-                gap: 12px !important;
-            }
-            
-            .modal-actions .btn {
-                width: 100% !important;
-            }
-
-            .staff-detail-header {
-                flex-direction: column;
-                text-align: center;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .staff-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: var(--space-sm);
-            }
-
-            .staff-status {
-                align-self: flex-start;
-            }
-
-            .staff-meta {
-                flex-direction: column;
-            }
-
-            .staff-role, .staff-email, .staff-joined {
-                width: 100%;
-            }
-        }
-
-        /* Menu toggle */
-        .menu-toggle {
-            position: fixed;
-            top: var(--space-md);
-            left: var(--space-md);
-            z-index: 100;
-            width: 42px;
-            height: 42px;
-            border-radius: var(--radius-md);
-            background: var(--primary-gradient);
-            border: none;
-            color: white;
-            font-size: var(--text-md);
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow-md);
-            transition: all var(--transition-fast);
-        }
-
-        .menu-toggle:hover {
-            transform: scale(1.1);
-        }
-
-        @media (max-width: 1024px) {
-            .menu-toggle {
-                display: flex;
-            }
-        }
+       /* ===== STAFF ACCOUNT — REDESIGNED MODERN UI ===== */
+
+/* ---- Layout ---- */
+.main-content {
+    padding: 28px 32px;
+    background-color: var(--bg-secondary);
+    min-height: 100vh;
+}
+
+/* ---- Page Header ---- */
+.header {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 20px 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(79,70,229,0.06);
+    border: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.header-icon-wrap {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    background: var(--primary-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(79,70,229,0.25);
+}
+
+.header-icon-wrap i {
+    color: white;
+    font-size: 18px;
+}
+
+.header-text h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 2px 0;
+    line-height: 1.3;
+}
+
+.header-text p {
+    font-size: 0.78rem;
+    color: var(--text-tertiary);
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* ---- Search bar ---- */
+.search-bar {
+    position: relative;
+    min-width: 260px;
+}
+
+.search-bar i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+    font-size: 13px;
+    pointer-events: none;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 10px 14px 10px 38px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 12px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-family: inherit;
+    transition: all 0.2s;
+    height: 42px;
+    box-sizing: border-box;
+}
+
+.search-bar input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--card-bg);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.search-bar input::placeholder { color: var(--text-tertiary); }
+
+/* ---- User profile chip ---- */
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 14px 6px 6px;
+    background: var(--bg-secondary);
+    border: 1.5px solid var(--border-color);
+    border-radius: 50px;
+    cursor: default;
+    transition: border-color 0.2s;
+}
+
+.user-profile:hover { border-color: var(--primary-light); }
+
+.profile-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-info h4 {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.user-info p {
+    font-size: 0.72rem;
+    color: var(--text-tertiary);
+    margin: 0;
+}
+
+/* ---- Staff container ---- */
+.staff-container {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border: 1px solid var(--border-color);
+    margin-bottom: 32px;
+}
+
+/* ---- Section header with toolbar ---- */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 20px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.section-eyebrow {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 4px;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.section-title i { color: var(--primary); font-size: 1rem; }
+
+/* ---- Filter toolbar ---- */
+.filter-controls {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filter-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filter-input {
+    padding: 8px 12px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 10px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.83rem;
+    font-family: inherit;
+    transition: all 0.2s;
+    height: 40px;
+    min-width: 148px;
+    cursor: pointer;
+}
+
+.filter-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--card-bg);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* ---- Buttons ---- */
+.btn {
+    padding: 0 18px;
+    border-radius: 10px;
+    font-size: 0.83rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 40px;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: 0 2px 8px rgba(79,70,229,0.2);
+}
+
+.btn-primary:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(79,70,229,0.3);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1.5px solid var(--border-color);
+}
+
+.btn-outline:hover {
+    background: var(--hover-color);
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+}
+
+.btn-success {
+    background: var(--success-gradient);
+    color: white;
+}
+
+.btn-warning {
+    background: var(--warning-gradient);
+    color: white;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--danger) 0%, #a41623 100%);
+    color: white;
+}
+
+.btn-sm {
+    padding: 0 12px;
+    font-size: 0.77rem;
+    height: 34px;
+    border-radius: 8px;
+    gap: 5px;
+}
+
+.btn i { font-size: 0.8em; }
+
+/* ---- Staff grid ---- */
+.staff-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+    margin-top: 4px;
+}
+
+/* ---- Staff card ---- */
+.staff-item {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1.5px solid var(--border-color);
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+.staff-item::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: transparent;
+    transition: background 0.2s;
+}
+
+.staff-item:hover {
+    box-shadow: 0 6px 24px rgba(0,0,0,0.09);
+    transform: translateY(-3px);
+    border-color: rgba(79,70,229,0.3);
+}
+
+.staff-item:hover::before {
+    background: var(--primary-gradient);
+}
+
+.staff-item.suspended {
+    opacity: 0.75;
+    border-color: rgba(107,114,128,0.3);
+}
+
+.staff-item.suspended::before {
+    background: linear-gradient(90deg, #9ca3af, #6b7280);
+}
+
+.staff-item.super-admin::before {
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+/* ---- Card: top row ---- */
+.staff-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+    gap: 8px;
+}
+
+.staff-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.staff-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.staff-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    object-fit: cover;
+    border: 2px solid var(--border-color);
+    transition: all 0.2s;
+    display: block;
+}
+
+.staff-item:hover .staff-avatar {
+    border-color: var(--primary-light);
+}
+
+.staff-avatar-ring {
+    position: absolute;
+    inset: -3px;
+    border-radius: 17px;
+    border: 2px solid transparent;
+    pointer-events: none;
+    transition: border-color 0.2s;
+}
+
+.staff-item:hover .staff-avatar-ring {
+    border-color: rgba(79,70,229,0.2);
+}
+
+.staff-details {
+    min-width: 0;
+}
+
+.staff-details h3 {
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--text-primary);
+    margin: 0 0 3px 0;
+    line-height: 1.3;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.staff-details p {
+    font-size: 0.78rem;
+    color: var(--text-tertiary);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+}
+
+/* ---- Status badge ---- */
+.staff-status {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    letter-spacing: 0.2px;
+}
+
+.status-active {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.status-suspended {
+    background: rgba(107, 114, 128, 0.1);
+    color: var(--text-secondary);
+    border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+.status-pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.status-super-admin {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* ---- Card meta pills ---- */
+.staff-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 14px 0;
+    padding: 12px 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.staff-role, .staff-email, .staff-joined {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    transition: all 0.15s;
+}
+
+.staff-role i, .staff-email i, .staff-joined i {
+    color: var(--primary);
+    font-size: 0.7rem;
+}
+
+/* ---- Card actions ---- */
+.staff-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+}
+
+.staff-actions .btn {
+    flex: 1;
+    min-width: 64px;
+}
+
+/* ---- Empty state ---- */
+.empty-state {
+    text-align: center;
+    padding: 60px 24px;
+    border-radius: 16px;
+    border: 2px dashed var(--border-color);
+    margin: 8px 0;
+}
+
+.empty-state-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.empty-state-icon i {
+    font-size: 2rem;
+    color: var(--text-tertiary);
+}
+
+.empty-state h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 6px 0;
+}
+
+.empty-state p {
+    font-size: 0.83rem;
+    color: var(--text-secondary);
+    margin: 0 auto 20px;
+    max-width: 380px;
+    line-height: 1.6;
+}
+
+/* ===== MODAL STYLES (DIPERBAIKI AGAR DI TENGAH) ===== */
+
+/* Modal Overlay */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.modal.active {
+    display: flex;
+    animation: fadeIn 0.22s ease;
+}
+
+/* Modal Content - DIPERLEBAR DAN DI TENGAH */
+.modal-content {
+    background: var(--card-bg);
+    border-radius: 24px;
+    padding: 28px;
+    max-width: 520px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.16), 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border-color);
+    animation: slideInUp 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);
+    text-align: center;
+}
+
+/* Modal Header */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.modal-title i { 
+    color: var(--primary); 
+    font-size: 1.1rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 0.9rem;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    padding: 0;
+    border-radius: 8px;
+    transition: all 0.18s;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.modal-close:hover {
+    background: var(--hover-color);
+    color: var(--text-primary);
+    transform: rotate(90deg);
+}
+
+/* ===== PERBAIKAN UTAMA: MODAL DETAIL STAFF DI TENGAH ===== */
+.modal-body {
+    padding: 8px 0 16px 0;
+}
+
+/* Staff Detail View - SEMUA DI TENGAH */
+.staff-detail-view {
+    width: 100%;
+}
+
+/* Header detail - DITENGAHKAN */
+.staff-detail-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.staff-detail-avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 24px;
+    object-fit: cover;
+    border: 3px solid var(--primary-light);
+    flex-shrink: 0;
+    margin: 0 auto;
+}
+
+.staff-detail-info {
+    text-align: center;
+}
+
+.staff-detail-info h3 {
+    margin: 0 0 6px 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.staff-detail-info p {
+    margin: 0 0 10px 0;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+}
+
+/* Meta info - RAPI DI TENGAH DENGAN LEBAR MAKSIMAL */
+.staff-detail-meta {
+    max-width: 380px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    margin-bottom: 8px;
+    transition: background 0.15s;
+}
+
+.detail-item:hover {
+    background: var(--hover-color);
+}
+
+.detail-item label {
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+
+.detail-item span {
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    word-break: break-all;
+    text-align: right;
+    max-width: 60%;
+}
+
+/* Modal Actions - Tombol di tengah */
+.modal-actions {
+    display: flex !important;
+    gap: 12px !important;
+    margin-top: 24px !important;
+    padding-top: 20px !important;
+    border-top: 1px solid var(--border-color) !important;
+    width: 100% !important;
+    justify-content: center !important;
+}
+
+.modal-actions-right {
+    justify-content: flex-end !important;
+}
+
+.modal-actions-center {
+    justify-content: center !important;
+}
+
+.modal-actions .btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 110px !important;
+    padding: 0 20px !important;
+    margin: 0 !important;
+    font-size: 0.84rem !important;
+    font-weight: 600 !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    line-height: 1 !important;
+    box-sizing: border-box !important;
+    height: 40px !important;
+}
+
+.modal-actions .btn-primary {
+    background: var(--primary-gradient) !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(79,70,229,0.2) !important;
+}
+
+.modal-actions .btn-primary:hover {
+    opacity: 0.9 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3) !important;
+}
+
+.modal-actions .btn-outline {
+    background: transparent !important;
+    color: var(--text-secondary) !important;
+    border: 1.5px solid var(--border-color) !important;
+}
+
+.modal-actions .btn-outline:hover {
+    background: var(--hover-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.modal-actions .btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    color: white !important;
+}
+
+/* ===== FORM STYLES UNTUK MODAL TAMBAH/EDIT ===== */
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 12px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.88rem;
+    font-family: inherit;
+    transition: all 0.18s;
+    box-sizing: border-box;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--card-bg);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* ---- Super Admin Badge ---- */
+.super-admin-badge {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    vertical-align: middle;
+    letter-spacing: 0.2px;
+}
+
+/* ---- Notification ---- */
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.notification {
+    padding: 12px 16px;
+    border-radius: 14px;
+    background: var(--card-bg);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 300px;
+    max-width: 380px;
+    animation: slideInRight 0.3s cubic-bezier(0.34,1.4,0.64,1);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--primary);
+}
+
+.notification i { font-size: 0.9rem; color: var(--primary); }
+.notification span { font-size: 0.84rem; font-weight: 500; color: var(--text-primary); flex: 1; }
+
+.notification.success { border-left-color: #10b981; }
+.notification.success i { color: #10b981; }
+.notification.error { border-left-color: var(--danger); }
+.notification.error i { color: var(--danger); }
+.notification.info { border-left-color: var(--info); }
+
+.notification-close {
+    margin-left: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-tertiary);
+    padding: 4px;
+    border-radius: 6px;
+    transition: all 0.15s;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.notification-close:hover {
+    background: var(--hover-color);
+    color: var(--text-primary);
+}
+
+.notification.hiding {
+    animation: slideOutRight 0.28s ease forwards;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideOutRight {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(20px); }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .staff-list {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content { padding: 20px 16px; }
+
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+    }
+
+    .header-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .search-bar { min-width: 100%; }
+
+    .user-profile { width: 100%; }
+
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-controls { flex-direction: column; }
+    .filter-input { width: 100%; }
+    .filter-group { width: 100%; }
+
+    .staff-list { grid-template-columns: 1fr; }
+
+    .modal-content { 
+        padding: 20px; 
+        border-radius: 20px;
+        margin: 16px;
+        width: calc(100% - 32px);
+    }
+
+    .modal-actions {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+
+    .modal-actions .btn { width: 100% !important; }
+
+    .staff-detail-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .detail-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+    }
+    
+    .detail-item span {
+        text-align: center;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .staff-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .staff-status { align-self: flex-start; }
+    
+    .staff-detail-meta {
+        max-width: 100%;
+    }
+}
+
+/* ---- Menu toggle ---- */
+.menu-toggle {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 100;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--primary-gradient);
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(79,70,229,0.3);
+    transition: all 0.2s;
+}
+
+.menu-toggle:hover { transform: scale(1.05); }
+
+@media (max-width: 1024px) {
+    .menu-toggle { display: flex; }
+}
+/* ===== OVERRIDE GLOBAL.CSS - MEMAKSA MODAL DETAIL STAFF DI TENGAH ===== */
+/* Ini harus diletakkan di PALING BAWAH tag style staff-account.html */
+
+/* Reset semua gaya yang mungkin mempengaruhi modal dari global.css */
+.modal,
+.modal.active,
+.modal-overlay,
+.modal-content,
+.modal-body,
+.staff-detail-view,
+.staff-detail-header,
+.staff-detail-info,
+.staff-detail-meta,
+.detail-item {
+    all: initial;
+}
+
+/* Terapkan ulang gaya yang benar - DIPAKSA DI TENGAH */
+.modal {
+    display: none !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(8px) !important;
+    z-index: 9999 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 20px !important;
+    box-sizing: border-box !important;
+}
+
+.modal.active {
+    display: flex !important;
+}
+
+.modal-content {
+    background: var(--card-bg, #ffffff) !important;
+    border-radius: 28px !important;
+    padding: 32px !important;
+    max-width: 500px !important;
+    width: 100% !important;
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.3) !important;
+    border: 1px solid var(--border-color, #e2e8f0) !important;
+    text-align: center !important;
+    margin: 0 auto !important;
+}
+
+/* Header modal */
+.modal-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 20px !important;
+    padding-bottom: 16px !important;
+    border-bottom: 1px solid var(--border-color, #e2e8f0) !important;
+}
+
+.modal-title {
+    font-size: 1.3rem !important;
+    font-weight: 700 !important;
+    color: var(--text-primary, #1e293b) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin: 0 !important;
+}
+
+.modal-close {
+    background: none !important;
+    border: none !important;
+    font-size: 1.2rem !important;
+    cursor: pointer !important;
+    padding: 8px !important;
+    border-radius: 50% !important;
+    transition: all 0.2s !important;
+    width: 36px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.modal-close:hover {
+    background: rgba(0,0,0,0.1) !important;
+}
+
+/* === INI YANG PALING PENTING - MEMAKSA DETAIL STAFF DI TENGAH === */
+.modal-body {
+    padding: 8px 0 !important;
+}
+
+.staff-detail-view {
+    width: 100% !important;
+}
+
+/* Header detail staff - DIPAKSA DI TENGAH */
+.staff-detail-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    gap: 16px !important;
+    margin-bottom: 24px !important;
+    padding-bottom: 20px !important;
+    border-bottom: 1px solid var(--border-color, #e2e8f0) !important;
+}
+
+.staff-detail-avatar {
+    width: 90px !important;
+    height: 90px !important;
+    border-radius: 25px !important;
+    object-fit: cover !important;
+    border: 3px solid var(--primary, #4361ee) !important;
+    margin: 0 auto !important;
+    display: block !important;
+}
+
+.staff-detail-info {
+    text-align: center !important;
+}
+
+.staff-detail-info h3 {
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+    margin: 0 0 6px 0 !important;
+    color: var(--text-primary, #1e293b) !important;
+}
+
+.staff-detail-info p {
+    font-size: 0.85rem !important;
+    color: var(--text-secondary, #64748b) !important;
+    margin: 0 0 8px 0 !important;
+}
+
+/* Meta info - DIBUAT RAPI DI TENGAH */
+.staff-detail-meta {
+    max-width: 380px !important;
+    margin: 0 auto !important;
+    text-align: left !important;
+}
+
+.detail-item {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 12px 16px !important;
+    border-radius: 12px !important;
+    background: var(--bg-secondary, #f8fafc) !important;
+    margin-bottom: 8px !important;
+}
+
+.detail-item label {
+    font-weight: 600 !important;
+    font-size: 0.8rem !important;
+    color: var(--text-secondary, #64748b) !important;
+}
+
+.detail-item span {
+    color: var(--text-primary, #1e293b) !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+    word-break: break-all !important;
+    text-align: right !important;
+    max-width: 60% !important;
+}
+
+/* Tombol aksi - DI TENGAH */
+.modal-actions {
+    display: flex !important;
+    gap: 12px !important;
+    margin-top: 24px !important;
+    padding-top: 20px !important;
+    border-top: 1px solid var(--border-color, #e2e8f0) !important;
+    justify-content: center !important;
+}
+
+.modal-actions .btn {
+    min-width: 120px !important;
+    padding: 10px 20px !important;
+}
+
+/* Responsive untuk layar kecil */
+@media (max-width: 640px) {
+    .modal-content {
+        padding: 20px !important;
+        margin: 16px !important;
+        width: calc(100% - 32px) !important;
+        max-width: none !important;
+    }
+    
+    .detail-item {
+        flex-direction: column !important;
+        text-align: center !important;
+        gap: 6px !important;
+    }
+    
+    .detail-item span {
+        text-align: center !important;
+        max-width: 100% !important;
+    }
+    
+    .modal-actions {
+        flex-direction: column !important;
+    }
+    
+    .modal-actions .btn {
+        width: 100% !important;
+    }
+}
     </style>
 </head>
 <body>
@@ -907,10 +1266,14 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="header fade-in">
-            <h1>
-                <i class="fas fa-user-friends"></i>
-                <span id="page-title">Staff Account Management</span>
-            </h1>
+            <div class="header-left">
+                <div class="header-icon-wrap">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="header-text">
+                    <h1 id="page-title">Staff Account Management</h1>
+                </div>
+            </div>
             
             <div class="header-actions">
                 <div class="search-bar">
@@ -930,10 +1293,13 @@
 
         <div class="staff-container fade-in" style="animation-delay: 0.2s;">
             <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-users"></i>
-                    <span id="staff-list-title">Daftar Staff</span>
-                </h2>
+                <div class="section-title-wrap">
+                    <div class="section-eyebrow">Manajemen Tim</div>
+                    <h2 class="section-title">
+                        <i class="fas fa-users"></i>
+                        <span id="staff-list-title">Daftar Staff</span>
+                    </h2>
+                </div>
                 
                 <div class="filter-controls">
                     <div class="filter-group">
@@ -957,10 +1323,13 @@
                         </select>
                     </div>
                     
-                    <button class="btn btn-warning" id="addSuperAdminBtn">
-                        <i class="fas fa-crown"></i>
-                        <span id="add-super-admin-btn-text">Tambah Admin</span>
-                    </button>
+                    <div class="filter-group" style="justify-content: flex-end;">
+                        <label class="filter-label">&nbsp;</label>
+                        <button class="btn btn-warning" id="addSuperAdminBtn">
+                            <i class="fas fa-crown"></i>
+                            <span id="add-super-admin-btn-text">Tambah Admin</span>
+                        </button>
+                    </div>
                 </div>
             </div>
             
@@ -971,7 +1340,9 @@
             
             <!-- Empty State -->
             <div class="empty-state" id="emptyState" style="display: none;">
-                <i class="fas fa-users"></i>
+                <div class="empty-state-icon">
+                    <i class="fas fa-users"></i>
+                </div>
                 <h3 id="empty-state-title">Tidak ada data staff</h3>
                 <p id="empty-state-desc">Belum ada staff yang terdaftar atau data sesuai dengan filter yang dipilih.</p>
                 <button class="btn btn-primary" id="addFirstStaffBtn">
@@ -2246,7 +2617,10 @@
                 staffItem.innerHTML = `
                     <div class="staff-header">
                         <div class="staff-info">
-                            <img class="staff-avatar" src="${staffMember.avatar}" alt="${staffMember.name}" onerror="this.src='https://iili.io/KfDh0EN.png'">
+                            <div class="staff-avatar-wrap">
+                                <img class="staff-avatar" src="${staffMember.avatar}" alt="${staffMember.name}" onerror="this.src='https://iili.io/KfDh0EN.png'">
+                                <div class="staff-avatar-ring"></div>
+                            </div>
                             <div class="staff-details">
                                 <h3>${staffMember.name} ${isSuperAdmin ? '<span class="super-admin-badge"><i class="fas fa-crown"></i> Super Admin</span>' : ''}</h3>
                                 <p>${staffMember.email}</p>
