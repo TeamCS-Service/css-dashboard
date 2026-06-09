@@ -2217,7 +2217,45 @@ async function sendToExcel(reportData) {
         // Variabel global
         let currentUser = null;
         let currentReportId = null;
+// ========== FUNGSI KONVERSI TIMESTAMP ==========
+function convertToDate(timestamp) {
+    if (!timestamp) return null;
+    
+    try {
+        // Firestore Timestamp (toDate method)
+        if (typeof timestamp.toDate === 'function') {
+            return timestamp.toDate();
+        }
+        // Firestore Timestamp (seconds property)
+        if (typeof timestamp === 'object' && timestamp.seconds) {
+            return new Date(timestamp.seconds * 1000);
+        }
+        // String ISO atau Date object
+        const date = new Date(timestamp);
+        if (!isNaN(date.getTime())) {
+            return date;
+        }
+        return null;
+    } catch (error) {
+        console.error('Error converting timestamp:', error);
+        return null;
+    }
+}
 
+function formatDateTime(date) {
+    if (!date) return 'N/A';
+    
+    const dateObj = convertToDate(date);
+    if (!dateObj) return 'Invalid Date';
+    
+    return dateObj.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
         // ========== FUNGSI NOTIFIKASI ==========
         
         // Fungsi untuk mendapatkan notifikasi
@@ -2415,7 +2453,7 @@ async function sendToExcel(reportData) {
             screenshotUrl: screenshotUrl || null,
             userId: currentUser.uid,
             status: 'pending',
-            dateCreated: new Date(),
+            dateCreated: firebase.firestore.FieldValue.serverTimestamp(),
             dateUpdated: new Date(),
             priority: 'medium',
             reportedBy: currentUser.displayName || 'Unknown'
@@ -2657,7 +2695,7 @@ async function sendToExcel(reportData) {
                 document.getElementById('detailReportStatus').innerHTML = `<span class="status ${isOverdue ? 'status-overdue' : 'status-pending'}">${isOverdue ? 'Overdue' : report.status}</span>`;
                 document.getElementById('detailReportBrand').innerHTML = `<span class="brand brand-${report.brand.toLowerCase().replace(/\s+/g, '-')}">${report.brand}</span>`;
                 document.getElementById('detailReportCategory').textContent = report.category;
-                document.getElementById('detailReportDateCreated').textContent = formatDate(report.dateCreated);
+                document.getElementById('detailReportDateCreated').textContent = formatDateTime(report.dateCreated);
                 document.getElementById('detailReportDueDate').innerHTML = `${formatDate(report.dueDate)} <span class="text-muted">(${Math.abs(daysLeft)} ${daysLeft < 0 ? 'days overdue' : 'days left'})</span>`;
                 document.getElementById('detailReportDescription').innerHTML = `<p>${report.description}</p>`;
                 
@@ -3074,29 +3112,68 @@ async function markReportAsComplete() {
             renderReportCards();
         }
 
-        // Fungsi utilitas untuk memformat tanggal
         function formatDate(date) {
-            if (!date) return 'N/A';
-            
-            const d = new Date(date);
-            return d.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric' 
-            });
+    if (!date) return 'N/A';
+    
+    try {
+        // Cek apakah date adalah Firestore Timestamp
+        let dateObj;
+        if (typeof date === 'object' && date !== null && date.toDate) {
+            // Firestore Timestamp object
+            dateObj = date.toDate();
+        } else if (typeof date === 'object' && date !== null && date.seconds) {
+            // Firestore Timestamp dengan format {seconds, nanoseconds}
+            dateObj = new Date(date.seconds * 1000);
+        } else {
+            // String atau Date object biasa
+            dateObj = new Date(date);
         }
+        
+        // Validasi apakah valid
+        if (isNaN(dateObj.getTime())) {
+            return 'Invalid Date';
+        }
+        
+        return dateObj.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        });
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return 'Invalid Date';
+    }
+}
 
         // Fungsi utilitas untuk menghitung hari tersisa
         function getDaysLeft(dueDate) {
-            if (!dueDate) return 0;
-            
-            const today = new Date();
-            const due = new Date(dueDate);
-            const diffTime = due - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            return diffDays;
+    if (!dueDate) return 0;
+    
+    try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        let due;
+        // Cek apakah dueDate adalah Firestore Timestamp
+        if (typeof dueDate === 'object' && dueDate !== null && dueDate.toDate) {
+            due = dueDate.toDate();
+        } else if (typeof dueDate === 'object' && dueDate !== null && dueDate.seconds) {
+            due = new Date(dueDate.seconds * 1000);
+        } else {
+            due = new Date(dueDate);
         }
-
+        
+        if (isNaN(due.getTime())) return 0;
+        
+        due.setHours(0, 0, 0, 0);
+        const diffTime = due - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    } catch (error) {
+        console.error('Error calculating days left:', error);
+        return 0;
+    }
+}
         // Fungsi untuk menampilkan notifikasi toast
         function showToast(message, type = 'success', duration = 3000) {
             // Hapus toast sebelumnya jika ada
