@@ -832,7 +832,9 @@
     import {
       getFirestore,
       doc,
-      getDoc
+      getDoc,
+      updateDoc,
+      serverTimestamp
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -849,6 +851,38 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+
+    // ========== FUNGSI HELPER UNTUK DEVICE INFO ==========
+    function getDeviceInfo() {
+        const ua = navigator.userAgent;
+        if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
+            return 'Tablet';
+        }
+        if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
+            return 'Mobile';
+        }
+        return 'Desktop';
+    }
+
+    function getBrowserInfo() {
+        const ua = navigator.userAgent;
+        if (ua.includes('Firefox')) return 'Firefox';
+        if (ua.includes('Edg')) return 'Edge';
+        if (ua.includes('Chrome')) return 'Chrome';
+        if (ua.includes('Safari')) return 'Safari';
+        return 'Other';
+    }
+
+    async function getClientIP() {
+        try {
+            const response = await fetch('https://api.ipify.org?format=json');
+            const data = await response.json();
+            return data.ip;
+        } catch (error) {
+            return 'unknown';
+        }
+    }
+    // ========== AKHIR FUNGSI HELPER ==========
 
     // DOM
     const loginBtn = document.getElementById("loginBtn");
@@ -919,6 +953,25 @@
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
+        // ========== TAMBAHAN: Update LastLogin di Firestore secara real-time ==========
+        try {
+          const userRef = doc(db, 'users', user.uid);
+          const clientIP = await getClientIP();
+          await updateDoc(userRef, {
+            LastLogin: serverTimestamp(),
+            lastLogin: serverTimestamp(),
+            lastActive: serverTimestamp(),
+            lastLoginDevice: getDeviceInfo(),
+            lastLoginBrowser: getBrowserInfo(),
+            lastLoginIP: clientIP
+          });
+          console.log('LastLogin updated successfully at:', new Date().toISOString());
+        } catch (updateError) {
+          console.warn('Failed to update LastLogin:', updateError);
+          // Tidak perlu error karena login tetap berhasil
+        }
+        // ========== AKHIR TAMBAHAN ==========
+
         try {
           const userDoc = await getDoc(doc(db, 'users', user.uid));
 
@@ -963,6 +1016,7 @@
           localStorage.setItem('adminName', userData.name || "Administrator");
           localStorage.setItem('adminRole', userData.role || "admin");
           localStorage.setItem('adminProfileImage', userData.image || userData.avatar || 'https://iili.io/KfDh0EN.png');
+          localStorage.setItem('adminEmail', user.email);
 
           setTimeout(() => { window.location.href = "index.html"; }, 1500);
 
