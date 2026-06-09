@@ -10,8 +10,29 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="global.css">
     <script src="global-time.js"></script>
-    <script src="solved.translation.js"></script>
-    <script src="activity-log.js"></script>
+    <script src="solved.translation.js"></script>   
+    <script>
+// Load activity-log.js dengan aman setelah DOM siap
+(function() {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadActivityLog);
+    } else {
+        loadActivityLog();
+    }
+    
+    function loadActivityLog() {
+        // Cek apakah sudah ada
+        if (document.querySelector('script[src="activity-log.js"]')) return;
+        
+        var script = document.createElement('script');
+        script.src = 'activity-log.js';
+        script.onerror = function() {
+            console.warn('Activity log failed to load');
+        };
+        document.head.appendChild(script);
+    }
+})();
+</script>
 
     <style>
             /* ========== VARIABEL CSS YANG DIPERLUKAN ========== */
