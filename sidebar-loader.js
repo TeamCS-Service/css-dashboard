@@ -65,6 +65,7 @@ class SidebarLoader {
                     promosiStatistics: "Statistik",
                     promosiLeads: "Leads",
                     promosiReport: "Report Promo",
+                    chatAgent: "Chat Agent",
                     
                     // Additional Menus
                     staffAccount: "Akun Staff",
@@ -123,6 +124,7 @@ class SidebarLoader {
                     promosiStatistics: "Statistics",
                     promosiLeads: "Leads",
                     promosiReport: "Promotion Report",
+                    chatAgent: "Chat Agent",
                     
                     // Additional Menus
                     staffAccount: "Staff Account",
@@ -181,6 +183,7 @@ class SidebarLoader {
                     promosiStatistics: "統計",
                     promosiLeads: "リード",
                     promosiReport: "プロモーションレポート",
+                    chatAgent: "チャットエージェント",
                     
                     // Additional Menus
                     staffAccount: "スタッフアカウント",
@@ -239,6 +242,7 @@ class SidebarLoader {
                     promosiStatistics: "统计",
                     promosiLeads: "线索",
                     promosiReport: "促销报告",
+                    chatAgent: "聊天客服",
                     
                     // Additional Menus
                     staffAccount: "员工账户",
