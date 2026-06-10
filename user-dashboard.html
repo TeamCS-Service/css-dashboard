@@ -3,1159 +3,942 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Agent Dashboard - CSS Admin</title>
-    
-    <!-- Firebase SDK -->
+    <title>My Dashboard - Support Chat</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --primary: #4361ee;
-            --primary-dark: #3a0ca3;
-            --secondary: #f72585;
-            --success: #06d6a0;
-            --warning: #f4a261;
-            --danger: #ef233c;
-            --dark: #1a1a2e;
-            --gray-100: #f8f9fa;
-            --gray-200: #e9ecef;
-            --gray-300: #dee2e6;
-            --gray-400: #ced4da;
-            --gray-500: #adb5bd;
-            --gray-600: #6c757d;
-            --gray-700: #495057;
-            --gray-800: #343a40;
-            --gray-900: #212529;
-            --bg-color: #f3f4f6;
-            --sidebar-bg: #ffffff;
-            --card-bg: #ffffff;
-            --border-color: #e5e7eb;
-            --text-color: #1f2937;
-            --text-muted: #6b7280;
-            --hover-bg: #f3f4f6;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --primary-soft: #eef2ff;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #f1f5f9;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --border: #e2e8f0;
+            --border-soft: #f1f5f9;
+            --text: #0f172a;
+            --text-2: #475569;
+            --text-3: #94a3b8;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
+            --radius: 14px;
+            --radius-sm: 8px;
+            --radius-full: 999px;
         }
 
         [data-theme="dark"] {
-            --bg-color: #111827;
-            --sidebar-bg: #1f2937;
-            --card-bg: #1f2937;
-            --border-color: #374151;
-            --text-color: #f9fafb;
-            --text-muted: #9ca3af;
-            --hover-bg: #374151;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-2: #162032;
+            --border: #334155;
+            --border-soft: #1e293b;
+            --text: #f1f5f9;
+            --text-2: #94a3b8;
+            --text-3: #475569;
+            --primary-soft: rgba(79,70,229,0.15);
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .chat-dashboard {
-            min-height: 100vh;
+        .app { display: flex; height: 100vh; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 320px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
+            flex-shrink: 0;
         }
 
-        .dashboard-header {
-            background: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
-            padding: 16px 24px;
+        .sidebar-top {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
         }
 
-        .header-title h1 {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--text-color);
-        }
-
-        .header-title p {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .agent-info {
+        .brand {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 8px 16px;
-            background: var(--hover-bg);
-            border-radius: 40px;
+            gap: 10px;
         }
 
-        .agent-avatar {
+        .brand-icon {
             width: 36px;
             height: 36px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 3px 10px rgba(79,70,229,0.3);
         }
 
-        .agent-avatar i {
-            font-size: 16px;
-            color: white;
+        .brand-icon i { color: white; font-size: 15px; }
+
+        .brand-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.3px;
         }
 
-        .agent-details {
-            font-size: 13px;
-        }
-
-        .agent-name {
-            font-weight: 600;
-        }
-
-        .agent-status {
-            font-size: 11px;
-            color: var(--success);
-        }
-
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            background: var(--hover-bg);
-            border-radius: 20px;
-            font-size: 12px;
+        .theme-btn {
+            width: 34px;
+            height: 34px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            border-radius: 8px;
             cursor: pointer;
-        }
-
-        .status-badge.online {
-            color: var(--success);
-        }
-
-        .status-badge.offline {
-            color: var(--gray-500);
-        }
-
-        .chat-layout {
             display: flex;
-            height: calc(100vh - 80px);
-            overflow: hidden;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-2);
+            transition: all 0.2s;
+        }
+        .theme-btn:hover { background: var(--primary-soft); color: var(--primary); border-color: var(--primary-light); }
+
+        /* Profile card */
+        .profile-card {
+            margin: 12px;
+            padding: 14px;
+            background: var(--primary-soft);
+            border-radius: var(--radius);
+            border: 1px solid transparent;
         }
 
-        .chat-list-panel {
-            width: 360px;
-            background: var(--card-bg);
-            border-right: 1px solid var(--border-color);
+        .profile-row {
             display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            align-items: center;
+            gap: 12px;
         }
 
-        .chat-search-bar {
-            padding: 16px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .search-input-wrapper {
-            position: relative;
-        }
-
-        .search-input-wrapper i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        .search-input-wrapper input {
-            width: 100%;
-            padding: 10px 12px 10px 36px;
-            border: 1px solid var(--border-color);
+        .avatar {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--primary), #a78bfa);
             border-radius: 12px;
-            background: var(--bg-color);
-            color: var(--text-color);
-            font-size: 13px;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .search-input-wrapper input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .chat-list-scroll {
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .topic-item {
-            display: flex;
-            align-items: center;
-            padding: 14px 16px;
-            cursor: pointer;
-            transition: background 0.2s;
-            border-bottom: 1px solid var(--border-color);
-            position: relative;
-        }
-
-        .topic-item:hover {
-            background: var(--hover-bg);
-        }
-
-        .topic-item.active {
-            background: rgba(67, 97, 238, 0.08);
-            border-left: 3px solid var(--primary);
-        }
-
-        .topic-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 12px;
             flex-shrink: 0;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
         }
 
-        .topic-avatar i {
-            font-size: 20px;
-            color: white;
-        }
+        .avatar i { color: white; font-size: 17px; }
 
-        .topic-info {
-            flex: 1;
-            min-width: 0;
-        }
+        .profile-info { flex: 1; min-width: 0; }
 
-        .topic-header-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 4px;
-        }
-
-        .topic-name {
-            font-weight: 600;
-            font-size: 14px;
-            color: var(--text-color);
-        }
-
-        .topic-time {
-            font-size: 10px;
-            color: var(--text-muted);
-        }
-
-        .topic-last-message {
-            font-size: 12px;
-            color: var(--text-muted);
+        .profile-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .topic-description {
-            font-size: 10px;
+        .profile-role {
+            font-size: 11px;
             color: var(--primary);
-            margin-top: 4px;
-        }
-
-        .unread-count {
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: var(--danger);
-            color: white;
-            font-size: 10px;
             font-weight: 600;
-            padding: 2px 6px;
-            border-radius: 10px;
-            min-width: 18px;
-            text-align: center;
-        }
-
-        .chat-messages-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: var(--bg-color);
-            overflow: hidden;
-        }
-
-        .chat-messages-header {
-            padding: 16px 20px;
-            background: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
+            margin-top: 2px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 4px;
         }
 
-        .topic-info-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .topic-avatar-header {
-            width: 44px;
-            height: 44px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        .online-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--success);
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: inline-block;
         }
 
-        .topic-avatar-header i {
-            font-size: 18px;
-            color: white;
-        }
-
-        .topic-details h3 {
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .topic-details p {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .chat-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .chat-action-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
+        .logout-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-2);
+            padding: 6px 10px;
+            border-radius: 8px;
             cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
             transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .logout-btn:hover { background: var(--danger); color: white; border-color: var(--danger); }
+
+        /* Topik list */
+        .topics-header {
+            padding: 16px 16px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-3);
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
         }
 
-        .chat-action-btn:hover {
-            background: var(--hover-bg);
-            color: var(--primary);
-        }
+        .topics-list { flex: 1; overflow-y: auto; padding: 0 8px 8px; }
 
-        .messages-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
+        .topic-item {
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            padding: 12px 10px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
             gap: 12px;
-        }
-
-        .message {
-            display: flex;
-            max-width: 70%;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message.user {
-            align-self: flex-start;
-        }
-
-        .message.agent {
-            align-self: flex-end;
-        }
-
-        .message-bubble {
-            padding: 10px 14px;
-            border-radius: 18px;
-            font-size: 14px;
-            line-height: 1.5;
+            transition: all 0.18s;
+            margin-bottom: 2px;
             position: relative;
         }
 
-        .message.user .message-bubble {
-            background: var(--card-bg);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
+        .topic-item:hover { background: var(--surface-2); }
+
+        .topic-item.active {
+            background: var(--primary-soft);
+        }
+
+        .topic-item.active .topic-name { color: var(--primary); }
+
+        .topic-icon-wrap {
+            width: 40px;
+            height: 40px;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .topic-icon-wrap i { color: white; font-size: 16px; }
+
+        .topic-meta { flex: 1; min-width: 0; }
+
+        .topic-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .topic-preview {
+            font-size: 11px;
+            color: var(--text-3);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .topic-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
+        .topic-time {
+            font-size: 10px;
+            color: var(--text-3);
+        }
+
+        .unread-badge {
+            background: var(--danger);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ===== CHAT AREA ===== */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            background: var(--bg);
+        }
+
+        .chat-empty {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            color: var(--text-3);
+            padding: 40px;
+        }
+
+        .chat-empty-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-empty-icon i { font-size: 32px; color: var(--text-3); }
+        .chat-empty h3 { font-size: 16px; font-weight: 700; color: var(--text-2); }
+        .chat-empty p { font-size: 13px; text-align: center; max-width: 300px; line-height: 1.6; }
+
+        /* Chat header */
+        .chat-header {
+            padding: 16px 24px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chat-header-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .chat-header-icon i { color: white; font-size: 16px; }
+
+        .chat-header-text h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .chat-header-text p {
+            font-size: 11px;
+            color: var(--text-3);
+            margin-top: 2px;
+        }
+
+        /* Messages */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .msg-group { display: flex; flex-direction: column; gap: 3px; }
+
+        .message {
+            display: flex;
+            gap: 8px;
+            animation: msgIn 0.2s ease;
+        }
+
+        @keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .message.outgoing { flex-direction: row-reverse; }
+
+        .msg-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            flex-shrink: 0;
+            align-self: flex-end;
+        }
+
+        .msg-avatar.user-av { background: linear-gradient(135deg, var(--primary), #818cf8); color: white; }
+        .msg-avatar.staff-av { background: linear-gradient(135deg, #f59e0b, #f97316); color: white; }
+
+        .msg-body { max-width: 65%; display: flex; flex-direction: column; gap: 2px; }
+
+        .msg-sender {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-3);
+            padding: 0 4px;
+        }
+
+        .message.outgoing .msg-sender { text-align: right; }
+
+        .bubble {
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 13.5px;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .message.incoming .bubble {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
             border-bottom-left-radius: 4px;
         }
 
-        .message.agent .message-bubble {
+        .message.outgoing .bubble {
             background: var(--primary);
             color: white;
             border-bottom-right-radius: 4px;
         }
 
-        .message-time {
+        .msg-time {
             font-size: 10px;
-            color: var(--text-muted);
-            margin-top: 4px;
-            margin-left: 8px;
+            color: var(--text-3);
+            padding: 0 4px;
         }
 
-        .message.agent .message-time {
-            text-align: right;
-            margin-right: 8px;
-        }
+        .message.outgoing .msg-time { text-align: right; }
 
-        .message-input-container {
-            padding: 16px 20px;
-            background: var(--card-bg);
-            border-top: 1px solid var(--border-color);
+        /* Date divider */
+        .date-divider {
             display: flex;
-            gap: 12px;
             align-items: center;
+            gap: 12px;
+            margin: 12px 0 4px;
+            color: var(--text-3);
+            font-size: 11px;
+            font-weight: 600;
         }
 
-        .attachment-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.2s;
+        .date-divider::before, .date-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
         }
 
-        .attachment-btn:hover {
-            background: var(--hover-bg);
-            color: var(--primary);
+        /* Input area */
+        .input-area {
+            padding: 14px 20px;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .message-input-wrapper {
+        .input-wrap {
             flex: 1;
             position: relative;
         }
 
-        .message-input-wrapper input {
+        .input-wrap input {
             width: 100%;
-            padding: 12px 50px 12px 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 28px;
-            background: var(--bg-color);
-            color: var(--text-color);
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
+            padding: 11px 16px;
+            padding-right: 48px;
+            background: var(--bg);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-full);
+            color: var(--text);
+            font-size: 13.5px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
-        .message-input-wrapper input:focus {
-            outline: none;
+        .input-wrap input:focus {
             border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
         }
+
+        .input-wrap input::placeholder { color: var(--text-3); }
 
         .send-btn {
             position: absolute;
-            right: 8px;
+            right: 5px;
             top: 50%;
             transform: translateY(-50%);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
+            width: 34px;
+            height: 34px;
             background: var(--primary);
             border: none;
+            border-radius: 50%;
             color: white;
             cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .send-btn:hover {
-            transform: translateY(-50%) scale(1.05);
-        }
-
-        .empty-state {
-            flex: 1;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-align: center;
-            color: var(--text-muted);
+            font-size: 13px;
+            transition: all 0.2s;
         }
 
-        .empty-state i {
-            font-size: 64px;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
+        .send-btn:hover { background: #4338ca; transform: translateY(-50%) scale(1.06); }
 
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--border-color);
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+
+        /* Spinner */
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--border);
             border-top-color: var(--primary);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
             margin: 40px auto;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .logout-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: var(--danger);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: opacity 0.2s;
-        }
-
-        .logout-btn:hover {
-            opacity: 0.85;
-        }
-
-        @media (max-width: 768px) {
-            .chat-list-panel {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                z-index: 20;
-                transform: translateX(-100%);
-                transition: transform 0.3s;
-            }
-            
-            .chat-list-panel.open {
-                transform: translateX(0);
-            }
-            
-            .message {
-                max-width: 85%;
-            }
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--border-color);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 3px;
+        /* Responsive */
+        @media (max-width: 640px) {
+            .sidebar { width: 100%; display: none; }
+            .sidebar.show { display: flex; position: fixed; top: 0; left: 0; height: 100vh; z-index: 50; width: 280px; box-shadow: var(--shadow-lg); }
         }
     </style>
 </head>
 <body>
-    <div class="chat-dashboard">
-        <div class="dashboard-header">
-            <div class="header-title">
-                <h1><i class="fas fa-headset"></i> Chat Agent Dashboard</h1>
-                <p>Kelola percakapan berdasarkan topik</p>
+<div class="app">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+            <div class="brand">
+                <div class="brand-icon"><i class="fas fa-headset"></i></div>
+                <span class="brand-name">Support Chat</span>
             </div>
-            <div class="header-actions">
-                <div class="agent-info" id="agentInfo">
-                    <div class="agent-avatar">
-                        <i class="fas fa-user-tie"></i>
-                    </div>
-                    <div class="agent-details">
-                        <div class="agent-name" id="agentName">Loading...</div>
-                        <div class="agent-status"><i class="fas fa-circle"></i> Online</div>
-                    </div>
+            <button class="theme-btn" id="themeBtn" title="Toggle tema"><i class="fas fa-moon" id="themeIcon"></i></button>
+        </div>
+
+        <div class="profile-card">
+            <div class="profile-row">
+                <div class="avatar"><i class="fas fa-user"></i></div>
+                <div class="profile-info">
+                    <div class="profile-name" id="userName">Memuat...</div>
+                    <div class="profile-role"><span class="online-dot"></span> <span id="userRole">Pengguna</span></div>
                 </div>
-                <div class="status-badge online" id="statusToggle">
-                    <i class="fas fa-toggle-on"></i>
-                    <span>Online</span>
-                </div>
-                <button class="logout-btn" id="logoutBtn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Logout
-                </button>
+                <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Keluar</button>
             </div>
         </div>
 
-        <div class="chat-layout">
-            <div class="chat-list-panel">
-                <div class="chat-search-bar">
-                    <div class="search-input-wrapper">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="searchChat" placeholder="Cari topik...">
-                    </div>
+        <div class="topics-header">Kategori Bantuan</div>
+        <div class="topics-list" id="topicsList">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat-area" id="chatArea">
+        <!-- Empty state default -->
+        <div class="chat-empty" id="chatEmpty">
+            <div class="chat-empty-icon"><i class="fas fa-comment-dots"></i></div>
+            <h3>Mulai Percakapan</h3>
+            <p>Pilih kategori di sebelah kiri untuk mengirim pesan kepada tim support kami.</p>
+        </div>
+
+        <!-- Active chat (hidden by default) -->
+        <div id="chatActive" style="display:none; flex-direction:column; flex:1; min-height:0;">
+            <div class="chat-header" id="chatHeader">
+                <div class="chat-header-icon" id="chatHeaderIcon">
+                    <i class="fas fa-comment"></i>
                 </div>
-                <div class="chat-list-scroll" id="topicListContainer">
-                    <div class="loading-spinner"></div>
+                <div class="chat-header-text">
+                    <h3 id="chatTopicName">-</h3>
+                    <p id="chatTopicDesc">-</p>
                 </div>
             </div>
 
-            <div class="chat-messages-panel" id="chatMessagesPanel">
-                <div class="empty-state">
-                    <i class="fas fa-comment-dots"></i>
-                    <h3>Pilih topik</h3>
-                    <p>Klik salah satu topik di sebelah kiri untuk mulai berdiskusi</p>
+            <div class="messages-container" id="messagesContainer"></div>
+
+            <div class="input-area">
+                <div class="input-wrap">
+                    <input type="text" id="messageInput" placeholder="Tulis pesan..." autocomplete="off">
+                    <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDUZka4FZyLi_cv6X_5D4zeRsfkpqOlBpY",
-            authDomain: "dashboard-css.firebaseapp.com",
-            databaseURL: "https://dashboard-css-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "dashboard-css",
-            storageBucket: "dashboard-css.appspot.com",
-            messagingSenderId: "771131792881",
-            appId: "1:771131792881:web:ad634424225bd7de847850",
-            measurementId: "G-3CYBC5B101"
-        };
+<script>
+    // ==================== FIREBASE ====================
+    const firebaseConfig = {
+        apiKey: "AIzaSyDUZka4FZyLi_cv6X_5D4zeRsfkpqOlBpY",
+        authDomain: "dashboard-css.firebaseapp.com",
+        projectId: "dashboard-css",
+        storageBucket: "dashboard-css.appspot.com",
+        messagingSenderId: "771131792881",
+        appId: "1:771131792881:web:ad634424225bd7de847850"
+    };
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
 
-        const db = firebase.firestore();
-        const auth = firebase.auth();
+    // ==================== TOPIK DEFAULT ====================
+    const DEFAULT_TOPICS = [
+        { id: 'report_panel',        name: 'Report Panel',         icon: 'fa-file-alt',      desc: 'Laporan dan panel monitoring',  color: '#4f46e5' },
+        { id: 'top_up_credit',       name: 'Top Up Kredit',        icon: 'fa-coins',         desc: 'Top up kredit dan transaksi',   color: '#10b981' },
+        { id: 'general_discuss',     name: 'General Discuss',      icon: 'fa-users',         desc: 'Diskusi umum layanan',          color: '#f59e0b' },
+        { id: 'information',         name: 'Informasi',            icon: 'fa-info-circle',   desc: 'Pengumuman penting',            color: '#ec4899' },
+        { id: 'report_phising',      name: 'Report Phising',       icon: 'fa-shield-alt',    desc: 'Laporan aktivitas mencurigakan', color: '#ef4444' },
+        { id: 'release_new_feature', name: 'Fitur Baru',           icon: 'fa-rocket',        desc: 'Rilis dan update fitur terbaru', color: '#7c3aed' },
+        { id: 'ide_saran_masukan',   name: 'Ide & Saran',          icon: 'fa-lightbulb',     desc: 'Masukan untuk pengembangan',    color: '#d97706' }
+    ];
 
-        let currentUser = null;
-        let currentTopic = null;
-        let currentTopicId = null;
-        let allTopics = [];
-        let searchTerm = '';
-        let isOnline = true;
-        let messagesUnsubscribe = null;
+    // ==================== STATE ====================
+    let currentUser = null;
+    let currentTopicId = null;
+    let topics = [];
+    let messagesUnsubscribe = null;
+    let topicsUnsubscribe = null;
 
-        // Daftar topik yang tersedia (seperti di Telegram)
-        const TOPICS = [
-            { 
-                id: 'report_panel', 
-                name: 'Report Panel', 
-                icon: 'fa-file-alt',
-                description: 'Diskusi terkait laporan dan panel monitoring',
-                color: '#4361ee'
-            },
-            { 
-                id: 'top_up_credit', 
-                name: 'Top Up Credit', 
-                icon: 'fa-coins',
-                description: 'Pembahasan tentang top up kredit dan transaksi',
-                color: '#06d6a0'
-            },
-            { 
-                id: 'general_discuss', 
-                name: 'General Discuss', 
-                icon: 'fa-users',
-                description: 'Diskusi umum seputar layanan',
-                color: '#f4a261'
-            },
-            { 
-                id: 'information', 
-                name: 'Information', 
-                icon: 'fa-info-circle',
-                description: 'Pengumuman dan informasi penting',
-                color: '#f72585'
-            },
-            { 
-                id: 'report_phising', 
-                name: 'Report Phising', 
-                icon: 'fa-shield-alt',
-                description: 'Laporan terkait phising dan keamanan',
-                color: '#ef233c'
-            },
-            { 
-                id: 'release_new_feature', 
-                name: 'Release New Feature', 
-                icon: 'fa-rocket',
-                description: 'Informasi rilis fitur terbaru',
-                color: '#7209b7'
-            },
-            { 
-                id: 'ide_saran_masukan', 
-                name: 'Ide, Saran & Masukan', 
-                icon: 'fa-lightbulb',
-                description: 'Tempat memberikan ide, saran dan masukan',
-                color: '#f9c74f'
-            }
-        ];
+    // ==================== INIT ====================
+    async function init() {
+        applyTheme();
+        await initAuth();
+        await ensureAgentTopics();
+        await loadTopics();
+    }
 
-        const chatListContainer = document.getElementById('topicListContainer');
-        const chatMessagesPanel = document.getElementById('chatMessagesPanel');
-        const searchInput = document.getElementById('searchChat');
-        const agentNameEl = document.getElementById('agentName');
-        const statusToggle = document.getElementById('statusToggle');
-        const logoutBtn = document.getElementById('logoutBtn');
+    function applyTheme() {
+        const theme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        document.getElementById('themeIcon').className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
 
-        function applySavedTheme() {
-            const theme = localStorage.getItem("theme") || "light";
-            document.documentElement.setAttribute("data-theme", theme);
-        }
+    document.getElementById('themeBtn').addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        document.getElementById('themeIcon').className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    });
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            applySavedTheme();
-            await initAuth();
-            await loadTopicsFromFirestore();
-            setupEventListeners();
-        });
-
-        async function initAuth() {
-            return new Promise((resolve) => {
-                auth.onAuthStateChanged(async (user) => {
-                    if (user) {
-                        currentUser = user;
-                        try {
-                            const userDoc = await db.collection('users').doc(user.uid).get();
-                            if (userDoc.exists) {
-                                const userData = userDoc.data();
-                                agentNameEl.textContent = userData.name || user.email.split('@')[0];
-                            } else {
-                                agentNameEl.textContent = user.email.split('@')[0];
-                            }
-                        } catch (error) {
-                            agentNameEl.textContent = user.email.split('@')[0];
-                        }
-                        resolve();
+    async function initAuth() {
+        return new Promise((resolve) => {
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    currentUser = user;
+                    const snap = await db.collection('users').doc(user.uid).get();
+                    let name = user.email.split('@')[0];
+                    if (snap.exists) {
+                        name = snap.data().name || name;
                     } else {
-                        const sessionUser = sessionStorage.getItem('user');
-                        if (sessionUser) {
-                            const userData = JSON.parse(sessionUser);
-                            currentUser = { uid: userData.uid, email: userData.email };
-                            agentNameEl.textContent = userData.displayName || userData.email.split('@')[0];
-                            resolve();
-                        } else {
-                            window.location.href = 'index.html';
-                        }
-                    }
-                });
-            });
-        }
-
-        async function loadTopicsFromFirestore() {
-            allTopics = [];
-            
-            for (const topic of TOPICS) {
-                // Cek apakah topik sudah ada di Firestore
-                const topicRef = db.collection('chat_topics').doc(topic.id);
-                const topicDoc = await topicRef.get();
-                
-                let lastMessage = '';
-                let lastMessageTime = null;
-                let unreadCount = 0;
-                let lastMessageSender = '';
-                
-                if (topicDoc.exists) {
-                    const data = topicDoc.data();
-                    lastMessage = data.lastMessage || '';
-                    lastMessageTime = data.lastMessageTime;
-                    unreadCount = data.unreadCount?.[currentUser?.uid] || 0;
-                    lastMessageSender = data.lastMessageSender || '';
-                } else {
-                    // Buat topik baru di Firestore
-                    await topicRef.set({
-                        name: topic.name,
-                        icon: topic.icon,
-                        description: topic.description,
-                        createdAt: new Date(),
-                        unreadCount: {},
-                        lastMessage: '',
-                        lastMessageTime: null,
-                        lastMessageSender: ''
-                    });
-                }
-                
-                allTopics.push({
-                    id: topic.id,
-                    name: topic.name,
-                    icon: topic.icon,
-                    description: topic.description,
-                    lastMessage: lastMessage,
-                    lastMessageTime: lastMessageTime,
-                    unread: unreadCount,
-                    lastMessageSender: lastMessageSender
-                });
-            }
-            
-            renderTopicList();
-        }
-
-        function formatTime(date) {
-            if (!date) return '';
-            const now = new Date();
-            const diff = now - date.toDate();
-            const minutes = Math.floor(diff / 60000);
-            const hours = Math.floor(diff / 3600000);
-            const days = Math.floor(diff / 86400000);
-
-            if (minutes < 1) return 'Baru saja';
-            if (minutes < 60) return `${minutes} menit lalu`;
-            if (hours < 24) return `${hours} jam lalu`;
-            if (days < 7) return `${days} hari lalu`;
-            return date.toDate().toLocaleDateString('id-ID');
-        }
-
-        function setupEventListeners() {
-            if (searchInput) {
-                searchInput.addEventListener('input', (e) => {
-                    searchTerm = e.target.value.toLowerCase();
-                    renderTopicList();
-                });
-            }
-
-            if (statusToggle) {
-                statusToggle.addEventListener('click', async () => {
-                    isOnline = !isOnline;
-                    if (isOnline) {
-                        statusToggle.className = 'status-badge online';
-                        statusToggle.innerHTML = '<i class="fas fa-toggle-on"></i><span>Online</span>';
-                    } else {
-                        statusToggle.className = 'status-badge offline';
-                        statusToggle.innerHTML = '<i class="fas fa-toggle-off"></i><span>Offline</span>';
-                    }
-                    
-                    if (currentUser) {
-                        await db.collection('users').doc(currentUser.uid).update({
-                            isOnline: isOnline,
-                            lastSeen: new Date()
-                        }).catch(() => {});
-                    }
-                });
-            }
-
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', async () => {
-                    try {
-                        if (currentUser) {
-                            await db.collection('users').doc(currentUser.uid).update({
-                                isOnline: false,
-                                lastSeen: new Date()
-                            }).catch(() => {});
-                        }
-                        await auth.signOut();
-                        sessionStorage.clear();
-                        localStorage.removeItem('currentUser');
-                        window.location.href = 'index.html';
-                    } catch (error) {
-                        console.error('Logout error:', error);
-                        window.location.href = 'index.html';
-                    }
-                });
-            }
-        }
-
-        function renderTopicList() {
-            if (!chatListContainer) return;
-
-            let filteredTopics = [...allTopics];
-
-            if (searchTerm) {
-                filteredTopics = filteredTopics.filter(topic => 
-                    topic.name.toLowerCase().includes(searchTerm) ||
-                    (topic.description && topic.description.toLowerCase().includes(searchTerm))
-                );
-            }
-
-            if (filteredTopics.length === 0) {
-                chatListContainer.innerHTML = `
-                    <div class="empty-state" style="padding: 40px;">
-                        <i class="fas fa-inbox"></i>
-                        <p>Tidak ada topik yang ditemukan</p>
-                    </div>
-                `;
-                return;
-            }
-
-            chatListContainer.innerHTML = filteredTopics.map(topic => `
-                <div class="topic-item ${currentTopicId === topic.id ? 'active' : ''}" data-topic-id="${topic.id}">
-                    <div class="topic-avatar" style="background: linear-gradient(135deg, ${TOPICS.find(t => t.id === topic.id)?.color || '#4361ee'}, ${TOPICS.find(t => t.id === topic.id)?.color || '#6c8aff'})">
-                        <i class="fas ${topic.icon}"></i>
-                    </div>
-                    <div class="topic-info">
-                        <div class="topic-header-info">
-                            <span class="topic-name">${escapeHtml(topic.name)}</span>
-                            <span class="topic-time">${topic.lastMessageTime ? formatTime(topic.lastMessageTime) : ''}</span>
-                        </div>
-                        <div class="topic-last-message">
-                            ${topic.lastMessage ? (topic.lastMessageSender === 'agent' ? `Anda: ${escapeHtml(topic.lastMessage.substring(0, 40))}` : escapeHtml(topic.lastMessage.substring(0, 40))) : 'Belum ada pesan'}
-                            ${topic.lastMessage && topic.lastMessage.length > 40 ? '...' : ''}
-                        </div>
-                        <div class="topic-description"><i class="fas fa-tag"></i> ${topic.description}</div>
-                    </div>
-                    ${topic.unread > 0 ? `<div class="unread-count">${topic.unread}</div>` : ''}
-                </div>
-            `).join('');
-
-            document.querySelectorAll('.topic-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const topicId = item.dataset.topicId;
-                    const selectedTopic = allTopics.find(t => t.id === topicId);
-                    if (selectedTopic) {
-                        openTopic(selectedTopic);
-                    }
-                });
-            });
-        }
-
-        async function openTopic(topic) {
-            currentTopic = topic;
-            currentTopicId = topic.id;
-            
-            // Mark as read
-            if (topic.unread > 0) {
-                await markTopicAsRead(topic.id);
-                topic.unread = 0;
-                renderTopicList();
-            }
-            
-            await loadMessages(topic.id);
-        }
-
-        async function markTopicAsRead(topicId) {
-            if (!currentUser) return;
-            
-            try {
-                await db.collection('chat_topics').doc(topicId).update({
-                    [`unreadCount.${currentUser.uid}`]: 0
-                });
-            } catch (error) {
-                console.error('Error marking topic as read:', error);
-            }
-        }
-
-        async function loadMessages(topicId) {
-            if (messagesUnsubscribe) {
-                messagesUnsubscribe();
-            }
-
-            const topicInfo = TOPICS.find(t => t.id === topicId);
-            
-            // Subscribe to real-time messages
-            messagesUnsubscribe = db.collection('chat_topics').doc(topicId)
-                .collection('messages')
-                .orderBy('timestamp', 'asc')
-                .onSnapshot((snapshot) => {
-                    const messages = [];
-                    snapshot.forEach(doc => {
-                        messages.push({
-                            id: doc.id,
-                            ...doc.data()
+                        await db.collection('users').doc(user.uid).set({
+                            name, email: user.email, role: 'user',
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
                         });
-                    });
-                    renderChatMessagesArea(topicInfo || currentTopic, messages);
-                    
-                    // Update last message in topic list
-                    if (messages.length > 0) {
-                        const lastMsg = messages[messages.length - 1];
-                        const topicIndex = allTopics.findIndex(t => t.id === topicId);
-                        if (topicIndex !== -1) {
-                            const senderLabel = lastMsg.sender === 'agent' ? 'Anda' : lastMsg.senderName;
-                            allTopics[topicIndex].lastMessage = lastMsg.text;
-                            allTopics[topicIndex].lastMessageTime = lastMsg.timestamp;
-                            allTopics[topicIndex].lastMessageSender = lastMsg.sender;
-                            renderTopicList();
-                        }
                     }
-                }, (error) => {
-                    console.error('Error loading messages:', error);
-                });
-        }
-
-        function renderChatMessagesArea(topic, messages) {
-            if (!chatMessagesPanel) return;
-
-            const topicColor = TOPICS.find(t => t.id === topic?.id)?.color || '#4361ee';
-
-            chatMessagesPanel.innerHTML = `
-                <div class="chat-messages-header">
-                    <div class="topic-info-header">
-                        <div class="topic-avatar-header" style="background: linear-gradient(135deg, ${topicColor}, ${topicColor}cc)">
-                            <i class="fas ${topic?.icon || 'fa-comment'}"></i>
-                        </div>
-                        <div class="topic-details">
-                            <h3>${escapeHtml(topic?.name || 'Topic')}</h3>
-                            <p><i class="fas fa-info-circle"></i> ${topic?.description || 'Diskusi topik'}</p>
-                        </div>
-                    </div>
-                    <div class="chat-actions">
-                        <button class="chat-action-btn" id="refreshMessagesBtn" title="Refresh">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="messages-container" id="messagesContainer">
-                    ${renderMessages(messages)}
-                </div>
-                <div class="message-input-container">
-                    <button class="attachment-btn" id="attachmentBtn">
-                        <i class="fas fa-paperclip"></i>
-                    </button>
-                    <div class="message-input-wrapper">
-                        <input type="text" id="messageInput" placeholder="Ketik pesan ke topik ${topic?.name}..." autocomplete="off">
-                        <button class="send-btn" id="sendMessageBtn">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            const sendBtn = document.getElementById('sendMessageBtn');
-            const messageInput = document.getElementById('messageInput');
-            const refreshBtn = document.getElementById('refreshMessagesBtn');
-            const attachmentBtn = document.getElementById('attachmentBtn');
-
-            if (sendBtn && messageInput) {
-                sendBtn.addEventListener('click', () => sendMessage(topic));
-                messageInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') sendMessage(topic);
-                });
-            }
-
-            if (refreshBtn) {
-                refreshBtn.addEventListener('click', () => {
-                    loadMessages(topic.id);
-                });
-            }
-
-            if (attachmentBtn) {
-                attachmentBtn.addEventListener('click', () => {
-                    alert('Fitur attachment akan segera hadir');
-                });
-            }
-
-            const messagesContainer = document.getElementById('messagesContainer');
-            if (messagesContainer) {
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
-        }
-
-        function renderMessages(messages) {
-            if (!messages || messages.length === 0) {
-                return `
-                    <div class="empty-state">
-                        <i class="fas fa-comment-dots"></i>
-                        <p>Belum ada pesan. Mulai diskusi!</p>
-                        <p style="font-size: 12px; margin-top: 8px;">Ketik pesan di bawah untuk memulai percakapan</p>
-                    </div>
-                `;
-            }
-
-            return messages.map(msg => `
-                <div class="message ${msg.sender === 'agent' ? 'agent' : 'user'}">
-                    <div>
-                        <div class="message-bubble">
-                            <strong style="font-size: 11px; opacity: 0.8;">${escapeHtml(msg.senderName)}</strong><br>
-                            ${escapeHtml(msg.text)}
-                            ${msg.fileURL ? `<br><a href="${msg.fileURL}" target="_blank" style="color: inherit;"><i class="fas fa-paperclip"></i> Attachment</a>` : ''}
-                        </div>
-                        <div class="message-time">${formatMessageTime(msg.timestamp)}</div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function formatMessageTime(timestamp) {
-            if (!timestamp) return '';
-            const date = timestamp.toDate();
-            return date.toLocaleString('id-ID', { 
-                hour: '2-digit', 
-                minute: '2-digit',
-                day: '2-digit',
-                month: '2-digit'
-            });
-        }
-
-        async function sendMessage(topic) {
-            const messageInput = document.getElementById('messageInput');
-            const message = messageInput.value.trim();
-            
-            if (!message || !currentUser) return;
-
-            try {
-                const messagesRef = db.collection('chat_topics').doc(topic.id).collection('messages');
-                const newMessage = {
-                    text: message,
-                    sender: 'agent',
-                    senderId: currentUser.uid,
-                    senderName: agentNameEl.textContent,
-                    timestamp: new Date(),
-                    read: false
-                };
-
-                await messagesRef.add(newMessage);
-
-                // Update last message di topic
-                await db.collection('chat_topics').doc(topic.id).update({
-                    lastMessage: message,
-                    lastMessageTime: new Date(),
-                    lastMessageSender: 'agent',
-                    lastMessageSenderId: currentUser.uid
-                });
-
-                messageInput.value = '';
-                messageInput.focus();
-
-                const messagesContainer = document.getElementById('messagesContainer');
-                if (messagesContainer) {
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    document.getElementById('userName').textContent = name;
+                    document.getElementById('userRole').textContent = 'Pengguna';
+                    document.getElementById('logoutBtn').addEventListener('click', () => {
+                        auth.signOut().then(() => window.location.href = 'index.html');
+                    });
+                    resolve();
+                } else {
+                    window.location.href = 'index.html';
                 }
-            } catch (error) {
-                console.error('Error sending message:', error);
-                alert('Gagal mengirim pesan. Silakan coba lagi.');
+            });
+        });
+    }
+
+    // ==================== PASTIKAN TOPIK ADA ====================
+    async function ensureAgentTopics() {
+        const ref = db.collection('chat_users').doc(currentUser.uid).collection('topics');
+        for (const topic of DEFAULT_TOPICS) {
+            const doc = await ref.doc(topic.id).get();
+            if (!doc.exists) {
+                await ref.doc(topic.id).set({
+                    topicId: topic.id,
+                    topicName: topic.name,
+                    topicIcon: topic.icon,
+                    topicDescription: topic.desc,
+                    topicColor: topic.color,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastMessage: '',
+                    lastMessageTime: null,
+                    lastMessageSender: '',
+                    lastMessageSenderId: '',
+                    lastMessageSenderName: '',
+                    unreadCount: {}
+                });
             }
         }
+    }
 
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+    // ==================== LOAD TOPIK ====================
+    async function loadTopics() {
+        if (topicsUnsubscribe) topicsUnsubscribe();
+        const ref = db.collection('chat_users').doc(currentUser.uid).collection('topics');
+        topicsUnsubscribe = ref.onSnapshot((snap) => {
+            topics = [];
+            snap.forEach(doc => {
+                const d = doc.data();
+                // FIX: unread untuk user = pesan dari staff yang belum dibaca
+                // Simpan sebagai unreadStaff di field, bukan unreadCount[uid] sendiri
+                const unread = d.unreadUser || 0;
+                topics.push({
+                    id: doc.id,
+                    name: d.topicName,
+                    icon: d.topicIcon,
+                    desc: d.topicDescription,
+                    color: d.topicColor,
+                    lastMessage: d.lastMessage || '',
+                    lastMessageTime: d.lastMessageTime,
+                    lastMessageSender: d.lastMessageSender || '',
+                    unread
+                });
+            });
+            topics.sort((a, b) => {
+                if (!a.lastMessageTime) return 1;
+                if (!b.lastMessageTime) return -1;
+                return b.lastMessageTime.toDate() - a.lastMessageTime.toDate();
+            });
+            renderTopics();
+        });
+    }
+
+    function renderTopics() {
+        const container = document.getElementById('topicsList');
+        if (topics.length === 0) {
+            container.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-3);font-size:13px;">Memuat topik...</div>';
+            return;
         }
-    </script>
+        container.innerHTML = topics.map(t => {
+            const timeLabel = t.lastMessageTime ? formatTime(t.lastMessageTime) : '';
+            const isFromStaff = t.lastMessageSender && t.lastMessageSender !== 'user';
+            const preview = t.lastMessage
+                ? `${isFromStaff ? '<b style="color:var(--primary-light)">Staff: </b>' : ''}${escapeHtml(t.lastMessage.substring(0, 35))}${t.lastMessage.length > 35 ? '…' : ''}`
+                : '<span style="font-style:italic">Belum ada pesan</span>';
+            return `
+            <div class="topic-item ${currentTopicId === t.id ? 'active' : ''}" data-id="${t.id}">
+                <div class="topic-icon-wrap" style="background:linear-gradient(135deg,${t.color},${t.color}bb)">
+                    <i class="fas ${t.icon}"></i>
+                </div>
+                <div class="topic-meta">
+                    <div class="topic-name">${escapeHtml(t.name)}</div>
+                    <div class="topic-preview">${preview}</div>
+                </div>
+                <div class="topic-right">
+                    ${timeLabel ? `<span class="topic-time">${timeLabel}</span>` : ''}
+                    ${t.unread > 0 ? `<span class="unread-badge">${t.unread}</span>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+
+        document.querySelectorAll('.topic-item').forEach(el => {
+            el.addEventListener('click', () => selectTopic(el.dataset.id));
+        });
+    }
+
+    // ==================== PILIH TOPIK ====================
+    async function selectTopic(topicId) {
+        currentTopicId = topicId;
+        const topic = topics.find(t => t.id === topicId);
+        if (!topic) return;
+
+        document.querySelectorAll('.topic-item').forEach(el => el.classList.toggle('active', el.dataset.id === topicId));
+
+        // Update header
+        document.getElementById('chatTopicName').textContent = topic.name;
+        document.getElementById('chatTopicDesc').textContent = topic.desc;
+        const hi = document.getElementById('chatHeaderIcon');
+        hi.style.background = `linear-gradient(135deg, ${topic.color}, ${topic.color}bb)`;
+        hi.innerHTML = `<i class="fas ${topic.icon}"></i>`;
+
+        // Show chat
+        document.getElementById('chatEmpty').style.display = 'none';
+        const ca = document.getElementById('chatActive');
+        ca.style.display = 'flex';
+
+        // Mark read: reset unreadUser
+        try {
+            await db.collection('chat_users').doc(currentUser.uid).collection('topics').doc(topicId)
+                .update({ unreadUser: 0 });
+        } catch(e) { console.warn('mark read:', e); }
+
+        await loadMessages(topicId);
+    }
+
+    // ==================== LOAD PESAN ====================
+    async function loadMessages(topicId) {
+        if (messagesUnsubscribe) messagesUnsubscribe();
+        const ref = db.collection('chat_users').doc(currentUser.uid)
+            .collection('topics').doc(topicId).collection('messages');
+        messagesUnsubscribe = ref.orderBy('timestamp', 'asc').onSnapshot(snap => {
+            const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderMessages(msgs);
+        });
+    }
+
+    function renderMessages(messages) {
+        const container = document.getElementById('messagesContainer');
+        if (messages.length === 0) {
+            container.innerHTML = `
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--text-3);padding:40px;">
+                    <i class="fas fa-comment-dots" style="font-size:36px;opacity:0.4"></i>
+                    <p style="font-size:13px;">Belum ada pesan. Mulailah percakapan!</p>
+                </div>`;
+            return;
+        }
+
+        let lastDate = null;
+        const html = messages.map(msg => {
+            const isOutgoing = msg.sender === 'user';
+            const cls = isOutgoing ? 'outgoing' : 'incoming';
+            const avCls = isOutgoing ? 'user-av' : 'staff-av';
+            const avInitial = isOutgoing ? '<i class="fas fa-user"></i>' : '<i class="fas fa-headset"></i>';
+
+            let senderLabel = '';
+            if (!isOutgoing) {
+                const role = msg.sender === 'super_admin' ? 'Admin' : msg.sender === 'it' ? 'IT' : 'Staff';
+                senderLabel = `${role}: ${escapeHtml(msg.senderName || 'Support')}`;
+            } else {
+                senderLabel = 'Anda';
+            }
+
+            let dateBlock = '';
+            if (msg.timestamp) {
+                const d = msg.timestamp.toDate();
+                const dateStr = d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' });
+                if (dateStr !== lastDate) {
+                    dateBlock = `<div class="date-divider">${dateStr}</div>`;
+                    lastDate = dateStr;
+                }
+            }
+
+            return `
+                ${dateBlock}
+                <div class="message ${cls}">
+                    <div class="msg-avatar ${avCls}">${avInitial}</div>
+                    <div class="msg-body">
+                        <div class="msg-sender">${senderLabel}</div>
+                        <div class="bubble">${escapeHtml(msg.text)}</div>
+                        <div class="msg-time">${formatTimeFull(msg.timestamp)}</div>
+                    </div>
+                </div>`;
+        }).join('');
+
+        container.innerHTML = html;
+        container.scrollTop = container.scrollHeight;
+    }
+
+    // ==================== KIRIM PESAN ====================
+    async function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const text = input.value.trim();
+        if (!text || !currentTopicId || !currentUser) return;
+
+        input.value = '';
+        const btn = document.getElementById('sendBtn');
+        btn.disabled = true;
+
+        try {
+            const topicRef = db.collection('chat_users').doc(currentUser.uid)
+                .collection('topics').doc(currentTopicId);
+            const senderName = document.getElementById('userName').textContent;
+
+            await topicRef.collection('messages').add({
+                text,
+                sender: 'user',
+                senderId: currentUser.uid,
+                senderName,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                read: false
+            });
+
+            // Ambil semua staff & super_admin untuk update unread mereka
+            const staffSnap = await db.collection('users').where('role', 'in', ['staff', 'super_admin']).get();
+            const unreadUpdate = {};
+            staffSnap.forEach(doc => {
+                unreadUpdate[`unreadCount.${doc.id}`] = firebase.firestore.FieldValue.increment(1);
+            });
+
+            await topicRef.update({
+                lastMessage: text,
+                lastMessageTime: firebase.firestore.FieldValue.serverTimestamp(),
+                lastMessageSender: 'user',
+                lastMessageSenderId: currentUser.uid,
+                lastMessageSenderName: senderName,
+                ...unreadUpdate
+            });
+        } catch (err) {
+            console.error('Error send:', err);
+            alert('Gagal mengirim pesan: ' + err.message);
+            input.value = text;
+        } finally {
+            btn.disabled = false;
+            input.focus();
+        }
+    }
+
+    // ==================== UTILS ====================
+    function formatTime(ts) {
+        if (!ts) return '';
+        const d = ts.toDate();
+        const now = new Date();
+        const diff = now - d;
+        const m = Math.floor(diff / 60000);
+        const h = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+        if (m < 1) return 'Baru saja';
+        if (m < 60) return `${m}m`;
+        if (h < 24) return `${h}j`;
+        if (days < 7) return `${days}h`;
+        return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+    }
+
+    function formatTimeFull(ts) {
+        if (!ts) return '';
+        const d = ts.toDate();
+        return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ==================== EVENT LISTENERS ====================
+    document.addEventListener('DOMContentLoaded', init);
+    document.getElementById('sendBtn').addEventListener('click', sendMessage);
+    document.getElementById('messageInput').addEventListener('keypress', e => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+</script>
 </body>
 </html>
