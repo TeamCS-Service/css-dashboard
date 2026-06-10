@@ -419,6 +419,9 @@ class SidebarLoader {
             
             const promosiReport = document.querySelector('#promosi-submenu .menu-item[data-page="report-promo.html"] .menu-text');
             if (promosiReport) promosiReport.textContent = this.getMenuItem('promosiReport');
+
+            const chatAgent = document.querySelector('.menu-item[data-page="chat-agent.html"] .menu-text');
+if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
             
             // Additional menus
             const staffAccount = document.querySelector('.menu-item[data-page="staff-account.html"] .menu-text');
@@ -920,7 +923,13 @@ class SidebarLoader {
                             <span class="menu-text">${this.getMenuItem('promosiReport')}</span>
                         </div>
                     </div>
-
+<!-- Chat Agent Menu (di bawah Promosi Panel) -->
+<div class="menu-item" data-page="chat-agent.html">
+    <div class="menu-icon">
+        <i class="fas fa-headset"></i>
+    </div>
+    <span class="menu-text">${this.getMenuItem('chatAgent')}</span>
+</div>
                     ${isSuperAdmin ? `
                     <!-- Admin Section (Super Admin Only) -->
                     <div class="menu-category">${this.getCategory('admin')}</div>
@@ -1119,16 +1128,16 @@ class SidebarLoader {
         }
     }
 
-    handleMenuNavigation(pageUrl) {
+handleMenuNavigation(pageUrl) {
     const allowedPages = [
         'summary-dashboard.html', 'pending-reports.html', 'solved-report.html',
-        'maintenance.html', 'completed-report.html', 'kpi-css.html', 'kpi-history.html', 'ide-saran.html',
-        'research.html', 'chat-response.html',
+        'maintenance.html', 'completed-report.html', 'kpi-css.html', 'kpi-history.html', 
+        'ide-saran.html', 'research.html', 'chat-response.html',
         'promosi-leads.html', 'promosi-statistik.html', 'report-promo.html',
         'staff-account.html', 'topup-credit.html', 'eventprovider.html', 
         'jadwalshift.html', 'pengaturan.html',
-        'index.html',
-        'idesaran-agent.html'  // ← TAMBAHKAN INI
+        'index.html', 'idesaran-agent.html',
+        'chat-agent.html'  // ← TAMBAHKAN BARIS INI
     ];
         
         if (!allowedPages.includes(pageUrl)) {
