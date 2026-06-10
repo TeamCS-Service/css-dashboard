@@ -1304,13 +1304,13 @@
                 <div class="filter-controls">
                     <div class="filter-group">
                         <label class="filter-label" id="filter-role-label" for="filterRole">Role</label>
-                        <select id="filterRole" class="filter-input">
-                            <option value="" id="all-roles-option">Semua Role</option>
-                            <option value="super_admin" id="super-admin-option">Super Admin</option>
-                            <option value="admin" id="admin-option">Admin</option>
-                            <option value="staff" id="staff-option">Staff</option>
-                            <option value="support" id="support-option">Support</option>
-                        </select>
+<select id="filterRole" class="filter-input">
+    <option value="" id="all-roles-option">Semua Role</option>
+    <option value="super_admin" id="super-admin-option">Super Admin</option>
+    <option value="agent" id="agent-option">Agent</option>
+    <option value="staff" id="staff-option">Staff</option>
+    <option value="support" id="support-option">Support</option>
+</select>
                     </div>
                     
                     <div class="filter-group">
@@ -1377,12 +1377,12 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label" id="role-label" for="staffRole">Role</label>
-                    <select id="staffRole" class="form-input" required>
-                        <option value="staff" id="staff-role-option">Staff</option>
-                        <option value="admin" id="admin-role-option">Admin</option>
-                        <option value="support" id="support-role-option">Support</option>
-                        <option value="super_admin" id="super-admin-role-option">Super Admin</option>
-                    </select>
+<select id="staffRole" class="form-input" required>
+    <option value="staff" id="staff-role-option">Staff</option>
+    <option value="agent" id="agent-role-option">Agent</option>
+    <option value="support" id="support-role-option">Support</option>
+    <option value="super_admin" id="super-admin-role-option">Super Admin</option>
+</select>
                 </div>
                 <div class="form-group">
                     <label class="form-label" id="password-label" for="staffPassword">Password</label>
@@ -1529,12 +1529,12 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label" id="edit-role-label" for="editStaffRole">Role</label>
-                    <select id="editStaffRole" class="form-input" required>
-                        <option value="staff" id="edit-staff-role-option">Staff</option>
-                        <option value="admin" id="edit-admin-role-option">Admin</option>
-                        <option value="support" id="edit-support-role-option">Support</option>
-                        <option value="super_admin" id="edit-super-admin-role-option">Super Admin</option>
-                    </select>
+   <select id="editStaffRole" class="form-input" required>
+    <option value="staff" id="edit-staff-role-option">Staff</option>
+    <option value="agent" id="edit-agent-role-option">Agent</option>
+    <option value="support" id="edit-support-role-option">Support</option>
+    <option value="super_admin" id="edit-super-admin-role-option">Super Admin</option>
+</select>
                 </div>
                 <div class="form-group">
                     <label class="form-label" id="edit-status-label" for="editStaffStatus">Status</label>
@@ -2452,21 +2452,20 @@
             }
 
             async loadFromFirebase() {
-                try {
-                    const snapshot = await db.collection('users').get();
-                    const lang = this.getLang();
-                    
-                    this.staffData = snapshot.docs.map(doc => {
-                        const data = doc.data();
-                        
-                        let role = 'staff';
-                        if (data.role === 'super_admin' || data.isSuperAdmin === true) {
-                            role = 'super_admin';
-                        } else if (data.role === 'Admin' || data.role === 'admin') {
-                            role = 'admin';
-                        } else if (data.role === 'Support' || data.role === 'support') {
-                            role = 'support';
-                        }
+    try {
+        const snapshot = await db.collection('users').get();
+        
+        this.staffData = snapshot.docs.map(doc => {
+            const data = doc.data();
+            
+            let role = 'staff';
+            if (data.role === 'super_admin' || data.isSuperAdmin === true) {
+                role = 'super_admin';
+            } else if (data.role === 'Agent' || data.role === 'agent') {
+                role = 'agent';  // ← GANTI dari 'admin'
+            } else if (data.role === 'Support' || data.role === 'support') {
+                role = 'support';
+            }
                         
                         let status = 'active';
                         const dbStatus = data.status;
@@ -3134,18 +3133,18 @@
                     );
                     
                     let permissions = [];
-                    let isSuperAdmin = false;
-                    
-                    if (formData.role === 'super_admin') {
-                        permissions = ["read", "write", "delete", "manage_users", "manage_roles", "all_access"];
-                        isSuperAdmin = true;
-                    } else if (formData.role === 'admin') {
-                        permissions = ["read", "write", "delete", "manage_users"];
-                    } else if (formData.role === 'support') {
-                        permissions = ["read", "write"];
-                    } else {
-                        permissions = ["read"];
-                    }
+let isSuperAdmin = false;
+
+if (formData.role === 'super_admin') {
+    permissions = ["read", "write", "delete", "manage_users", "manage_roles", "all_access"];
+    isSuperAdmin = true;
+} else if (formData.role === 'agent') {  // ← GANTI dari 'admin'
+    permissions = ["read", "write", "delete", "manage_users"];
+} else if (formData.role === 'support') {
+    permissions = ["read", "write"];
+} else {
+    permissions = ["read"];
+}
                     
                     const userData = {
                         name: formData.name,
@@ -3195,15 +3194,15 @@
                 }
             }
 
-            denormalizeRole(role) {
-                const roleMap = {
-                    'staff': 'Customer Service Support',
-                    'admin': 'Admin',
-                    'support': 'Support',
-                    'super_admin': 'super_admin'
-                };
-                return roleMap[role] || 'Customer Service Support';
-            }
+denormalizeRole(role) {
+    const roleMap = {
+        'staff': 'Customer Service Support',
+        'agent': 'Agent',  // ← GANTI dari 'admin': 'Admin'
+        'support': 'Support',
+        'super_admin': 'super_admin'
+    };
+    return roleMap[role] || 'Customer Service Support';
+}
 
             denormalizeStatus(status) {
                 const statusMap = {
@@ -3278,16 +3277,16 @@
                 return statusMap[status] || status;
             }
 
-            getRoleText(role) {
-                const lang = this.getLang();
-                const roleMap = {
-                    'super_admin': lang.superAdmin || 'Super Admin',
-                    'admin': lang.admin || 'Admin',
-                    'staff': lang.staff || 'Staff',
-                    'support': lang.support || 'Support'
-                };
-                return roleMap[role] || role;
-            }
+getRoleText(role) {
+    const lang = this.getLang();
+    const roleMap = {
+        'super_admin': lang.superAdmin || 'Super Admin',
+        'agent': lang.agent || 'Agent',  // ← GANTI dari 'admin'
+        'staff': lang.staff || 'Staff',
+        'support': lang.support || 'Support'
+    };
+    return roleMap[role] || role;
+}
 
             getStatusIcon(status, isSuperAdmin = false) {
                 if (isSuperAdmin) return 'fa-crown';
