@@ -995,30 +995,72 @@
 
           showSuccess("Login berhasil! Mengarahkan...");
 
-          if (document.getElementById("remember").checked) {
-            localStorage.setItem("rememberEmail", email);
-          } else {
-            localStorage.removeItem("rememberEmail");
-          }
+if (document.getElementById("remember").checked) {
+    localStorage.setItem("rememberEmail", email);
+} else {
+    localStorage.removeItem("rememberEmail");
+}
 
-          const userData2 = {
-            email: user.email,
-            uid: user.uid,
-            displayName: userData.name || "Administrator",
-            role: userData.role || "admin",
-            status: userData.status || "Active",
-            avatar: userData.image || userData.avatar || 'https://iili.io/KfDh0EN.png'
-          };
+// ========== LOGIKA REDIRECT BERDASARKAN ROLE ==========
+// Ambil role dari field "role" ATAU "roleType" (keduanya dicek agar tidak miss)
+const userRoleFromDb = userData.role || userData.roleType || "admin";
+const userType = userData.userType || userData.roleType || userData.role;
 
-          sessionStorage.setItem("isLoggedIn", "true");
-          sessionStorage.setItem("user", JSON.stringify(userData2));
-          localStorage.setItem('currentUser', JSON.stringify(userData2));
-          localStorage.setItem('adminName', userData.name || "Administrator");
-          localStorage.setItem('adminRole', userData.role || "admin");
-          localStorage.setItem('adminProfileImage', userData.image || userData.avatar || 'https://iili.io/KfDh0EN.png');
-          localStorage.setItem('adminEmail', user.email);
+// Tentukan halaman redirect berdasarkan role
+let redirectUrl = "summary-dashboard.html"; // default dashboard admin
 
-          setTimeout(() => { window.location.href = "index.html"; }, 1500);
+// Convert role ke lowercase untuk pengecekan case-insensitive
+// Firestore menyimpan "Agent" (kapital) maupun "agent" (lowercase) — keduanya tertangani
+const roleLower = userRoleFromDb.toLowerCase().trim();
+const roleTypeLower = (userData.roleType || "").toLowerCase().trim();
+
+const isAgent = roleLower === "agent" || roleLower === "chat_agent" || roleLower === "support"
+             || roleTypeLower === "agent" || roleTypeLower === "chat_agent" || roleTypeLower === "support";
+
+const isSuperAdmin = roleLower === "super_admin" || roleLower === "super admin";
+
+if (isSuperAdmin) {
+    redirectUrl = "summary-dashboard.html";
+} 
+else if (isAgent) {
+    redirectUrl = "user-dashboard.html";  // Redirect ke dashboard agent
+}
+else if (roleLower === "admin") {
+    redirectUrl = "summary-dashboard.html";
+}
+else {
+    redirectUrl = "summary-dashboard.html";
+}
+
+console.log(`[Login] role="${userRoleFromDb}", roleType="${userData.roleType}", roleLower="${roleLower}", isAgent=${isAgent} → redirect: ${redirectUrl}`);
+
+const userData2 = {
+    email: user.email,
+    uid: user.uid,
+    displayName: userData.name || "Administrator",
+    role: userData.role || "admin",
+    userType: userType,
+    status: userData.status || "Active",
+    avatar: userData.image || userData.avatar || 'https://iili.io/KfDh0EN.png',
+    redirectUrl: redirectUrl
+};
+
+sessionStorage.setItem("isLoggedIn", "true");
+sessionStorage.setItem("user", JSON.stringify(userData2));
+sessionStorage.setItem("redirectUrl", redirectUrl);
+
+localStorage.setItem('currentUser', JSON.stringify(userData2));
+localStorage.setItem('adminName', userData.name || "Administrator");
+localStorage.setItem('adminRole', userData.role || "admin");
+localStorage.setItem('adminProfileImage', userData.image || userData.avatar || 'https://iili.io/KfDh0EN.png');
+localStorage.setItem('adminEmail', user.email);
+localStorage.setItem('userType', userData.role);
+localStorage.setItem('redirectUrl', redirectUrl);
+
+// Redirect ke halaman yang sesuai
+setTimeout(() => { 
+    window.location.href = redirectUrl; 
+}, 1500);
 
         } catch (firestoreError) {
           console.error("Firestore error:", firestoreError);
@@ -1110,9 +1152,25 @@
 
       document.addEventListener("keydown", e => { if (e.key === "Enter") handleLogin(); });
 
-      auth.onAuthStateChanged(user => {
+      auth.onAuthStateChanged(async user => {
         if (user) {
-          setTimeout(() => { window.location.href = "summary-dashboard.html"; }, 1000);
+          // Cek role dari Firestore sebelum redirect agar agent tidak salah arah
+          try {
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (userDoc.exists()) {
+              const roleLower = (userDoc.data().role || '').toLowerCase();
+              const target = (roleLower === 'agent' || roleLower === 'chat_agent' || roleLower === 'support')
+                ? 'user-dashboard.html'
+                : 'summary-dashboard.html';
+              setTimeout(() => { window.location.href = target; }, 1000);
+            } else {
+              setTimeout(() => { window.location.href = 'summary-dashboard.html'; }, 1000);
+            }
+          } catch (e) {
+            // Fallback: gunakan redirectUrl yang sudah tersimpan jika Firestore gagal
+            const saved = localStorage.getItem('redirectUrl') || 'summary-dashboard.html';
+            setTimeout(() => { window.location.href = saved; }, 1000);
+          }
         }
       });
     });
