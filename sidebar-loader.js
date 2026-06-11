@@ -1,4 +1,5 @@
-// sidebar-loader.js - WITH MENU ITEMS REMOVED
+// sidebar-loader.js - WITH IMPROVED MOBILE RESPONSIVENESS & SEPARATED CHAT AGENT MENU
+
 class SidebarLoader {
     constructor() {
         this.sidebarContainer = document.getElementById('sidebar-container');
@@ -28,53 +29,31 @@ class SidebarLoader {
                     maintenance: "Pemeliharaan",
                     performance: "Kinerja",
                     admin: "Administrator",
-                    promotions: "Promosi"
+                    chatServices: "Layanan Chat"  // Kategori baru untuk Chat Agent
                 },
                 menuItems: {
-                    // Main Menu
                     dashboardOverview: "Dashboard Overview",
-                    
-                    // Reports
                     reportsMenu: "Laporan",
                     pendingReports: "Laporan Tertunda",
                     solvedReports: "Laporan Selesai",
-                     ideasAgent: "Ide Saran Agent",
-                    
-                    // Maintenance
+                    ideasAgent: "Ide Saran Agent",
                     maintenanceMenu: "Pemeliharaan",
                     pendingMaintenance: "Pemeliharaan Tertunda",
                     completedMaintenance: "Pemeliharaan Selesai",
-                    
-                    // Releases
                     releases: "Rilis",
                     newFeatures: "Fitur Baru",
                     newGames: "Game Baru",
-                    
-                    // KPI
                     kpiPoints: "KPI Points",
                     kpiCss: "KPI CSS",
                     kpiHistory: "History KPI",
-                    
-                    // Ideas & Research
                     ideasSuggestions: "Ide & Saran",
                     research: "Riset",
                     chatResponse: "Respon Chat",
-                    
-                    // Promosi Panel
-                    promosiPanel: "Promosi Panel",
-                    promosiStatistics: "Statistik",
-                    promosiLeads: "Leads",
-                    promosiReport: "Report Promo",
-                    chatAgent: "Chat Agent",
-                    
-                    // Additional Menus
+                    chatAgent: "Chat Agent",   // Menu utama Chat Agent
                     staffAccount: "Akun Staff",
                     topUpCredit: "Top Up Kredit",
                     eventProvider: "Penyedia Event",
-                    shiftSchedule: "Jadwal Shift",
                     settings: "Pengaturan",
-                    
-                    // Actions
                     logout: "Keluar",
                     darkMode: "Mode Gelap",
                     lightMode: "Mode Terang"
@@ -87,53 +66,31 @@ class SidebarLoader {
                     maintenance: "Maintenance",
                     performance: "Performance",
                     admin: "Administrator",
-                    promotions: "Promotions"
+                    chatServices: "Chat Services"
                 },
                 menuItems: {
-                    // Main Menu
                     dashboardOverview: "Dashboard Overview",
-                    
-                    // Reports
                     reportsMenu: "Reports",
                     pendingReports: "Pending Reports",
                     solvedReports: "Solved Reports",
-                     ideasAgent: "Ideas & Suggestions",
-                    
-                    // Maintenance
+                    ideasAgent: "Ideas & Suggestions Agent",
                     maintenanceMenu: "Maintenance",
                     pendingMaintenance: "Pending Maintenance",
                     completedMaintenance: "Completed Maintenance",
-                    
-                    // Releases
                     releases: "Releases",
                     newFeatures: "New Features",
                     newGames: "New Games",
-                    
-                    // KPI
                     kpiPoints: "KPI Points",
                     kpiCss: "KPI CSS",
                     kpiHistory: "KPI History",
-                    
-                    // Ideas & Research
                     ideasSuggestions: "Ideas & Suggestions",
                     research: "Research",
                     chatResponse: "Chat Response",
-                    
-                    // Promosi Panel
-                    promosiPanel: "Promotion Panel",
-                    promosiStatistics: "Statistics",
-                    promosiLeads: "Leads",
-                    promosiReport: "Promotion Report",
                     chatAgent: "Chat Agent",
-                    
-                    // Additional Menus
                     staffAccount: "Staff Account",
                     topUpCredit: "Top Up Credit",
                     eventProvider: "Event Provider",
-                    shiftSchedule: "Shift Schedule",
                     settings: "Settings",
-                    
-                    // Actions
                     logout: "Logout",
                     darkMode: "Dark Mode",
                     lightMode: "Light Mode"
@@ -146,53 +103,31 @@ class SidebarLoader {
                     maintenance: "メンテナンス",
                     performance: "パフォーマンス",
                     admin: "管理者",
-                    promotions: "プロモーション"
+                    chatServices: "チャットサービス"
                 },
                 menuItems: {
-                    // Main Menu
                     dashboardOverview: "ダッシュボード概要",
-                    
-                    // Reports
                     reportsMenu: "レポート",
                     pendingReports: "保留中のレポート",
                     solvedReports: "解決済みレポート",
                     ideasAgent: "アイデアと提案エージェント",
-                    
-                    // Maintenance
                     maintenanceMenu: "メンテナンス",
                     pendingMaintenance: "保留中のメンテナンス",
                     completedMaintenance: "完了済みメンテナンス",
-                    
-                    // Releases
                     releases: "リリース",
                     newFeatures: "新機能",
                     newGames: "新ゲーム",
-                    
-                    // KPI
                     kpiPoints: "KPIポイント",
                     kpiCss: "KPI CSS",
                     kpiHistory: "KPI履歴",
-                    
-                    // Ideas & Research
                     ideasSuggestions: "アイデアと提案",
                     research: "リサーチ",
                     chatResponse: "チャット応答",
-                    
-                    // Promosi Panel
-                    promosiPanel: "プロモーションパネル",
-                    promosiStatistics: "統計",
-                    promosiLeads: "リード",
-                    promosiReport: "プロモーションレポート",
                     chatAgent: "チャットエージェント",
-                    
-                    // Additional Menus
                     staffAccount: "スタッフアカウント",
                     topUpCredit: "クレジットチャージ",
                     eventProvider: "イベントプロバイダー",
-                    shiftSchedule: "シフトスケジュール",
                     settings: "設定",
-                    
-                    // Actions
                     logout: "ログアウト",
                     darkMode: "ダークモード",
                     lightMode: "ライトモード"
@@ -205,53 +140,31 @@ class SidebarLoader {
                     maintenance: "维护",
                     performance: "性能",
                     admin: "管理员",
-                    promotions: "促销"
+                    chatServices: "聊天服务"
                 },
                 menuItems: {
-                    // Main Menu
                     dashboardOverview: "仪表板概览",
-                    
-                    // Reports
                     reportsMenu: "报告",
                     pendingReports: "待处理报告",
                     solvedReports: "已解决报告",
                     ideasAgent: "想法与建议代理",
-                    
-                    // Maintenance
                     maintenanceMenu: "维护",
                     pendingMaintenance: "待处理维护",
                     completedMaintenance: "已完成维护",
-                    
-                    // Releases
                     releases: "发布",
                     newFeatures: "新功能",
                     newGames: "新游戏",
-                    
-                    // KPI
                     kpiPoints: "KPI 积分",
                     kpiCss: "KPI CSS",
                     kpiHistory: "KPI历史",
-                    
-                    // Ideas & Research
                     ideasSuggestions: "想法与建议",
                     research: "研究",
                     chatResponse: "聊天回复",
-                    
-                    // Promosi Panel
-                    promosiPanel: "促销面板",
-                    promosiStatistics: "统计",
-                    promosiLeads: "线索",
-                    promosiReport: "促销报告",
                     chatAgent: "聊天客服",
-                    
-                    // Additional Menus
                     staffAccount: "员工账户",
                     topUpCredit: "充值积分",
                     eventProvider: "活动提供商",
-                    shiftSchedule: "轮班安排",
                     settings: "设置",
-                    
-                    // Actions
                     logout: "退出登录",
                     darkMode: "深色模式",
                     lightMode: "浅色模式"
@@ -268,7 +181,6 @@ class SidebarLoader {
             if (translation && translation[part] !== undefined) {
                 translation = translation[part];
             } else {
-                // Fallback ke bahasa Indonesia
                 let fallbackTranslation = this.translations.id;
                 for (const p of parts) {
                     if (fallbackTranslation && fallbackTranslation[p] !== undefined) {
@@ -302,7 +214,6 @@ class SidebarLoader {
         console.error(`[SidebarLoader] ${message}`, error || '');
     }
 
-    // ========== SIMPLIFIED USER DATA ==========
     async initializeUserData() {
         try {
             const sessionUser = sessionStorage.getItem("user");
@@ -336,28 +247,24 @@ class SidebarLoader {
         }
     }
 
-    // ========== COMPLETE TRANSLATION APPLICATION ==========
     applyTranslations() {
         try {
-            // Update dashboard title
             const logoText = document.querySelector('.logo-text');
             if (logoText) {
                 logoText.textContent = this.getTranslation('dashboardTitle');
             }
 
-            // Update menu categories
             const categories = document.querySelectorAll('.menu-category');
             if (categories.length >= 1) categories[0].textContent = this.getCategory('reports');
             if (categories.length >= 2) categories[1].textContent = this.getCategory('maintenance');
             if (categories.length >= 3) categories[2].textContent = this.getCategory('performance');
-            if (categories.length >= 4) categories[3] && (categories[3].textContent = this.getCategory('promotions'));
+            if (categories.length >= 4) categories[3].textContent = this.getCategory('chatServices'); // Kategori Chat Services
             if (categories.length >= 5) categories[4] && (categories[4].textContent = this.getCategory('admin'));
 
-            // Dashboard Overview
+            // Update semua menu item (sama seperti sebelumnya, tapi tambahkan untuk chatAgent)
             const dashboardItem = document.querySelector('.menu-item[data-page="summary-dashboard.html"] .menu-text');
             if (dashboardItem) dashboardItem.textContent = this.getMenuItem('dashboardOverview');
             
-            // Reports section
             const reportsSubmenu = document.querySelector('.has-submenu:has(+ .submenu .menu-item[data-page="pending-reports.html"]) .menu-text');
             if (reportsSubmenu) reportsSubmenu.textContent = this.getMenuItem('reportsMenu');
             
@@ -368,10 +275,8 @@ class SidebarLoader {
             if (solvedReports) solvedReports.textContent = this.getMenuItem('solvedReports');
 
             const ideasAgent = document.querySelector('.menu-item[data-page="idesaran-agent.html"] .menu-text');
-        if (ideasAgent) ideasAgent.textContent = this.getMenuItem('ideasAgent');
-        
+            if (ideasAgent) ideasAgent.textContent = this.getMenuItem('ideasAgent');
             
-            // Maintenance section
             const maintenanceSubmenu = document.querySelector('.has-submenu:has(+ .submenu .menu-item[data-page="maintenance.html"]) .menu-text');
             if (maintenanceSubmenu) maintenanceSubmenu.textContent = this.getMenuItem('maintenanceMenu');
             
@@ -381,7 +286,6 @@ class SidebarLoader {
             const completedMaintenance = document.querySelector('.menu-item[data-page="completed-report.html"] .menu-text');
             if (completedMaintenance) completedMaintenance.textContent = this.getMenuItem('completedMaintenance');
             
-            // Releases section
             const releasesSubmenu = document.querySelector('.has-submenu:has(+ .submenu .menu-item[data-page="releases-newfeature.html"]) .menu-text');
             if (releasesSubmenu) releasesSubmenu.textContent = this.getMenuItem('releases');
             
@@ -391,7 +295,6 @@ class SidebarLoader {
             const newGames = document.querySelector('.menu-item[data-page="releases-newgame.html"] .menu-text');
             if (newGames) newGames.textContent = this.getMenuItem('newGames');
             
-            // KPI section
             const kpiSubmenu = document.querySelector('.has-submenu:has(+ .submenu .menu-item[data-page="kpi-css.html"]) .menu-text');
             if (kpiSubmenu) kpiSubmenu.textContent = this.getMenuItem('kpiPoints');
             
@@ -409,25 +312,10 @@ class SidebarLoader {
             
             const chatResponse = document.querySelector('.menu-item[data-page="chat-response.html"] .menu-text');
             if (chatResponse) chatResponse.textContent = this.getMenuItem('chatResponse');
-            
-            // Promosi Panel - Main menu item
-            const promosiPanelItem = document.querySelector('.has-submenu[data-submenu="promosi-submenu"] .menu-text');
-            if (promosiPanelItem) promosiPanelItem.textContent = this.getMenuItem('promosiPanel');
-            
-            // Promosi Panel - Submenu items
-            const promosiStatistics = document.querySelector('#promosi-submenu .menu-item[data-page="promosi-statistik.html"] .menu-text');
-            if (promosiStatistics) promosiStatistics.textContent = this.getMenuItem('promosiStatistics');
-            
-            const promosiLeads = document.querySelector('#promosi-submenu .menu-item[data-page="promosi-leads.html"] .menu-text');
-            if (promosiLeads) promosiLeads.textContent = this.getMenuItem('promosiLeads');
-            
-            const promosiReport = document.querySelector('#promosi-submenu .menu-item[data-page="report-promo.html"] .menu-text');
-            if (promosiReport) promosiReport.textContent = this.getMenuItem('promosiReport');
 
             const chatAgent = document.querySelector('.menu-item[data-page="chat-agent.html"] .menu-text');
-if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
+            if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
             
-            // Additional menus
             const staffAccount = document.querySelector('.menu-item[data-page="staff-account.html"] .menu-text');
             if (staffAccount) staffAccount.textContent = this.getMenuItem('staffAccount');
             
@@ -436,9 +324,6 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
             
             const eventProvider = document.querySelector('.menu-item[data-page="eventprovider.html"] .menu-text');
             if (eventProvider) eventProvider.textContent = this.getMenuItem('eventProvider');
-            
-            const shiftSchedule = document.querySelector('.menu-item[data-page="jadwalshift.html"] .menu-text');
-            if (shiftSchedule) shiftSchedule.textContent = this.getMenuItem('shiftSchedule');
             
             const settings = document.querySelector('.menu-item[data-page="pengaturan.html"] .menu-text');
             if (settings) settings.textContent = this.getMenuItem('settings');
@@ -467,7 +352,6 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
         }
     }
 
-    // ========== SIDEBAR GENERATION ==========
     injectStyles() {
         if (document.getElementById('sidebar-styles')) {
             return;
@@ -503,46 +387,57 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
                 --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             }
 
+            /* Mobile Menu Toggle Button - Improved */
             .menu-toggle {
                 display: none;
                 position: fixed;
-                top: 15px;
-                left: 15px;
+                top: 16px;
+                left: 16px;
                 z-index: 1100;
                 background: var(--primary-color);
                 color: white;
                 border: none;
-                border-radius: var(--border-radius);
-                width: 40px;
-                height: 40px;
+                border-radius: 12px;
+                width: 48px;
+                height: 48px;
                 cursor: pointer;
                 align-items: center;
                 justify-content: center;
                 flex-direction: column;
                 padding: 0;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                transition: all 0.3s ease;
+            }
+
+            .menu-toggle:hover {
+                transform: scale(1.05);
+                background: var(--secondary-color);
             }
 
             .menu-toggle span {
                 display: block;
                 width: 24px;
-                height: 2px;
+                height: 2.5px;
                 background-color: white;
-                margin: 2px 0;
+                margin: 3px 0;
                 transition: all 0.3s ease;
+                border-radius: 2px;
             }
 
             .menu-toggle.active span:nth-child(1) {
-                transform: rotate(45deg) translate(5px, 5px);
+                transform: rotate(45deg) translate(6px, 6px);
             }
 
             .menu-toggle.active span:nth-child(2) {
                 opacity: 0;
+                transform: scale(0.8);
             }
 
             .menu-toggle.active span:nth-child(3) {
-                transform: rotate(-45deg) translate(5px, -5px);
+                transform: rotate(-45deg) translate(6px, -6px);
             }
 
+            /* Sidebar Container */
             .sidebar {
                 position: fixed;
                 top: 0;
@@ -556,11 +451,30 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
                 display: flex;
                 flex-direction: column;
                 transition: transform var(--transition-speed) ease;
+                scrollbar-width: thin;
+            }
+
+            .sidebar::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .sidebar::-webkit-scrollbar-track {
+                background: rgba(0, 0, 0, 0.05);
+                border-radius: 3px;
+            }
+
+            .sidebar::-webkit-scrollbar-thumb {
+                background: var(--primary-color);
+                border-radius: 3px;
             }
 
             .sidebar-header {
                 padding: 20px;
                 border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+                position: sticky;
+                top: 0;
+                background: var(--sidebar-bg);
+                z-index: 10;
             }
 
             .logo-container {
@@ -602,20 +516,36 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
                 font-weight: 600;
             }
 
+            /* Pemisah visual antar grup menu */
+            .menu-divider {
+                height: 1px;
+                background: rgba(0, 0, 0, 0.1);
+                margin: 10px 15px;
+            }
+            [data-theme="dark"] .menu-divider {
+                background: rgba(255, 255, 255, 0.1);
+            }
+
             .menu-item {
                 display: flex;
                 align-items: center;
-                height: var(--menu-item-height);
+                min-height: var(--menu-item-height);
                 padding: 0 15px;
                 border-radius: var(--border-radius);
                 color: var(--text-color);
                 cursor: pointer;
-                transition: background-color var(--transition-speed);
+                transition: all var(--transition-speed);
                 text-decoration: none;
+                gap: 12px;
             }
 
             .menu-item:hover {
                 background-color: rgba(0, 0, 0, 0.05);
+                transform: translateX(4px);
+            }
+
+            [data-theme="dark"] .menu-item:hover {
+                background-color: rgba(255, 255, 255, 0.05);
             }
 
             .menu-item.active {
@@ -633,23 +563,30 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                margin-right: 15px;
                 color: var(--text-light);
                 transition: color var(--transition-speed);
+                flex-shrink: 0;
             }
 
             .menu-item:hover .menu-icon {
                 color: var(--primary-color);
             }
 
+            .menu-item.active .menu-icon {
+                color: white;
+            }
+
             .menu-text {
                 flex: 1;
                 font-size: 14px;
                 font-weight: 500;
+                line-height: 1.4;
             }
 
             .submenu-indicator {
                 transition: transform var(--transition-speed);
+                margin-left: auto;
+                flex-shrink: 0;
             }
 
             .has-submenu.active .submenu-indicator {
@@ -668,7 +605,7 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
             }
 
             .submenu .menu-item {
-                height: 45px;
+                min-height: 45px;
                 padding-left: 40px;
             }
 
@@ -702,11 +639,13 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
                 border-radius: var(--border-radius);
                 color: var(--text-color);
                 cursor: pointer;
-                transition: background-color var(--transition-speed);
+                transition: all var(--transition-speed);
+                gap: 12px;
             }
 
             .theme-toggle:hover {
                 background: rgba(0, 0, 0, 0.05);
+                transform: translateX(4px);
             }
 
             .sidebar-overlay {
@@ -718,10 +657,64 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
                 background: rgba(0, 0, 0, 0.5);
                 z-index: 999;
                 display: none;
+                backdrop-filter: blur(2px);
             }
 
             .sidebar-overlay.active {
                 display: block;
+            }
+
+            /* Mobile Styles */
+            @media (max-width: 768px) {
+                .menu-toggle { display: flex; }
+                body { padding-top: 0; }
+                .main-content, .content-wrapper, .dashboard-container {
+                    transition: margin-left var(--transition-speed) ease;
+                    margin-left: 0;
+                }
+                .sidebar {
+                    width: 85%;
+                    max-width: 320px;
+                    transform: translateX(-100%);
+                    box-shadow: none;
+                }
+                .sidebar.active {
+                    transform: translateX(0);
+                    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+                }
+                .sidebar-overlay.active { display: block; animation: fadeIn 0.3s ease; }
+                .menu-item { min-height: 52px; padding: 8px 15px; }
+                .menu-item:active { transform: scale(0.98); background-color: rgba(0, 0, 0, 0.1); }
+                .submenu .menu-item { min-height: 48px; padding-left: 48px; }
+                .menu-icon { width: 24px; height: 24px; font-size: 18px; }
+                .menu-text { font-size: 15px; }
+                .menu-category { font-size: 13px; margin-top: 24px; margin-bottom: 12px; padding: 0 15px; }
+                @keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                .sidebar.active { animation: slideIn 0.3s ease; }
+                body.sidebar-open { overflow: hidden; }
+            }
+            @media (max-width: 480px) {
+                .menu-toggle { top: 12px; left: 12px; width: 44px; height: 44px; }
+                .menu-toggle span { width: 20px; margin: 2.5px 0; }
+                .sidebar { width: 100%; max-width: none; }
+                .sidebar-header { padding: 16px; }
+                .logo-text { font-size: 16px; }
+                .logo-image { width: 36px; height: 36px; }
+                .sidebar-menu { padding: 12px; }
+                .menu-item { min-height: 48px; padding: 6px 12px; }
+                .menu-text { font-size: 14px; }
+                .menu-category { font-size: 12px; margin-top: 20px; margin-bottom: 8px; padding: 0 12px; }
+                .submenu .menu-item { padding-left: 40px; }
+            }
+            @media (max-width: 768px) and (orientation: landscape) {
+                .sidebar { overflow-y: auto; padding-bottom: 20px; }
+                .sidebar-menu { padding-bottom: 20px; }
+                .menu-item { min-height: 44px; }
+            }
+            @media (min-width: 769px) and (max-width: 1024px) {
+                .sidebar { width: 260px; }
+                .menu-item { min-height: 48px; }
             }
 
             .super-admin-only {
@@ -739,34 +732,11 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
                 font-weight: 600;
             }
 
-            @media (max-width: 768px) {
-                .menu-toggle {
-                    display: flex;
-                }
-                
-                .sidebar {
-                    transform: translateX(-100%);
-                }
-                
-                .sidebar.active {
-                    transform: translateX(0);
-                }
-                
-                .sidebar-overlay.active {
-                    display: block;
-                }
-            }
-
             @media (prefers-reduced-motion: reduce) {
-                * {
-                    animation-duration: 0.01ms !important;
-                    animation-iteration-count: 1 !important;
-                    transition-duration: 0.01ms !important;
-                }
+                * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
             }
 
-            .menu-item:focus-visible,
-            .theme-toggle:focus-visible {
+            .menu-item:focus-visible, .theme-toggle:focus-visible {
                 outline: 2px solid var(--primary-color);
                 outline-offset: 2px;
             }
@@ -824,12 +794,12 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
                             </div>
                             <span class="menu-text">${this.getMenuItem('solvedReports')}</span>
                         </div>
-                          <div class="menu-item" data-page="idesaran-agent.html">
-        <div class="menu-icon">
-            <i class="fas fa-comment-dots"></i>
-        </div>
-        <span class="menu-text">Ide Saran Agent</span>
-    </div>
+                        <div class="menu-item" data-page="idesaran-agent.html">
+                            <div class="menu-icon">
+                                <i class="fas fa-comment-dots"></i>
+                            </div>
+                            <span class="menu-text">${this.getMenuItem('ideasAgent')}</span>
+                        </div>
                     </div>
                     
                     <!-- Maintenance Section -->
@@ -896,44 +866,20 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
                         </div>
                     </div>
 
-                    <!-- Promosi Panel Section -->
-                    <div class="menu-category">${this.getCategory('promotions')}</div>
-                    <div class="menu-item has-submenu" data-submenu="promosi-submenu">
+                    <!-- ========== CHAT SERVICES SECTION (TERPISAH) ========== -->
+                    <div class="menu-category">${this.getCategory('chatServices')}</div>
+                    
+                    <!-- Chat Agent Menu Utama - Berdiri Sendiri, Tidak Tergabung dengan Promosi -->
+                    <div class="menu-item" data-page="chat-agent.html">
                         <div class="menu-icon">
-                            <i class="fas fa-bullhorn"></i>
+                            <i class="fas fa-headset"></i>
                         </div>
-                        <span class="menu-text">${this.getMenuItem('promosiPanel')}</span>
-                        <div class="submenu-indicator">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
+                        <span class="menu-text">${this.getMenuItem('chatAgent')}</span>
                     </div>
-                    <div class="submenu" id="promosi-submenu">
-                        <div class="menu-item" data-page="promosi-statistik.html">
-                            <div class="menu-icon">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <span class="menu-text">${this.getMenuItem('promosiStatistics')}</span>
-                        </div>
-                        <div class="menu-item" data-page="promosi-leads.html">
-                            <div class="menu-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <span class="menu-text">${this.getMenuItem('promosiLeads')}</span>
-                        </div>
-                        <div class="menu-item" data-page="report-promo.html">
-                            <div class="menu-icon">
-                                <i class="fas fa-file-alt"></i>
-                            </div>
-                            <span class="menu-text">${this.getMenuItem('promosiReport')}</span>
-                        </div>
-                    </div>
-<!-- Chat Agent Menu (di bawah Promosi Panel) -->
-<div class="menu-item" data-page="chat-agent.html">
-    <div class="menu-icon">
-        <i class="fas fa-headset"></i>
-    </div>
-    <span class="menu-text">${this.getMenuItem('chatAgent')}</span>
-</div>
+                    
+                    <!-- Pemisah visual sebelum menu promosi -->
+                    <div class="menu-divider"></div>
+
                     ${isSuperAdmin ? `
                     <!-- Admin Section (Super Admin Only) -->
                     <div class="menu-category">${this.getCategory('admin')}</div>
@@ -945,7 +891,7 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
                     </div>
                     ` : ''}
 
-                    <!-- Additional Menus -->
+                    <!-- Additional / Promotional Menus -->
                     <div class="menu-item" data-page="topup-credit.html">
                         <div class="menu-icon">
                             <i class="fas fa-coins"></i>
@@ -958,13 +904,6 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
                             <i class="fas fa-trophy"></i>
                         </div>
                         <span class="menu-text">${this.getMenuItem('eventProvider')}</span>
-                    </div>
-
-                    <div class="menu-item" data-page="jadwalshift.html">
-                        <div class="menu-icon">
-                            <i class="fas fa-calendar-alt"></i>
-                        </div>
-                        <span class="menu-text">${this.getMenuItem('shiftSchedule')}</span>
                     </div>
 
                     <div class="menu-item" data-page="pengaturan.html">
@@ -986,7 +925,6 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
         `;
     }
 
-    // ========== MAIN LOAD METHOD ==========
     async load() {
         if (!this.sidebarContainer) {
             this.error('Sidebar container not found');
@@ -994,51 +932,67 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
         }
 
         try {
-            // Load theme
             this.loadTheme();
-            
-            // Inject styles
             this.injectStyles();
-            
-            // Initialize user data (tanpa Firebase)
             await this.initializeUserData();
             
-            // Jika tidak ada user data (akan redirect ke login)
             if (!this.currentUserId) {
                 return;
             }
             
-            // Render sidebar
             this.sidebarContainer.innerHTML = this.generateSidebarHTML();
             
-            // Setup functionality
             this.createMenuToggle();
             this.initializeSidebarFunctionality();
             this.restoreSidebarState();
             this.setActiveMenuItem();
             this.applyTranslations();
+            
+            // Prevent body scroll when sidebar is open on mobile
+            this.setupBodyScrollLock();
             
             this.isInitialized = true;
             this.log('Sidebar loaded successfully');
             
         } catch (error) {
             this.error('Error loading sidebar:', error);
-            // Fallback rendering
             this.sidebarContainer.innerHTML = this.generateSidebarHTML();
             this.createMenuToggle();
             this.initializeSidebarFunctionality();
             this.restoreSidebarState();
             this.setActiveMenuItem();
             this.applyTranslations();
+            this.setupBodyScrollLock();
         }
     }
 
-    // ========== SIDEBAR FUNCTIONALITY ==========
+    // New method to prevent body scroll when sidebar is open on mobile
+    setupBodyScrollLock() {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    const sidebar = document.querySelector('.sidebar');
+                    if (sidebar && sidebar.classList.contains('active')) {
+                        document.body.classList.add('sidebar-open');
+                    } else {
+                        document.body.classList.remove('sidebar-open');
+                    }
+                }
+            });
+        });
+        
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) {
+            observer.observe(sidebar, { attributes: true });
+        }
+    }
+
     createMenuToggle() {
         if (!document.querySelector('.menu-toggle')) {
             const menuToggle = document.createElement('button');
             menuToggle.className = 'menu-toggle';
             menuToggle.setAttribute('aria-label', 'Toggle menu');
+            menuToggle.setAttribute('aria-expanded', 'false');
             menuToggle.innerHTML = `
                 <span></span>
                 <span></span>
@@ -1067,6 +1021,17 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
                 sidebar.classList.toggle('active');
                 overlay.classList.toggle('active');
                 menuToggle.classList.toggle('active');
+                
+                const isExpanded = sidebar.classList.contains('active');
+                menuToggle.setAttribute('aria-expanded', isExpanded);
+                
+                if (window.innerWidth <= 768) {
+                    if (isExpanded) {
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        document.body.style.overflow = '';
+                    }
+                }
             };
             
             menuToggle.addEventListener('click', toggleHandler);
@@ -1108,7 +1073,6 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
         const menuItems = document.querySelectorAll('.menu-item[data-page]');
         const logoutButton = document.getElementById('logoutButton');
         
-        // Handle regular menu items
         menuItems.forEach(item => {
             if (item === logoutButton) return;
             
@@ -1121,7 +1085,6 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
             this.eventListeners.push({ element: item, type: 'click', handler });
         });
         
-        // Handle logout separately
         if (logoutButton) {
             const logoutHandler = async () => {
                 await this.handleLogout();
@@ -1132,17 +1095,15 @@ if (chatAgent) chatAgent.textContent = this.getMenuItem('chatAgent');
         }
     }
 
-handleMenuNavigation(pageUrl) {
-    const allowedPages = [
-        'summary-dashboard.html', 'pending-reports.html', 'solved-report.html',
-        'maintenance.html', 'completed-report.html', 'kpi-css.html', 'kpi-history.html', 
-        'ide-saran.html', 'research.html', 'chat-response.html',
-        'promosi-leads.html', 'promosi-statistik.html', 'report-promo.html',
-        'staff-account.html', 'topup-credit.html', 'eventprovider.html', 
-        'jadwalshift.html', 'pengaturan.html',
-        'index.html', 'idesaran-agent.html',
-        'chat-agent.html'  // ← TAMBAHKAN BARIS INI
-    ];
+    handleMenuNavigation(pageUrl) {
+        const allowedPages = [
+            'summary-dashboard.html', 'pending-reports.html', 'solved-report.html',
+            'maintenance.html', 'completed-report.html', 'kpi-css.html', 'kpi-history.html', 
+            'ide-saran.html', 'research.html', 'chat-response.html',
+            'staff-account.html', 'topup-credit.html', 'eventprovider.html', 
+            'pengaturan.html', 'index.html', 'idesaran-agent.html',
+            'chat-agent.html'
+        ];
         
         if (!allowedPages.includes(pageUrl)) {
             this.error('Invalid page navigation attempt:', pageUrl);
@@ -1160,17 +1121,14 @@ handleMenuNavigation(pageUrl) {
 
     async handleLogout() {
         try {
-            // Clear semua storage data
             const sensitiveKeys = [
                 'userRole', 'userId', 'sidebarState', 'theme', 'language',
                 'rememberEmail', 'currentUser', 'adminName', 'adminRole', 'adminProfileImage'
             ];
             sensitiveKeys.forEach(key => localStorage.removeItem(key));
             
-            // Clear session storage
             sessionStorage.clear();
             
-            // Firebase logout (jika ada)
             try {
                 if (typeof firebase !== 'undefined' && firebase.auth) {
                     await firebase.auth().signOut();
@@ -1179,7 +1137,6 @@ handleMenuNavigation(pageUrl) {
                 console.log('Firebase logout optional:', firebaseError.message);
             }
             
-            // Navigate to login page
             window.location.href = 'index.html';
         } catch (error) {
             this.error('Logout error:', error);
@@ -1214,6 +1171,7 @@ handleMenuNavigation(pageUrl) {
             resizeTimeout = setTimeout(() => {
                 if (window.innerWidth > 768) {
                     this.closeMobileSidebar();
+                    document.body.style.overflow = '';
                 }
             }, 250);
         };
@@ -1227,9 +1185,14 @@ handleMenuNavigation(pageUrl) {
         const overlay = document.querySelector('.sidebar-overlay');
         const menuToggle = document.querySelector('.menu-toggle');
         
-        if (sidebar) sidebar.classList.remove('active');
+        if (sidebar) {
+            sidebar.classList.remove('active');
+            if (menuToggle) menuToggle.classList.remove('active');
+            if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
+        }
         if (overlay) overlay.classList.remove('active');
-        if (menuToggle) menuToggle.classList.remove('active');
+        
+        document.body.style.overflow = '';
     }
 
     async reloadSidebar() {
@@ -1317,6 +1280,8 @@ handleMenuNavigation(pageUrl) {
         });
         this.eventListeners = [];
         
+        document.body.style.overflow = '';
+        
         window.sidebarLoader = null;
         
         this.log('SidebarLoader destroyed');
@@ -1331,7 +1296,6 @@ handleMenuNavigation(pageUrl) {
     }
 }
 
-// Global functions
 function isSuperAdmin() {
     const sidebarLoader = window.sidebarLoader;
     return sidebarLoader ? sidebarLoader.isSuperAdmin() : false;
@@ -1342,7 +1306,6 @@ function getUserData() {
     return sidebarLoader ? sidebarLoader.getUserData() : null;
 }
 
-// Initialize with error handling
 document.addEventListener('DOMContentLoaded', async function() {
     try {
         const sidebarLoader = new SidebarLoader();
@@ -1351,7 +1314,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     } catch (error) {
         console.error('Failed to initialize SidebarLoader:', error);
         
-        // Fallback minimal sidebar
         try {
             const container = document.getElementById('sidebar-container');
             if (container) {
@@ -1378,7 +1340,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 });
 
-// Handle page unload
 window.addEventListener('beforeunload', () => {
     if (window.sidebarLoader) {
         window.sidebarLoader.destroy();
