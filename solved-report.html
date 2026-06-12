@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/charts.css/dist/charts.min.css">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="global.css">
+    <link rel="shortcut icon" href="https://iili.io/CCzxYNa.png" type="image/png">
+  <link rel="icon" href="https://iili.io/CCzxYNa.png" type="image/png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="https://iili.io/CCzxYNa.png" type="image/png">
         <link rel="stylesheet" href="stylemobile.css"> 
         <script src="global-time.js"></script>
         
@@ -1721,6 +1724,8 @@
 <button class="menu-toggle">
                     <i class="fas fa-bars"></i>
                 </button>
+                <div id="notificationBellContainer"></div>
+
 <div class="user-profile">
                     <img class="profile-img" src="https://iili.io/Fpiva7S.png" alt="Profile">
                     <div class="user-info">
@@ -4807,6 +4812,23 @@ function getSolvedTranslation(key) {
     const lang = solvedTranslations[currentSolvedLanguage] || solvedTranslations['id'];
     return lang[key] || key;
 }
+</script>
+<!-- Load notification bell component -->
+<script src="notification-bell.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            if (typeof initNotificationBell === 'function') {
+                initNotificationBell({
+                    containerId: 'notificationBellContainer',
+                    position: 'right',
+                    soundEnabled: true
+                });
+            } else {
+                console.warn('notification-bell.js not loaded');
+            }
+        }, 500);
+    });
 </script>
 </body>
 </html>
