@@ -41,6 +41,11 @@ let _isInitialized   = false; // flag sudah diinisialisasi
 let _channel         = null;  // BroadcastChannel untuk sinkronisasi antar tab
 // Menyimpan timestamp lastMessage per topicId yang sudah diproses untuk mencegah duplikat saat reconnect
 let _processedTopics = {};    // { [userId_topicId]: timestampMs }
+// Menyimpan topik yang sudah dibaca staff (unreadCount=0 dari Firestore) agar tidak trigger notif ulang
+// Key: "userId__topicId__lastMessageTimestampMs", value: true
+// Ini adalah solusi untuk race condition: saat staff buka chat, unreadCount=0 dipropagasi ke Firestore,
+// tapi listener notif mungkin masih melihat snapshot lama dengan unreadCount>0
+let _readTopicStates = {};    // { [userId__topicId__tsMs]: true }
 // Menyimpan unsubscribe listeners lama yang belum dibersihkan (safety net)
 let _pendingUnsubs   = [];
 
@@ -523,6 +528,14 @@ function _setupGroupListener() {
                     if (!_processedTopics[key] || ms > _processedTopics[key]) {
                         _processedTopics[key] = ms;
                     }
+                    // Rekam topik yang SUDAH dibaca (unreadCount=0) saat initial load.
+                    // Ini adalah fix utama untuk race condition: snapshot Firestore yang
+                    // datang terlambat masih bisa membawa unreadCount>0 meski staff sudah
+                    // membuka chat dan mereset unread. Dengan menyimpan state "sudah dibaca"
+                    // per kombinasi topik+timestamp, kita bisa memblokir notif tersebut.
+                    if (unreadForStaff === 0) {
+                        _readTopicStates[`${key}__${lastMsgTime.getTime()}`] = true;
+                    }
                 }
                 continue;
             }
@@ -530,11 +543,27 @@ function _setupGroupListener() {
             // Hanya proses perubahan 'added' dan 'modified' (bukan 'removed')
             if (change.type === 'removed') continue;
 
+            // Cek apakah kombinasi topik+timestamp ini sudah pernah dilihat dengan unreadCount=0.
+            // Ini memblokir snapshot terlambat yang datang setelah mark-read dari chat-agent.html.
+            if (lastMsgTime) {
+                const stateKey = `${key}__${lastMsgTime.getTime()}`;
+                if (_readTopicStates[stateKey]) {
+                    _log('Skip — snapshot terlambat, topik sudah dibaca:', stateKey);
+                    continue;
+                }
+            }
+
             // Kondisi pemicu notifikasi:
             // 1. Pengirim pesan terakhir adalah user (bukan staff)
             // 2. Ada pesan belum dibaca oleh staff ini
             // 3. Ada konten pesan
             if (lastMsgSender !== 'user' || unreadForStaff <= 0 || !lastMsg) continue;
+
+            // Jika unreadCount di-reset ke 0 (staff baru saja buka chat), catat di _readTopicStates
+            // agar snapshot berikutnya dengan konten sama tidak trigger notif lagi
+            if (unreadForStaff === 0 && lastMsgTime) {
+                _readTopicStates[`${key}__${lastMsgTime.getTime()}`] = true;
+            }
 
             // Ambil nama user (gunakan cache untuk efisiensi)
             let userName = _userNameCache[userId];
@@ -948,17 +977,32 @@ function markConversationAsRead(userId, topicId) {
     let changed = false;
     _notifications.forEach(n => {
         if (n.userId === userId && (!topicId || n.topicId === topicId) && !n.read) {
-            n.read   = true;
-            changed  = true;
+            n.read  = true;
+            changed = true;
+            // Daftarkan ke _readTopicStates agar listener Firestore tidak trigger notif
+            // ulang dari snapshot yang datang setelah fungsi ini dipanggil (race condition fix)
+            if (n.timestamp instanceof Date) {
+                _readTopicStates[`${userId}__${n.topicId}__${n.timestamp.getTime()}`] = true;
+            }
         }
     });
+    // Selalu daftarkan kombinasi userId+topicId terbaru ke _readTopicStates,
+    // bahkan jika tidak ada notif di state (staff mungkin buka chat langsung dari URL)
+    if (topicId) {
+        const key = `${userId}__${topicId}`;
+        const tsMs = _processedTopics[key];
+        if (tsMs) {
+            _readTopicStates[`${key}__${tsMs}`] = true;
+        }
+    }
     if (changed) {
         _updateBadge();
         if (_isOpen) _renderDropdown();
         _saveToStorage();
-        _broadcast('CONV_READ', { userId, topicId });
-        _log(`Percakapan ditandai terbaca: user=${userId}, topic=${topicId}`);
     }
+    // Selalu broadcast agar tab lain ikut update, meski tidak ada perubahan lokal
+    _broadcast('CONV_READ', { userId, topicId });
+    _log(`Percakapan ditandai terbaca: user=${userId}, topic=${topicId}`);
 }
 
 /**
