@@ -515,19 +515,53 @@ input,textarea{font-family:inherit;border:none;outline:none}
 @media(max-width:768px){
   .nav-rail{display:none}
   .hamburger-btn{display:flex}
+
+  /* Sidebar: slide-in dari kiri */
   .sidebar{
     position:fixed;left:0;top:0;bottom:0;z-index:20;
+    width:min(300px, 85vw);
     transform:translateX(-100%);transition:transform var(--t-med) var(--ease);
     box-shadow:var(--sh-xl);
   }
   .sidebar.show{transform:translateX(0)}
   .mob-overlay.show{display:block}
-  .chat-hdr{flex-wrap:wrap;height:auto;padding:12px 14px}
-  #searchInput{width:100%}
-  #searchInput:focus{width:100%}
-  .gs-dropdown{width:100%;right:0}
+
+  /* ── Chat header mobile: 2 baris ── */
+  .chat-hdr{
+    flex-wrap:wrap;
+    height:auto;
+    padding:10px 12px;
+    gap:8px;
+    row-gap:8px;
+  }
+
+  /* Baris 1: hamburger + topic icon + topic info + action btn */
+  .hamburger-btn{ order:1; flex-shrink:0; }
+  .ch-topic-icon{ order:2; flex-shrink:0; }
+  .ch-info{ order:3; flex:1; min-width:0; }
+  .ch-actions{ order:4; flex-shrink:0; }
+
+  /* Baris 2: search bar full width */
+  .gs-wrap{
+    order:5;
+    width:100%;
+    flex-basis:100%;
+  }
+  .gs-inner{ width:100%; }
+  #searchInput{
+    width:100% !important;
+    box-sizing:border-box;
+  }
+  #searchInput:focus{ width:100% !important; }
+  .gs-dropdown{
+    width:100%;
+    right:0;
+    left:0;
+  }
+
+  /* Pesan & input */
   .messages-container{padding:14px 12px}
-  .msg-body{max-width:80%}
+  .msg-body{max-width:82%}
   .input-bar{padding:10px 12px}
 }
 </style>
