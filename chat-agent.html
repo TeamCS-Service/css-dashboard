@@ -768,20 +768,120 @@ input,textarea{font-family:inherit;border:none;outline:none}
 @media(max-width:1100px){
   :root{--col2:240px;--col3:240px}
 }
+
+/* Tablet: topics panel becomes an overlay drawer */
 @media(max-width:900px){
-  .col-topics{position:fixed;right:0;top:0;bottom:0;z-index:50;box-shadow:var(--sh-xl);width:280px;transform:translateX(100%);transition:transform var(--t-med) var(--ease)}
+  .col-topics{position:fixed;right:0;top:0;bottom:0;z-index:50;box-shadow:var(--sh-xl);width:min(300px,84vw);transform:translateX(100%);transition:transform var(--t-med) var(--ease)}
   .col-topics.open{transform:translateX(0)}
-  .mob-overlay{display:block!important}
 }
+
+/* Mobile: single-column app, rail becomes top bar, panels become full-screen overlays */
 @media(max-width:640px){
-  .col-users{position:fixed;left:var(--col1);top:0;bottom:0;z-index:40;box-shadow:var(--sh-xl);transform:translateX(-100%);transition:transform var(--t-med) var(--ease)}
+  :root{--hdr:56px}
+
+  .app{flex-direction:column;height:100vh;height:100dvh}
+
+  /* Nav rail becomes a horizontal top bar */
+  .nav-rail{
+    flex-direction:row;width:100%;height:var(--hdr);
+    padding:0 8px;gap:2px;border-right:none;
+    border-bottom:1px solid var(--bd);
+    justify-content:flex-start;align-items:center;
+    overflow-x:auto;
+  }
+  .rail-logo{display:none}
+  .rail-spacer{display:none}
+  .rail-sep{display:none}
+  .rail-btn{width:38px;height:38px;flex-shrink:0}
+  .rail-tooltip{display:none}
+  .rail-btn.active::before{
+    left:20%;right:20%;top:auto;bottom:0;
+    width:auto;height:3px;border-radius:3px 3px 0 0;
+  }
+
+  /* Users panel: full-screen drawer from the left */
+  .col-users{
+    position:fixed;left:0;top:var(--hdr);bottom:0;
+    width:100%;max-width:100%;
+    z-index:60;box-shadow:none;
+    transform:translateX(-100%);
+    transition:transform var(--t-med) var(--ease);
+  }
   .col-users.open{transform:translateX(0)}
-  #globalSearchInput{width:160px}
-  #globalSearchInput:focus{width:180px}
-  .gs-dropdown{width:280px;right:-60px}
+
+  /* Topics panel: full-screen drawer from the right */
+  .col-topics{
+    width:100%;max-width:100%;top:var(--hdr);z-index:55;
+  }
+
+  .mob-overlay{top:var(--hdr)}
+
+  /* Chat header: shrink to fit */
+  .chat-hdr{padding:0 10px;gap:8px}
+  .ch-topic-icon{width:34px;height:34px}
+  .ch-topic-icon i{font-size:14px}
+  .ch-name{font-size:13px}
+  .ch-sub{display:none}
   .ch-user-chip{display:none}
+
+  /* Global search collapses to icon-trigger style */
+  .gs-wrap{flex:0 0 auto}
+  #globalSearchInput{
+    width:34px;padding:8px;border-radius:50%;
+    cursor:pointer;color:transparent;background:var(--s1);
+  }
+  #globalSearchInput::placeholder{color:transparent}
+  .gs-inner i.gs-ico{left:50%;transform:translate(-50%,-50%)}
+  #globalSearchInput:focus{
+    width:calc(100vw - 130px);position:fixed;left:8px;right:8px;top:8px;
+    padding:8px 28px 8px 30px;border-radius:20px;color:var(--t1);
+    z-index:300;
+  }
+  #globalSearchInput:focus::placeholder{color:var(--t3)}
+  #globalSearchInput:focus + .gs-clear{display:block}
+  .gs-dropdown{width:calc(100vw - 16px);right:8px;left:8px;position:fixed;top:54px}
+
+  /* Header action buttons */
+  .ch-actions{gap:4px}
+  .ch-action-btn{width:32px;height:32px;font-size:12px}
+
+  /* Messages area padding */
+  .messages-container{padding:14px 12px}
+  .msg-body{max-width:82%}
+
+  /* Input bar */
+  .input-bar{padding:8px 10px}
+
+  /* Hamburger button to open users panel */
+  .mob-menu-btn{display:flex!important}
+
+  /* Notification panel full width */
+  .notif-panel{right:8px;left:8px;width:auto;top:calc(var(--hdr) + 8px)}
+
+  /* Command palette padding */
+  .cmd-overlay{padding-top:70px}
+  .cmd-box{margin:0 12px}
+
+  /* Topics/users panel close buttons always visible */
+  #closeTopicsBtn{display:flex!important}
+  #closeUsersBtn{display:flex!important}
+
+  /* Toast wrap full width on mobile */
+  .toast-wrap{left:8px;right:8px;bottom:12px}
+  .toast{width:100%;max-width:none}
 }
+
+.mob-menu-btn{
+  display:none;
+  width:38px;height:38px;border-radius:12px;
+  align-items:center;justify-content:center;
+  color:var(--t3);font-size:16px;flex-shrink:0;
+  transition:all var(--t-med) var(--ease);
+}
+.mob-menu-btn:hover{background:var(--p-soft);color:var(--p)}
+
 .mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:39;backdrop-filter:blur(2px)}
+.mob-overlay.show{display:block}
 </style>
 </head>
 <body>
@@ -865,6 +965,7 @@ input,textarea{font-family:inherit;border:none;outline:none}
   <div class="panel-header">
     <span class="panel-title">Support Chat</span>
     <button class="hdr-btn" id="themeBtn2" title="Toggle tema"><i class="fas fa-moon" id="themeIcon2"></i></button>
+    <button class="hdr-btn" id="closeUsersBtn" style="display:none" title="Tutup"><i class="fas fa-times"></i></button>
   </div>
 
   <!-- Staff card -->
@@ -918,6 +1019,9 @@ input,textarea{font-family:inherit;border:none;outline:none}
 
   <!-- Chat header -->
   <div class="chat-hdr" id="chatHdr">
+    <button class="mob-menu-btn" id="mobMenuBtn" title="Menu pengguna">
+      <i class="fas fa-bars"></i>
+    </button>
     <div class="ch-topic-icon" id="chatHeaderIcon" style="background:linear-gradient(135deg,var(--p),var(--p-dark))">
       <i class="fas fa-comment-dots"></i>
     </div>
@@ -1075,24 +1179,35 @@ document.getElementById('themeBtn2').addEventListener('click',toggleTheme);
 applyTheme();
 
 /* ══════════════════════════════════════════
-   MOBILE OVERLAY
+   MOBILE OVERLAY & DRAWERS
 ══════════════════════════════════════════ */
 const mobOverlay=document.getElementById('mobOverlay');
 const colUsers=document.getElementById('colUsers');
 const colTopics=document.getElementById('colTopics');
-mobOverlay.addEventListener('click',()=>{
+
+function closeAllDrawers(){
   colUsers.classList.remove('open');
   colTopics.classList.remove('open');
-  mobOverlay.style.display='none';
-});
-document.getElementById('closeTopicsBtn').addEventListener('click',()=>{
-  colTopics.classList.remove('open');
-  mobOverlay.style.display='none';
-});
+  mobOverlay.classList.remove('show');
+}
+function openUsersDrawer(){
+  colUsers.classList.add('open');
+  mobOverlay.classList.add('show');
+}
+function openTopicsDrawer(){
+  colTopics.classList.add('open');
+  mobOverlay.classList.add('show');
+}
+
+mobOverlay.addEventListener('click',closeAllDrawers);
+document.getElementById('closeTopicsBtn').addEventListener('click',closeAllDrawers);
+document.getElementById('closeUsersBtn')?.addEventListener('click',closeAllDrawers);
+document.getElementById('mobMenuBtn')?.addEventListener('click',openUsersDrawer);
+
 function checkMobile(){
-  const isMob=window.innerWidth<=640;
   const isMed=window.innerWidth<=900;
   document.getElementById('closeTopicsBtn').style.display=isMed?'flex':'none';
+  if(window.innerWidth>900)closeAllDrawers();
 }
 window.addEventListener('resize',checkMobile);checkMobile();
 
@@ -1296,8 +1411,12 @@ function renderUsers(){
   el.querySelectorAll('.user-card').forEach(el=>{
     el.addEventListener('click',()=>{
       selectUser(el.dataset.uid);
-      if(window.innerWidth<=640){colUsers.classList.remove('open');mobOverlay.style.display='none';}
-      if(window.innerWidth<=900){colTopics.classList.add('open');mobOverlay.style.display='block';}
+      if(window.innerWidth<=640){
+        colUsers.classList.remove('open');
+        openTopicsDrawer();
+      }else if(window.innerWidth<=900){
+        openTopicsDrawer();
+      }
     });
   });
 }
@@ -1368,7 +1487,7 @@ function renderTopics(){
   el.querySelectorAll('.topic-card').forEach(el=>{
     el.addEventListener('click',()=>{
       selectTopic(el.dataset.tid);
-      if(window.innerWidth<=900){colTopics.classList.remove('open');mobOverlay.style.display='none';}
+      if(window.innerWidth<=900){closeAllDrawers();}
     });
   });
 }
