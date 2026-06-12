@@ -937,11 +937,15 @@ function renderMessages(msgs) {
         prevSender = msg.sender;
         const avClass = isOut ? 'u-av' : 's-av';
         const avText = isOut ? '<i class="fas fa-user" style="font-size:10px"></i>' : '<i class="fas fa-headset" style="font-size:10px"></i>';
+        const isAutoBot = msg.isAutoReply === true || msg.senderId === 'system_bot';
+        const bubbleCls = isAutoBot ? 'bubble auto-reply' : 'bubble';
+        const autoTag = isAutoBot ? `<div class="auto-reply-tag"><i class="fas fa-robot"></i> Support Bot</div>` : '';
         html += `<div class="msg-row ${dir}${!sameSender ? ' first-in-group' : ''}">
           <div class="msg-av ${avClass} ${sameSender ? 'invisible' : ''}">${avText}</div>
           <div class="msg-body">
             ${!sameSender ? `<div class="msg-sender-tag">${esc(senderName)}</div>` : ''}
-            <div class="bubble">${esc(msg.text)}</div>
+            ${autoTag}
+            <div class="${bubbleCls}">${esc(msg.text)}</div>
             <div class="msg-meta"><span class="msg-time-txt">${fmtTimeFull(msg.timestamp)}</span></div>
           </div>
         </div>`;
@@ -963,13 +967,20 @@ async function sendMessage() {
     try {
         const topicRef = db.collection('chat_users').doc(currentUser.uid).collection('topics').doc(currentTopicId);
         const senderName = document.getElementById('userName').textContent;
+
+        // ── Ambil lastMessageTime SEBELUM pesan ini dikirim ──────────────
+        const topicSnap = await topicRef.get();
+        const prevLastMsgTime = topicSnap.exists ? topicSnap.data().lastMessageTime : null;
+        const prevLastMsgSender = topicSnap.exists ? topicSnap.data().lastMessageSender : null;
+
+        // ── Kirim pesan user ke Firestore ────────────────────────────────
         await topicRef.collection('messages').add({
             text, sender: 'user', senderId: currentUser.uid, senderName,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
         const staffSnap = await db.collection('users').where('role', 'in', ['staff', 'super_admin']).get();
         const unreadUpdate = {};
-        staffSnap.forEach(doc => { unreadUpdate[`unreadCount.${doc.id}`] = firebase.firestore.FieldValue.increment(1); });
+        staffSnap.forEach(doc => { unreadUpdate['unreadCount.' + doc.id] = firebase.firestore.FieldValue.increment(1); });
         await topicRef.update({
             lastMessage: text,
             lastMessageTime: firebase.firestore.FieldValue.serverTimestamp(),
@@ -978,6 +989,10 @@ async function sendMessage() {
             lastMessageSenderName: senderName,
             ...unreadUpdate
         });
+
+        // ── Auto-reply logic ─────────────────────────────────────────────
+        scheduleAutoReply(topicRef, prevLastMsgTime, prevLastMsgSender);
+
         await loadAllMessagesForSearch();
     } catch (err) {
         showToast('Gagal mengirim pesan', 'err');
@@ -987,6 +1002,108 @@ async function sendMessage() {
         inp.focus();
     }
 }
+
+/* ══════════════════════════════════════════
+   AUTO-REPLY BOT SYSTEM
+   Aturan:
+   • Jika gap antara chat terakhir dan pesan user sekarang > 1 jam
+     (atau belum pernah ada pesan sebelumnya = topik baru)
+     → tunggu 10 detik, jika belum ada balasan dari staff → kirim bot reply
+   • Jika gap < 1 jam → tidak auto-reply (staff masih aktif)
+   • Pesan bot mengikuti waktu: pagi/siang/sore/malam
+══════════════════════════════════════════ */
+
+// Simpan pending timer per topicId agar tidak dobel
+const _autoReplyTimers = {};
+
+function _getBotGreeting() {
+    const hour = new Date().getHours();
+    if (hour >= 4  && hour < 11) return 'Selamat pagi';
+    if (hour >= 11 && hour < 15) return 'Selamat siang';
+    if (hour >= 15 && hour < 19) return 'Selamat sore';
+    return 'Selamat malam';
+}
+
+function _getBotMessage() {
+    const greeting = _getBotGreeting();
+    return greeting + ' Team,' + '\n' + 'Mohon kesediaannya untuk menunggu, kami akan melakukan pengecekan terlebih dahulu🙏🏻';
+}
+
+function scheduleAutoReply(topicRef, prevLastMsgTime, prevLastMsgSender) {
+    const topicId = topicRef.id;
+
+    // Hitung gap sejak pesan terakhir sebelum pesan user ini
+    let gapMs = Infinity; // default: anggap > 1 jam jika belum ada pesan sebelumnya
+    if (prevLastMsgTime) {
+        const prevDate = prevLastMsgTime.toDate ? prevLastMsgTime.toDate() : new Date(prevLastMsgTime);
+        gapMs = Date.now() - prevDate.getTime();
+    }
+
+    const ONE_HOUR_MS = 60 * 60 * 1000;
+
+    // Jika chat terakhir < 1 jam yang lalu → staff masih aktif → skip auto-reply
+    if (gapMs < ONE_HOUR_MS) {
+        console.log('[AutoReply] Gap ' + Math.round(gapMs/60000) + ' mnt < 60 mnt - skip auto-reply untuk topik ' + topicId);
+        return;
+    }
+
+    console.log('[AutoReply] Gap ' + Math.round(gapMs/60000) + ' mnt >= 60 mnt - jadwalkan auto-reply 10 detik untuk topik ' + topicId);
+
+    // Batalkan timer sebelumnya jika ada (user kirim pesan bertubi-tubi)
+    if (_autoReplyTimers[topicId]) {
+        clearTimeout(_autoReplyTimers[topicId]);
+        delete _autoReplyTimers[topicId];
+    }
+
+    // Set timer 10 detik
+    _autoReplyTimers[topicId] = setTimeout(async () => {
+        delete _autoReplyTimers[topicId];
+
+        try {
+            // Cek apakah sudah ada balasan dari staff dalam 10 detik ini
+            const recentSnap = await topicRef.collection('messages')
+                .orderBy('timestamp', 'desc')
+                .limit(1)
+                .get();
+
+            if (!recentSnap.empty) {
+                const lastMsg = recentSnap.docs[0].data();
+                // Jika pesan terakhir bukan dari user → staff sudah balas → skip
+                if (lastMsg.sender !== 'user') {
+                    console.log('[AutoReply] Staff sudah membalas - batalkan auto-reply untuk ' + topicId);
+                    return;
+                }
+            }
+
+            // Kirim auto-reply dari bot
+            const botMsg = _getBotMessage();
+            const now = firebase.firestore.FieldValue.serverTimestamp();
+
+            await topicRef.collection('messages').add({
+                text:       botMsg,
+                sender:     'staff',
+                senderId:   'system_bot',
+                senderName: 'Support Team',
+                isAutoReply: true,
+                timestamp:  now
+            });
+
+            await topicRef.update({
+                lastMessage:          botMsg,
+                lastMessageTime:      now,
+                lastMessageSender:    'staff',
+                lastMessageSenderId:  'system_bot',
+                lastMessageSenderName:'Support Team',
+                unreadUser: firebase.firestore.FieldValue.increment(1)
+            });
+
+            console.log('[AutoReply] Bot reply terkirim untuk topik ' + topicId);
+        } catch (err) {
+            console.error('[AutoReply] Gagal kirim auto-reply:', err);
+        }
+    }, 10000); // 10 detik
+}
+
 
 /* ══════════════════════════════════════════
    GLOBAL SEARCH
@@ -1034,13 +1151,15 @@ function renderSuggestions(results, q) {
         }
         return;
     }
-    dd.innerHTML = `<div class="gs-section-lbl">Hasil · ${results.length} pesan</div>` +
-        results.map(r => `<div class="gs-item" data-tid="${r.topicId}" data-text="${esc(r.text)}">
-          <div class="gs-item-meta">
-            <span class="gs-topic-tag"><i class="fas ${r.topicIcon}" style="color:${r.topicColor}"></i>${esc(r.topicName)}</span>
-          </div>
-          <div class="gs-item-text">${hlText(r.text.substring(0, 100), q)}${r.text.length > 100 ? '…' : ''}</div>
-        </div>`).join('');
+    dd.innerHTML = '<div class="gs-section-lbl">Hasil · ' + results.length + ' pesan</div>' +
+        results.map(function(r) {
+            return '<div class="gs-item" data-tid="' + r.topicId + '" data-text="' + esc(r.text) + '">'
+                + '<div class="gs-item-meta">'
+                + '<span class="gs-topic-tag"><i class="fas ' + r.topicIcon + '" style="color:' + r.topicColor + '"></i>' + esc(r.topicName) + '</span>'
+                + '</div>'
+                + '<div class="gs-item-text">' + hlText(r.text.substring(0, 100), q) + (r.text.length > 100 ? '\u2026' : '') + '</div>'
+                + '</div>';
+        }).join('');
     dd.classList.add('open');
     dd.querySelectorAll('.gs-item').forEach(el => {
         el.addEventListener('click', async () => {
