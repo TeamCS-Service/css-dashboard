@@ -2,22 +2,25 @@
 
 class SidebarLoader {
     constructor() {
-        this.sidebarContainer = document.getElementById('sidebar-container');
-        
-        // Sistem terjemahan yang lebih lengkap untuk semua menu
-        this.translations = this.createFullTranslationSystem();
-        
-        this.currentLanguage = localStorage.getItem('language') || 'id';
-        this.currentUserRole = 'user';
-        this.currentUserId = null;
-        this.userData = null;
-        this.isInitialized = false;
-        
-        this.debug = localStorage.getItem('debugMode') === 'true';
-        this.eventListeners = [];
-        
-        this.log('SidebarLoader initialized');
-    }
+    this.sidebarContainer = document.getElementById('sidebar-container');
+    
+    // Sistem terjemahan yang lebih lengkap untuk semua menu
+    this.translations = this.createFullTranslationSystem();
+    
+    this.currentLanguage = localStorage.getItem('language') || 'id';
+    this.currentUserRole = 'user';
+    this.currentUserId = null;
+    this.userData = null;
+    this.isInitialized = false;
+    
+    this.debug = localStorage.getItem('debugMode') === 'true';
+    this.eventListeners = [];
+    
+    // Untuk menyimpan unsubscribe listener chat unread
+    this.chatUnreadUnsubscribe = null;
+    
+    this.log('SidebarLoader initialized');
+}
 
     // ========== COMPLETE TRANSLATION SYSTEM ==========
     createFullTranslationSystem() {
@@ -740,6 +743,26 @@ class SidebarLoader {
                 outline: 2px solid var(--primary-color);
                 outline-offset: 2px;
             }
+                 .menu-badge {
+            background: #ef4444;
+            color: white;
+            border-radius: 9999px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: auto;
+            min-width: 20px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        [data-theme="dark"] .menu-badge {
+            background: #dc2626;
+        }
+        
+        .menu-item:focus-visible, .theme-toggle:focus-visible {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
         `;
         
         document.head.appendChild(style);
