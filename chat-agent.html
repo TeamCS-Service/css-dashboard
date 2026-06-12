@@ -1397,7 +1397,7 @@ async function selectTopic(topicId){
   av.textContent=initials(currentAgentName);
   av.style.background=user?.color||'var(--p)';
 
-  // Mark read
+  // Mark read di Firestore
   try{
     await db.collection('chat_users').doc(currentAgentId).collection('topics').doc(topicId)
       .update({[`unreadCount.${currentUser.uid}`]:0});
@@ -1406,6 +1406,13 @@ async function selectTopic(topicId){
     const ui=allUsers.findIndex(u=>u.uid===currentAgentId);
     if(ui!==-1){allUsers[ui].totalUnread=topicsList.reduce((s,t)=>s+t.unread,0);renderUsers();}
   }catch{}
+
+  // Beritahu notification-bell.js bahwa percakapan ini sudah dibaca.
+  // Ini wajib agar badge langsung turun dan listener Firestore tidak trigger
+  // notifikasi ulang dari snapshot yang masih membawa data unreadCount lama (race condition fix).
+  if(window.NotificationBell){
+    window.NotificationBell.markConversationAsRead(currentAgentId, topicId);
+  }
 
   // Skeleton loading
   const mc=document.getElementById('messagesContainer');
@@ -1419,6 +1426,11 @@ async function selectTopic(topicId){
     if(currentTopicId===topicId&&currentAgentId){
       db.collection('chat_users').doc(currentAgentId).collection('topics').doc(topicId)
         .update({[`unreadCount.${currentUser.uid}`]:0}).catch(()=>{});
+      // Sinkronkan ke notification-bell.js agar badge tidak naik lagi
+      // ketika pesan baru masuk ke topik yang sedang dibuka staff
+      if(window.NotificationBell){
+        window.NotificationBell.markConversationAsRead(currentAgentId, topicId);
+      }
     }
   });
   document.getElementById('messageInput').focus();
