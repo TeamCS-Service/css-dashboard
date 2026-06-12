@@ -2,14 +2,13 @@
 <html lang="id" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Login - CSS Admin Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="stylemobile.css">
-   <link rel="shortcut icon" href="https://iili.io/CCzxYNa.png" type="image/png">
-  <link rel="icon" href="https://iili.io/CCzxYNa.png" type="image/png" sizes="32x32" type="image/png">
-  <link rel="apple-touch-icon" href="https://iili.io/CCzxYNa.png" type="image/png">
+  <link rel="shortcut icon" href="https://iili.io/CCzxYNa.png" type="image/png">
+  <link rel="icon" href="https://iili.io/CCzxYNa.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="https://iili.io/CCzxYNa.png">
   <style>
     :root {
       --primary: #4361ee;
@@ -29,8 +28,8 @@
     }
 
     [data-theme="dark"] {
-      --card-bg: rgba(13,21,48,0.82);
-      --card-border: rgba(255,255,255,0.07);
+      --card-bg: rgba(13,21,48,0.86);
+      --card-border: rgba(255,255,255,0.08);
       --text: #e8f0ff;
       --text-muted: #7b8fb5;
       --input-bg: rgba(255,255,255,0.04);
@@ -46,7 +45,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
+      overflow-x: hidden;
       position: relative;
       background: #0a0f2c;
       transition: background 0.6s ease;
@@ -60,7 +59,6 @@
       overflow: hidden;
     }
 
-    /* DAY SKY */
     .sky-day {
       position: absolute;
       inset: 0;
@@ -71,7 +69,6 @@
 
     [data-theme="dark"] .sky-day { opacity: 0; }
 
-    /* NIGHT SKY */
     .sky-night {
       position: absolute;
       inset: 0;
@@ -82,7 +79,6 @@
 
     [data-theme="dark"] .sky-night { opacity: 1; }
 
-    /* SUN */
     .sun {
       position: absolute;
       width: 100px;
@@ -98,7 +94,6 @@
 
     [data-theme="dark"] .sun { opacity: 0; pointer-events: none; }
 
-    /* SUN RAYS */
     .sun-rays {
       position: absolute;
       top: 60px;
@@ -114,7 +109,6 @@
 
     [data-theme="dark"] .sun-rays { opacity: 0; }
 
-    /* MOON */
     .moon {
       position: absolute;
       width: 80px;
@@ -149,7 +143,6 @@
       top: 46px; left: 42px;
     }
 
-    /* CLOUDS */
     .cloud {
       position: absolute;
       background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.82));
@@ -180,7 +173,6 @@
     .cloud-c::before { width: 50px; height: 50px; top: -26px; left: 12px; }
     .cloud-c::after { width: 66px; height: 66px; top: -30px; left: 40px; }
 
-    /* STARS */
     .star {
       position: absolute;
       border-radius: 50%;
@@ -192,7 +184,6 @@
 
     [data-theme="dark"] .star { opacity: 1; }
 
-    /* SHOOTING STARS */
     .shooting {
       position: absolute;
       width: 160px;
@@ -216,7 +207,6 @@
 
     [data-theme="dark"] .shooting { display: block; }
 
-    /* BIRDS */
     .bird {
       position: absolute;
       color: rgba(30,30,60,0.3);
@@ -227,7 +217,6 @@
 
     [data-theme="dark"] .bird { opacity: 0; }
 
-    /* AURORA */
     .aurora {
       position: absolute;
       inset: 0;
@@ -260,7 +249,6 @@
 
     [data-theme="dark"] .aurora { opacity: 1; }
 
-    /* HORIZON GLOW */
     .horizon {
       position: absolute;
       bottom: -20%;
@@ -278,7 +266,6 @@
       opacity: 0.5;
     }
 
-    /* THEME TRANSITION OVERLAY */
     .theme-burst {
       position: fixed;
       inset: 0;
@@ -296,8 +283,9 @@
       position: relative;
       z-index: 10;
       width: 100%;
-      max-width: 420px;
-      padding: 20px;
+      max-width: 440px;
+      margin: 1rem auto;
+      padding: 12px;
       animation: cardIn 0.7s cubic-bezier(0.22,1,0.36,1) forwards;
     }
 
@@ -306,13 +294,12 @@
       backdrop-filter: blur(24px) saturate(160%);
       -webkit-backdrop-filter: blur(24px) saturate(160%);
       border: 1px solid var(--card-border);
-      border-radius: 28px;
+      border-radius: 32px;
       overflow: hidden;
       box-shadow: var(--shadow-card);
       transition: background 0.4s, border-color 0.4s, box-shadow 0.4s;
     }
 
-    /* CARD TOP GRADIENT STRIPE */
     .card-stripe {
       height: 5px;
       background: linear-gradient(90deg, #4361ee, #f72585, #4361ee);
@@ -320,17 +307,16 @@
       animation: stripeShift 4s linear infinite;
     }
 
-    /* HEADER */
     .card-header {
-      padding: 32px 36px 28px;
+      padding: 28px 32px 20px;
       text-align: center;
       position: relative;
     }
 
     .logo-wrap {
-      width: 72px;
-      height: 72px;
-      margin: 0 auto 18px;
+      width: 68px;
+      height: 68px;
+      margin: 0 auto 14px;
       background: linear-gradient(135deg, #4361ee, #6c8aff);
       border-radius: 22px;
       display: flex;
@@ -349,7 +335,7 @@
     }
 
     .logo-wrap i {
-      font-size: 30px;
+      font-size: 28px;
       color: white;
       position: relative;
     }
@@ -364,22 +350,20 @@
     }
 
     .card-header p {
-      font-size: 13.5px;
+      font-size: 13px;
       color: var(--text-muted);
       font-weight: 400;
       transition: color 0.4s;
     }
 
-    /* DIVIDER */
     .card-divider {
       height: 1px;
       background: linear-gradient(90deg, transparent, var(--input-border), transparent);
       margin: 0 24px;
     }
 
-    /* FORM */
     .card-body {
-      padding: 28px 36px 24px;
+      padding: 24px 32px 20px;
     }
 
     .field {
@@ -389,12 +373,12 @@
 
     .field label {
       display: block;
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 600;
       color: var(--text-muted);
       letter-spacing: 0.5px;
       text-transform: uppercase;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       transition: color 0.4s;
     }
 
@@ -407,7 +391,7 @@
       left: 14px;
       top: 50%;
       transform: translateY(-50%);
-      font-size: 15px;
+      font-size: 14px;
       color: var(--text-muted);
       transition: color 0.3s;
       pointer-events: none;
@@ -415,11 +399,11 @@
 
     .field-inner input {
       width: 100%;
-      padding: 13px 14px 13px 42px;
+      padding: 12px 12px 12px 42px;
       background: var(--input-bg);
       border: 1.5px solid var(--input-border);
       border-radius: 14px;
-      font-size: 14.5px;
+      font-size: 14px;
       font-family: 'Outfit', sans-serif;
       color: var(--text);
       outline: none;
@@ -458,7 +442,6 @@
       padding-right: 44px;
     }
 
-    /* REMEMBER + FORGOT */
     .row-meta {
       display: flex;
       align-items: center;
@@ -494,10 +477,9 @@
 
     .link-forgot:hover { opacity: 0.75; }
 
-    /* LOGIN BUTTON */
     .btn-login {
       width: 100%;
-      padding: 14px;
+      padding: 13px;
       background: linear-gradient(135deg, #4361ee, #6c8aff);
       color: white;
       font-family: 'Outfit', sans-serif;
@@ -527,10 +509,9 @@
     .btn-login:active { transform: translateY(0); }
     .btn-login:disabled { opacity: 0.75; cursor: not-allowed; transform: none; }
 
-    /* MESSAGES */
     .msg {
       font-size: 13px;
-      padding: 11px 14px;
+      padding: 10px 14px;
       border-radius: 12px;
       margin-top: 14px;
       display: none;
@@ -561,9 +542,8 @@
       background: rgba(6,214,160,0.1);
     }
 
-    /* CARD FOOTER */
     .card-footer {
-      padding: 14px 36px 22px;
+      padding: 14px 32px 24px;
       text-align: center;
       border-top: 1px solid var(--input-border);
     }
@@ -579,7 +559,6 @@
       font-size: 11px;
     }
 
-    /* THEME TOGGLE */
     .theme-toggle {
       position: fixed;
       top: 18px;
@@ -612,7 +591,6 @@
       background: rgba(255,255,255,0.28);
     }
 
-    /* DECORATIVE ORBS (dark mode) */
     .orb {
       position: absolute;
       border-radius: 50%;
@@ -639,85 +617,138 @@
     }
 
     /* ===== KEYFRAMES ===== */
-    @keyframes sunFloat {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
-    @keyframes sunPulse {
-      0%, 100% { box-shadow: 0 0 0 16px rgba(255,215,0,0.15), 0 0 80px 20px rgba(255,200,0,0.4), 0 0 160px 40px rgba(255,180,0,0.18); }
-      50% { box-shadow: 0 0 0 22px rgba(255,215,0,0.2), 0 0 110px 30px rgba(255,200,0,0.52), 0 0 200px 55px rgba(255,180,0,0.22); }
-    }
-
+    @keyframes sunFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    @keyframes sunPulse { 0%, 100% { box-shadow: 0 0 0 16px rgba(255,215,0,0.15), 0 0 80px 20px rgba(255,200,0,0.4), 0 0 160px 40px rgba(255,180,0,0.18); } 50% { box-shadow: 0 0 0 22px rgba(255,215,0,0.2), 0 0 110px 30px rgba(255,200,0,0.52), 0 0 200px 55px rgba(255,180,0,0.22); } }
     @keyframes rotateSun { to { transform: rotate(360deg); } }
+    @keyframes moonFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+    @keyframes moonGlow { 0%, 100% { box-shadow: 0 0 40px 12px rgba(240,232,200,0.22), 0 0 100px 20px rgba(180,160,120,0.14), inset -10px -10px 0 0 rgba(0,0,0,0.09); } 50% { box-shadow: 0 0 60px 18px rgba(240,232,200,0.3), 0 0 140px 30px rgba(180,160,120,0.2), inset -10px -10px 0 0 rgba(0,0,0,0.09); } }
+    @keyframes driftCloud { 0% { transform: translateX(0); } 100% { transform: translateX(135vw); } }
+    @keyframes flyBird { 0% { transform: translateX(0) translateY(0); } 100% { transform: translateX(130vw) translateY(-20px); } }
+    @keyframes twinkle { 0%, 100% { opacity: 0.2; transform: scale(1); } 50% { opacity: 1; transform: scale(1.4); } }
+    @keyframes shoot { 0%, 65% { opacity: 0; transform: translateX(0) translateY(0) rotate(-30deg); } 70% { opacity: 1; } 82% { opacity: 0; transform: translateX(-260px) translateY(190px) rotate(-30deg); } 100% { opacity: 0; } }
+    @keyframes auroraFloat { 0% { transform: translate(0, 0) rotate(0deg); } 100% { transform: translate(6vw, 3vh) rotate(12deg); } }
+    @keyframes horizonPulse { 0%, 100% { transform: scaleX(1); opacity: 0.9; } 50% { transform: scaleX(1.08); opacity: 1; } }
+    @keyframes orbDrift { 0% { transform: translate(0, 0); } 100% { transform: translate(30px, -20px); } }
+    @keyframes stripeShift { 0% { background-position: 0% 0%; } 100% { background-position: 200% 0%; } }
+    @keyframes cardIn { from { opacity: 0; transform: translateY(30px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes burstOut { 0% { opacity: 0.6; background: radial-gradient(circle at var(--bx,90%) var(--by,5%), rgba(255,255,255,0.5) 0%, transparent 0%); } 100% { opacity: 0; background: radial-gradient(circle at var(--bx,90%) var(--by,5%), rgba(255,255,255,0.05) 70%, transparent 70%); } }
 
-    @keyframes moonFloat {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-9px); }
+    /* ===== RESPONSIVE MOBILE IMPROVED (tidak menutup seluruh layar) ===== */
+    @media (max-width: 560px) {
+      .page-wrap {
+        max-width: 92%;
+        padding: 8px;
+        margin: 0.8rem auto;
+      }
+      .login-card {
+        border-radius: 28px;
+        backdrop-filter: blur(20px);
+      }
+      .card-header {
+        padding: 20px 20px 14px;
+      }
+      .logo-wrap {
+        width: 56px;
+        height: 56px;
+        margin-bottom: 10px;
+        border-radius: 18px;
+      }
+      .logo-wrap i {
+        font-size: 24px;
+      }
+      .card-header h1 {
+        font-size: 20px;
+      }
+      .card-header p {
+        font-size: 12px;
+      }
+      .card-body {
+        padding: 18px 22px 16px;
+      }
+      .field {
+        margin-bottom: 14px;
+      }
+      .field label {
+        font-size: 11px;
+        margin-bottom: 4px;
+      }
+      .field-inner input {
+        padding: 10px 10px 10px 38px;
+        font-size: 13.5px;
+      }
+      .toggle-pw {
+        right: 12px;
+        font-size: 14px;
+      }
+      .row-meta {
+        margin-bottom: 18px;
+        font-size: 12px;
+      }
+      .btn-login {
+        padding: 11px;
+        font-size: 14px;
+      }
+      .msg {
+        font-size: 12px;
+        padding: 8px 12px;
+      }
+      .card-footer {
+        padding: 12px 20px 18px;
+      }
+      .card-footer p {
+        font-size: 11px;
+      }
+      .theme-toggle {
+        width: 38px;
+        height: 38px;
+        top: 14px;
+        right: 14px;
+        font-size: 14px;
+      }
+      /* elemen dekoratif lebih halus di mobile */
+      .sun, .sun-rays, .moon {
+        width: 70px;
+        height: 70px;
+        top: 40px;
+        right: 8%;
+      }
+      .cloud-a, .cloud-b, .cloud-c {
+        transform: scale(0.8);
+      }
     }
 
-    @keyframes moonGlow {
-      0%, 100% { box-shadow: 0 0 40px 12px rgba(240,232,200,0.22), 0 0 100px 20px rgba(180,160,120,0.14), inset -10px -10px 0 0 rgba(0,0,0,0.09); }
-      50% { box-shadow: 0 0 60px 18px rgba(240,232,200,0.3), 0 0 140px 30px rgba(180,160,120,0.2), inset -10px -10px 0 0 rgba(0,0,0,0.09); }
-    }
-
-    @keyframes driftCloud {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(135vw); }
-    }
-
-    @keyframes flyBird {
-      0% { transform: translateX(0) translateY(0); }
-      100% { transform: translateX(130vw) translateY(-20px); }
-    }
-
-    @keyframes twinkle {
-      0%, 100% { opacity: 0.2; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.4); }
-    }
-
-    @keyframes shoot {
-      0%, 65% { opacity: 0; transform: translateX(0) translateY(0) rotate(-30deg); }
-      70% { opacity: 1; }
-      82% { opacity: 0; transform: translateX(-260px) translateY(190px) rotate(-30deg); }
-      100% { opacity: 0; }
-    }
-
-    @keyframes auroraFloat {
-      0% { transform: translate(0, 0) rotate(0deg); }
-      100% { transform: translate(6vw, 3vh) rotate(12deg); }
-    }
-
-    @keyframes horizonPulse {
-      0%, 100% { transform: scaleX(1); opacity: 0.9; }
-      50% { transform: scaleX(1.08); opacity: 1; }
-    }
-
-    @keyframes orbDrift {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(30px, -20px); }
-    }
-
-    @keyframes stripeShift {
-      0% { background-position: 0% 0%; }
-      100% { background-position: 200% 0%; }
-    }
-
-    @keyframes cardIn {
-      from { opacity: 0; transform: translateY(30px) scale(0.96); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    @keyframes burstOut {
-      0% { opacity: 0.6; background: radial-gradient(circle at var(--bx,90%) var(--by,5%), rgba(255,255,255,0.5) 0%, transparent 0%); }
-      100% { opacity: 0; background: radial-gradient(circle at var(--bx,90%) var(--by,5%), rgba(255,255,255,0.05) 70%, transparent 70%); }
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 480px) {
-      .page-wrap { padding: 16px; }
-      .card-header, .card-body, .card-footer { padding-left: 24px; padding-right: 24px; }
-      .sun, .sun-rays, .moon { width: 72px; height: 72px; }
+    @media (max-width: 420px) {
+      .page-wrap {
+        max-width: 94%;
+        padding: 6px;
+      }
+      .card-header {
+        padding: 16px 16px 12px;
+      }
+      .logo-wrap {
+        width: 50px;
+        height: 50px;
+      }
+      .logo-wrap i {
+        font-size: 22px;
+      }
+      .card-header h1 {
+        font-size: 18px;
+      }
+      .card-body {
+        padding: 14px 18px 14px;
+      }
+      .field-inner input {
+        padding: 9px 8px 9px 36px;
+        font-size: 13px;
+      }
+      .btn-login {
+        padding: 10px;
+        font-size: 13.5px;
+      }
+      .card-footer {
+        padding: 10px 16px 14px;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -731,7 +762,6 @@
 </head>
 <body>
 
-  <!-- BACKGROUND -->
   <div class="bg-scene">
     <div class="sky-day"></div>
     <div class="sky-night"></div>
@@ -739,8 +769,6 @@
     <div class="aurora"></div>
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
-
-    <!-- Day elements -->
     <div class="sun"></div>
     <div class="sun-rays"></div>
     <div class="cloud cloud-a"></div>
@@ -748,8 +776,6 @@
     <div class="cloud cloud-c"></div>
     <div class="bird bird-1"><i class="fas fa-dove"></i></div>
     <div class="bird bird-2"><i class="fas fa-dove"></i></div>
-
-    <!-- Night elements -->
     <div class="moon"></div>
     <div id="starsLayer"></div>
     <div class="shooting" style="top:120px; left:82%; animation-delay:0s;"></div>
@@ -757,29 +783,22 @@
     <div class="shooting" style="top:170px; left:90%; animation-delay:8.5s;"></div>
   </div>
 
-  <!-- THEME BURST -->
   <div class="theme-burst" id="themeBurst"></div>
-
-  <!-- THEME TOGGLE -->
   <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
     <i class="fas fa-moon"></i>
   </button>
 
-  <!-- LOGIN CARD -->
   <div class="page-wrap">
     <div class="login-card">
       <div class="card-stripe"></div>
-
       <div class="card-header">
         <div class="logo-wrap">
           <i class="fas fa-shield-halved"></i>
         </div>
-        <h1>CSS Admin Dashboard</h1>
+        <h1>D'GAMING ENGINE</h1>
         <p>Silakan masuk ke akun Anda</p>
       </div>
-
       <div class="card-divider"></div>
-
       <div class="card-body">
         <div class="field">
           <label for="email">Email</label>
@@ -788,7 +807,6 @@
             <input type="email" id="email" placeholder="email@domain.com" autocomplete="email">
           </div>
         </div>
-
         <div class="field">
           <label for="password">Password</label>
           <div class="field-inner">
@@ -799,7 +817,6 @@
             </span>
           </div>
         </div>
-
         <div class="row-meta">
           <label class="check-label">
             <input type="checkbox" id="remember">
@@ -807,15 +824,12 @@
           </label>
           <a href="#" id="forgotPassword" class="link-forgot">Lupa Password?</a>
         </div>
-
         <button class="btn-login" id="loginBtn">
           <i class="fas fa-arrow-right-to-bracket"></i>&nbsp; Masuk
         </button>
-
         <div class="msg msg-error" id="loginError"></div>
         <div class="msg msg-success" id="loginSuccess"></div>
       </div>
-
       <div class="card-footer">
         <p>&copy; 2025 CSS Admin Dashboard. All rights reserved.</p>
         <p id="browserInfo"></p>
@@ -823,22 +837,10 @@
     </div>
   </div>
 
-  <!-- FIREBASE -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import {
-      getAuth,
-      signInWithEmailAndPassword,
-      sendPasswordResetEmail,
-      createUserWithEmailAndPassword
-    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-    import {
-      getFirestore,
-      doc,
-      getDoc,
-      updateDoc,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDUZka4FZyLi_cv6X_5D4zeRsfkpqOlBpY",
@@ -850,44 +852,14 @@
       appId: "1:771131792881:web:ad634424225bd7de847850",
       measurementId: "G-3CYBC5B101"
     };
-
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // ========== FUNGSI HELPER UNTUK DEVICE INFO ==========
-    function getDeviceInfo() {
-        const ua = navigator.userAgent;
-        if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
-            return 'Tablet';
-        }
-        if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
-            return 'Mobile';
-        }
-        return 'Desktop';
-    }
+    function getDeviceInfo() { return /(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(navigator.userAgent) ? 'Tablet' : /Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(navigator.userAgent) ? 'Mobile' : 'Desktop'; }
+    function getBrowserInfo() { const ua=navigator.userAgent; if(ua.includes('Firefox')) return 'Firefox'; if(ua.includes('Edg')) return 'Edge'; if(ua.includes('Chrome')) return 'Chrome'; if(ua.includes('Safari')) return 'Safari'; return 'Other'; }
+    async function getClientIP() { try { const res=await fetch('https://api.ipify.org?format=json'); const data=await res.json(); return data.ip; } catch(e){ return 'unknown'; } }
 
-    function getBrowserInfo() {
-        const ua = navigator.userAgent;
-        if (ua.includes('Firefox')) return 'Firefox';
-        if (ua.includes('Edg')) return 'Edge';
-        if (ua.includes('Chrome')) return 'Chrome';
-        if (ua.includes('Safari')) return 'Safari';
-        return 'Other';
-    }
-
-    async function getClientIP() {
-        try {
-            const response = await fetch('https://api.ipify.org?format=json');
-            const data = await response.json();
-            return data.ip;
-        } catch (error) {
-            return 'unknown';
-        }
-    }
-    // ========== AKHIR FUNGSI HELPER ==========
-
-    // DOM
     const loginBtn = document.getElementById("loginBtn");
     const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("password");
@@ -900,286 +872,79 @@
     const starsLayer = document.getElementById("starsLayer");
     const themeBurst = document.getElementById("themeBurst");
 
-    // Show/hide password
     togglePassword.addEventListener("click", () => {
       const show = passwordInput.type === "password";
       passwordInput.type = show ? "text" : "password";
       togglePassword.innerHTML = show ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
     });
+    function createStars() { if(!starsLayer||starsLayer.children.length) return; for(let i=0;i<110;i++){ const s=document.createElement("div"); s.className="star"; const sz=[2,3,4][Math.floor(Math.random()*3)]; s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*5}s;animation-duration:${2.5+Math.random()*4}s;${sz===4?'box-shadow:0 0 8px 2px rgba(255,255,255,0.7);':''}`; starsLayer.appendChild(s); } }
+    function isValidEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+    function showError(msg){ loginError.innerHTML='<i class="fas fa-circle-exclamation"></i> '+msg; loginError.style.display="flex"; loginSuccess.style.display="none"; setTimeout(()=>loginError.style.display="none",5000); }
+    function showSuccess(msg){ loginSuccess.innerHTML='<i class="fas fa-circle-check"></i> '+msg; loginSuccess.style.display="flex"; loginError.style.display="none"; setTimeout(()=>loginSuccess.style.display="none",3000); }
 
-    togglePassword.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); togglePassword.click(); }
-    });
-
-    // Stars
-    function createStars() {
-      if (!starsLayer || starsLayer.childElementCount > 0) return;
-      for (let i = 0; i < 130; i++) {
-        const s = document.createElement("div");
-        s.className = "star";
-        const sz = [2, 3, 4][Math.floor(Math.random() * 3)];
-        s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*5}s;animation-duration:${2.5+Math.random()*4}s;${sz===4?'box-shadow:0 0 8px 2px rgba(255,255,255,0.7);':''}`;
-        starsLayer.appendChild(s);
-      }
-    }
-
-    // Validation
-    function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
-
-    // Messages
-    function showError(msg) {
-      loginError.innerHTML = '<i class="fas fa-circle-exclamation"></i> ' + msg;
-      loginError.style.display = "flex";
-      loginSuccess.style.display = "none";
-      setTimeout(() => loginError.style.display = "none", 5000);
-    }
-
-    function showSuccess(msg) {
-      loginSuccess.innerHTML = '<i class="fas fa-circle-check"></i> ' + msg;
-      loginSuccess.style.display = "flex";
-      loginError.style.display = "none";
-      setTimeout(() => loginSuccess.style.display = "none", 3000);
-    }
-
-    // Login
     async function handleLogin() {
-      const email = emailInput.value.trim();
-      const password = passwordInput.value.trim();
-
-      if (!email || !password) { showError("Email dan password harus diisi"); return; }
-      if (!isValidEmail(email)) { showError("Format email tidak valid"); return; }
-
+      const email=emailInput.value.trim(), password=passwordInput.value.trim();
+      if(!email||!password) return showError("Email dan password harus diisi");
+      if(!isValidEmail(email)) return showError("Format email tidak valid");
       try {
-        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>&nbsp; Memuat...';
-        loginBtn.disabled = true;
-
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        // ========== TAMBAHAN: Update LastLogin di Firestore secara real-time ==========
+        loginBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i>&nbsp; Memuat...'; loginBtn.disabled=true;
+        const userCredential=await signInWithEmailAndPassword(auth,email,password);
+        const user=userCredential.user;
         try {
-          const userRef = doc(db, 'users', user.uid);
-          const clientIP = await getClientIP();
-          await updateDoc(userRef, {
-            LastLogin: serverTimestamp(),
-            lastLogin: serverTimestamp(),
-            lastActive: serverTimestamp(),
-            lastLoginDevice: getDeviceInfo(),
-            lastLoginBrowser: getBrowserInfo(),
-            lastLoginIP: clientIP
-          });
-          console.log('LastLogin updated successfully at:', new Date().toISOString());
-        } catch (updateError) {
-          console.warn('Failed to update LastLogin:', updateError);
-          // Tidak perlu error karena login tetap berhasil
-        }
-        // ========== AKHIR TAMBAHAN ==========
-
-        try {
-          const userDoc = await getDoc(doc(db, 'users', user.uid));
-
-          if (!userDoc.exists()) {
-            showError("Data user tidak ditemukan. Silakan hubungi administrator.");
-            await auth.signOut();
-            loginBtn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i>&nbsp; Masuk';
-            loginBtn.disabled = false;
-            return;
-          }
-
-          const userData = userDoc.data();
-
-          if (userData.status === 'Suspended') {
-            showError("Akun Anda telah di-suspend. Silakan hubungi administrator.");
-            await auth.signOut();
-            loginBtn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i>&nbsp; Masuk';
-            loginBtn.disabled = false;
-            return;
-          }
-
-          showSuccess("Login berhasil! Mengarahkan...");
-
-if (document.getElementById("remember").checked) {
-    localStorage.setItem("rememberEmail", email);
-} else {
-    localStorage.removeItem("rememberEmail");
-}
-
-// ========== LOGIKA REDIRECT BERDASARKAN ROLE ==========
-// Ambil role dari field "role" ATAU "roleType" (keduanya dicek agar tidak miss)
-const userRoleFromDb = userData.role || userData.roleType || "admin";
-const userType = userData.userType || userData.roleType || userData.role;
-
-// Tentukan halaman redirect berdasarkan role
-let redirectUrl = "summary-dashboard.html"; // default dashboard admin
-
-// Convert role ke lowercase untuk pengecekan case-insensitive
-// Firestore menyimpan "Agent" (kapital) maupun "agent" (lowercase) — keduanya tertangani
-const roleLower = userRoleFromDb.toLowerCase().trim();
-const roleTypeLower = (userData.roleType || "").toLowerCase().trim();
-
-const isAgent = roleLower === "agent" || roleLower === "chat_agent" || roleLower === "support"
-             || roleTypeLower === "agent" || roleTypeLower === "chat_agent" || roleTypeLower === "support";
-
-const isSuperAdmin = roleLower === "super_admin" || roleLower === "super admin";
-
-if (isSuperAdmin) {
-    redirectUrl = "summary-dashboard.html";
-} 
-else if (isAgent) {
-    redirectUrl = "user-dashboard.html";  // Redirect ke dashboard agent
-}
-else if (roleLower === "admin") {
-    redirectUrl = "summary-dashboard.html";
-}
-else {
-    redirectUrl = "summary-dashboard.html";
-}
-
-console.log(`[Login] role="${userRoleFromDb}", roleType="${userData.roleType}", roleLower="${roleLower}", isAgent=${isAgent} → redirect: ${redirectUrl}`);
-
-const userData2 = {
-    email: user.email,
-    uid: user.uid,
-    displayName: userData.name || "Administrator",
-    role: userData.role || "admin",
-    userType: userType,
-    status: userData.status || "Active",
-    avatar: userData.image || userData.avatar || 'https://iili.io/KfDh0EN.png',
-    redirectUrl: redirectUrl
-};
-
-sessionStorage.setItem("isLoggedIn", "true");
-sessionStorage.setItem("user", JSON.stringify(userData2));
-sessionStorage.setItem("redirectUrl", redirectUrl);
-
-localStorage.setItem('currentUser', JSON.stringify(userData2));
-localStorage.setItem('adminName', userData.name || "Administrator");
-localStorage.setItem('adminRole', userData.role || "admin");
-localStorage.setItem('adminProfileImage', userData.image || userData.avatar || 'https://iili.io/KfDh0EN.png');
-localStorage.setItem('adminEmail', user.email);
-localStorage.setItem('userType', userData.role);
-localStorage.setItem('redirectUrl', redirectUrl);
-
-// Redirect ke halaman yang sesuai
-setTimeout(() => { 
-    window.location.href = redirectUrl; 
-}, 1500);
-
-        } catch (firestoreError) {
-          console.error("Firestore error:", firestoreError);
-          showError("Gagal memuat data user. Silakan coba lagi.");
-          await auth.signOut();
-          loginBtn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i>&nbsp; Masuk';
-          loginBtn.disabled = false;
-        }
-
-      } catch (error) {
-        console.error("Login error:", error);
-        let msg = "Terjadi kesalahan saat login. Silakan coba lagi.";
-        if (error.code) switch (error.code) {
-          case "auth/user-not-found":
-          case "auth/wrong-password": msg = "Email atau password salah. Silakan periksa kembali."; break;
-          case "auth/invalid-email": msg = "Format email tidak valid."; break;
-          case "auth/user-disabled": msg = "Akun dinonaktifkan. Silakan hubungi administrator."; break;
-          case "auth/too-many-requests": msg = "Terlalu banyak percobaan gagal. Silakan coba lagi nanti."; break;
-          case "auth/network-request-failed": msg = "Koneksi jaringan bermasalah. Periksa koneksi internet Anda."; break;
-          default: msg = "Tidak dapat mengakses sistem. Silakan coba lagi atau hubungi administrator.";
-        }
+          const userRef=doc(db,'users',user.uid);
+          const clientIP=await getClientIP();
+          await updateDoc(userRef,{ LastLogin:serverTimestamp(), lastLogin:serverTimestamp(), lastActive:serverTimestamp(), lastLoginDevice:getDeviceInfo(), lastLoginBrowser:getBrowserInfo(), lastLoginIP:clientIP });
+        } catch(e){ console.warn("Update lastLogin error:",e); }
+        const userDoc=await getDoc(doc(db,'users',user.uid));
+        if(!userDoc.exists()){ showError("Data user tidak ditemukan."); await auth.signOut(); loginBtn.innerHTML='<i class="fas fa-arrow-right-to-bracket"></i>&nbsp; Masuk'; loginBtn.disabled=false; return; }
+        const userData=userDoc.data();
+        if(userData.status==='Suspended'){ showError("Akun Anda telah di-suspend."); await auth.signOut(); loginBtn.innerHTML='<i class="fas fa-arrow-right-to-bracket"></i>&nbsp; Masuk'; loginBtn.disabled=false; return; }
+        showSuccess("Login berhasil! Mengarahkan...");
+        if(document.getElementById("remember").checked) localStorage.setItem("rememberEmail",email); else localStorage.removeItem("rememberEmail");
+        const roleLower=(userData.role||"").toLowerCase();
+        const isAgent=roleLower==="agent"||roleLower==="chat_agent"||roleLower==="support";
+        const redirectUrl = isAgent ? "user-dashboard.html" : "summary-dashboard.html";
+        const userData2={ email:user.email, uid:user.uid, displayName:userData.name||"Administrator", role:userData.role||"admin", userType:userData.role, status:userData.status||"Active", avatar:userData.image||userData.avatar||'https://iili.io/KfDh0EN.png', redirectUrl };
+        sessionStorage.setItem("isLoggedIn","true"); sessionStorage.setItem("user",JSON.stringify(userData2)); sessionStorage.setItem("redirectUrl",redirectUrl);
+        localStorage.setItem('currentUser',JSON.stringify(userData2)); localStorage.setItem('adminName',userData.name||"Administrator"); localStorage.setItem('adminRole',userData.role||"admin"); localStorage.setItem('adminProfileImage',userData.image||userData.avatar||'https://iili.io/KfDh0EN.png'); localStorage.setItem('adminEmail',user.email); localStorage.setItem('redirectUrl',redirectUrl);
+        setTimeout(()=>{ window.location.href=redirectUrl; },1500);
+      } catch(error){
+        let msg="Terjadi kesalahan saat login.";
+        if(error.code){ switch(error.code){
+          case "auth/user-not-found": case "auth/wrong-password": msg="Email atau password salah."; break;
+          case "auth/invalid-email": msg="Format email tidak valid."; break;
+          case "auth/user-disabled": msg="Akun dinonaktifkan."; break;
+          case "auth/too-many-requests": msg="Terlalu banyak percobaan."; break;
+          default: msg="Tidak dapat mengakses sistem.";
+        }}
         showError(msg);
-        loginBtn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i>&nbsp; Masuk';
-        loginBtn.disabled = false;
+        loginBtn.innerHTML='<i class="fas fa-arrow-right-to-bracket"></i>&nbsp; Masuk'; loginBtn.disabled=false;
       }
     }
 
-    // Forgot password
-    async function handleForgotPassword() {
-      const email = emailInput.value.trim();
-      if (!email) { showError("Masukkan email untuk reset password"); return; }
-      if (!isValidEmail(email)) { showError("Format email tidak valid"); return; }
-      try {
-        await sendPasswordResetEmail(auth, email);
-        showSuccess("Email reset password telah dikirim. Periksa inbox Anda.");
-      } catch (error) {
-        showError(error.code === "auth/user-not-found" ? "Email tidak terdaftar dalam sistem." : "Terjadi kesalahan saat mengirim email reset password.");
-      }
+    async function handleForgotPassword(){
+      const email=emailInput.value.trim();
+      if(!email) return showError("Masukkan email untuk reset password");
+      if(!isValidEmail(email)) return showError("Format email tidak valid");
+      try{ await sendPasswordResetEmail(auth,email); showSuccess("Email reset password telah dikirim."); } catch(e){ showError("Email tidak terdaftar."); }
     }
 
-    // Theme
-    function toggleTheme() {
-      const rect = themeToggle.getBoundingClientRect();
-      themeBurst.style.setProperty('--bx', `${rect.left + rect.width / 2}px`);
-      themeBurst.style.setProperty('--by', `${rect.top + rect.height / 2}px`);
-      themeBurst.classList.remove('animate');
-      void themeBurst.offsetWidth;
-      themeBurst.classList.add('animate');
-
-      const cur = document.documentElement.getAttribute("data-theme");
-      const next = cur === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", next);
-      localStorage.setItem("theme", next);
-      themeToggle.querySelector("i").className = next === "dark" ? "fas fa-sun" : "fas fa-moon";
-
-      setTimeout(() => themeBurst.classList.remove('animate'), 750);
+    function toggleTheme(){
+      const rect=themeToggle.getBoundingClientRect(); themeBurst.style.setProperty('--bx',`${rect.left+rect.width/2}px`); themeBurst.style.setProperty('--by',`${rect.top+rect.height/2}px`); themeBurst.classList.remove('animate'); void themeBurst.offsetWidth; themeBurst.classList.add('animate');
+      const cur=document.documentElement.getAttribute("data-theme"); const next=cur==="dark"?"light":"dark"; document.documentElement.setAttribute("data-theme",next); localStorage.setItem("theme",next); themeToggle.querySelector("i").className=next==="dark"?"fas fa-sun":"fas fa-moon"; setTimeout(()=>themeBurst.classList.remove('animate'),700);
     }
 
-    function applySavedTheme() {
-      const theme = localStorage.getItem("theme") || "light";
-      document.documentElement.setAttribute("data-theme", theme);
-      themeToggle.querySelector("i").className = theme === "dark" ? "fas fa-sun" : "fas fa-moon";
-    }
+    function applySavedTheme(){ const theme=localStorage.getItem("theme")||"light"; document.documentElement.setAttribute("data-theme",theme); themeToggle.querySelector("i").className=theme==="dark"?"fas fa-sun":"fas fa-moon"; }
+    function detectBrowser(){ let b="Unknown Browser"; const ua=navigator.userAgent; if(ua.includes("Firefox")) b="Mozilla Firefox"; else if(ua.includes("Edg")) b="Microsoft Edge"; else if(ua.includes("Chrome")) b="Google Chrome"; else if(ua.includes("Safari")) b="Safari"; browserInfo.textContent="Browser: "+b; }
 
-    function detectBrowser() {
-      const ua = navigator.userAgent;
-      let b = "Unknown Browser";
-      if (ua.includes("Firefox")) b = "Mozilla Firefox";
-      else if (ua.includes("Edg")) b = "Microsoft Edge";
-      else if (ua.includes("Chrome")) b = "Google Chrome";
-      else if (ua.includes("Safari")) b = "Safari";
-      browserInfo.textContent = "Browser: " + b;
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      createStars();
-      detectBrowser();
-      applySavedTheme();
-
-      const remembered = localStorage.getItem("rememberEmail");
-      if (remembered) {
-        emailInput.value = remembered;
-        document.getElementById("remember").checked = true;
-      }
-
-      loginBtn.addEventListener("click", handleLogin);
-      themeToggle.addEventListener("click", toggleTheme);
-      forgotPassword.addEventListener("click", e => { e.preventDefault(); handleForgotPassword(); });
-
-      document.addEventListener("keydown", e => { if (e.key === "Enter") handleLogin(); });
-
-      auth.onAuthStateChanged(async user => {
-        if (user) {
-          // Cek role dari Firestore sebelum redirect agar agent tidak salah arah
-          try {
-            const userDoc = await getDoc(doc(db, 'users', user.uid));
-            if (userDoc.exists()) {
-              const roleLower = (userDoc.data().role || '').toLowerCase();
-              const target = (roleLower === 'agent' || roleLower === 'chat_agent' || roleLower === 'support')
-                ? 'user-dashboard.html'
-                : 'summary-dashboard.html';
-              setTimeout(() => { window.location.href = target; }, 1000);
-            } else {
-              setTimeout(() => { window.location.href = 'summary-dashboard.html'; }, 1000);
-            }
-          } catch (e) {
-            // Fallback: gunakan redirectUrl yang sudah tersimpan jika Firestore gagal
-            const saved = localStorage.getItem('redirectUrl') || 'summary-dashboard.html';
-            setTimeout(() => { window.location.href = saved; }, 1000);
-          }
-        }
-      });
+    document.addEventListener("DOMContentLoaded",()=>{
+      createStars(); detectBrowser(); applySavedTheme();
+      const remembered=localStorage.getItem("rememberEmail"); if(remembered){ emailInput.value=remembered; document.getElementById("remember").checked=true; }
+      loginBtn.addEventListener("click",handleLogin); themeToggle.addEventListener("click",toggleTheme); forgotPassword.addEventListener("click",e=>{ e.preventDefault(); handleForgotPassword(); });
+      document.addEventListener("keydown",e=>{ if(e.key==="Enter") handleLogin(); });
+      auth.onAuthStateChanged(async user=>{ if(user){ try{ const userDoc=await getDoc(doc(db,'users',user.uid)); if(userDoc.exists()){ const roleLower=(userDoc.data().role||"").toLowerCase(); const target=(roleLower==="agent"||roleLower==="chat_agent"||roleLower==="support")?"user-dashboard.html":"summary-dashboard.html"; setTimeout(()=>window.location.href=target,1000); }else{ setTimeout(()=>window.location.href="summary-dashboard.html",1000); } } catch(e){ const saved=localStorage.getItem('redirectUrl')||"summary-dashboard.html"; setTimeout(()=>window.location.href=saved,1000); } } });
     });
-
-    window.addEventListener("error", e => console.error("Global error:", e.error));
-    window.addEventListener("unhandledrejection", e => { console.error("Unhandled rejection:", e.reason); e.preventDefault(); });
+    window.addEventListener("error",e=>console.error(e.error)); window.addEventListener("unhandledrejection",e=>{ console.error(e.reason); e.preventDefault(); });
   </script>
 </body>
 </html>
