@@ -1441,19 +1441,103 @@
             background-color: #f59e0b;
             color: white;
         }
+        /* ========== MOBILE SIDEBAR FIX (ditambahkan) ========== */
+.mobile-menu-toggle {
+    display: none;
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 1002;
+    background: var(--primary-gradient);
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: all 0.2s ease;
+}
+.mobile-menu-toggle:hover {
+    transform: scale(1.02);
+}
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(2px);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+.sidebar-close {
+    display: none;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    z-index: 10;
+}
+.sidebar-close:hover {
+    background: var(--hover-color);
+}
+
+@media (max-width: 768px) {
+    .mobile-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    #sidebar-container .sidebar {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        width: 280px;
+        height: 100%;
+        transition: left 0.3s ease;
+        z-index: 1001;
+        background: var(--card-bg);
+        box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+    }
+    #sidebar-container .sidebar.active {
+        left: 0;
+    }
+    .sidebar-close {
+        display: block;
+    }
+}
     </style>
 </head>
 <body>
+<!-- Mobile Menu Toggle -->
+<button class="mobile-menu-toggle" id="mobileMenuToggle">
+    <i class="fas fa-bars"></i>
+</button>
+<div id="sidebar-overlay" class="sidebar-overlay"></div>
 
 <div id="sidebar-container"></div>
 
 <!-- Main Content -->
 <div class="main-content">
     <div class="header">
+        <!-- HAPUS kedua tombol menu-toggle yang ada di dalam .header -->
         <div id="notificationContainer"></div>
-        <button class="menu-toggle">
-            <i class="fas fa-bars"></i>
-        </button>
+        <!-- <button class="menu-toggle"> ... </button>  HAPUS BARIS INI -->
         <h1><i class="fas fa-file-alt"></i> Pending Reports</h1>
 
         <div class="header-actions">
@@ -1461,9 +1545,7 @@
                 <i class="fas fa-search"></i>
                 <input type="text" placeholder="Search by ID, title, brand, or description..." id="dashboardSearch">
             </div>
-            <button class="menu-toggle">
-                <i class="fas fa-bars"></i>
-            </button>
+
             <!-- KONTAINER Lonceng akan muncul di sini (otomatis oleh notification-bell.js) -->
             <div id="notificationBellContainer"></div>
             <div class="user-profile">
@@ -2731,6 +2813,48 @@
     };
     document.addEventListener('DOMContentLoaded', function() { setTimeout(() => { initializePendingReportsLanguage(); }, 100); });
     window.addEventListener('load', function() { initializePendingReportsLanguage(); });
+    // Fungsi untuk mengaktifkan toggle sidebar pada mobile
+function initMobileSidebar() {
+    const toggleBtn = document.getElementById('mobileMenuToggle');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (!toggleBtn || !overlay) return;
+
+    // Tunggu sidebar-container dimuat oleh sidebar-loader.js
+    const checkSidebar = setInterval(() => {
+        const sidebar = document.querySelector('#sidebar-container .sidebar');
+        if (sidebar) {
+            clearInterval(checkSidebar);
+            // Tambahkan tombol close di dalam sidebar jika belum ada
+            if (!sidebar.querySelector('.sidebar-close')) {
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'sidebar-close';
+                closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                closeBtn.setAttribute('aria-label', 'Close menu');
+                closeBtn.onclick = () => {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                };
+                sidebar.insertBefore(closeBtn, sidebar.firstChild);
+            }
+            // Event untuk tombol toggle
+            toggleBtn.onclick = () => {
+                sidebar.classList.add('active');
+                overlay.classList.add('active');
+            };
+            // Event untuk overlay
+            overlay.onclick = () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            };
+        }
+    }, 100);
+}
+
+// Panggil saat DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+    initMobileSidebar();
+    // ... kode lainnya yang sudah ada (checkAuthState, dll)
+});
 </script>
 </body>
 </html>
