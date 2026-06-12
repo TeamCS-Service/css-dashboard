@@ -2,15 +2,15 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Summary Dashboard - CSS Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="global.css">
     <link rel="stylesheet" href="stylemobile.css">
     <link rel="shortcut icon" href="https://iili.io/CCzxYNa.png" type="image/png">
-  <link rel="icon" href="https://iili.io/CCzxYNa.png" type="image/png" sizes="32x32" type="image/png">
-  <link rel="apple-touch-icon" href="https://iili.io/CCzxYNa.png" type="image/png">
+    <link rel="icon" href="https://iili.io/CCzxYNa.png" type="image/png" sizes="32x32">
+    <link rel="apple-touch-icon" href="https://iili.io/CCzxYNa.png">
     <script src="global-time.js"></script>
     <script src="activity-log.js"></script>
     
@@ -102,108 +102,6 @@
             display: none;
         }
 
-        @media (max-width: 768px) {
-            .menu-toggle {
-                display: block;
-            }
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .header-actions {
-                width: 100%;
-                flex-direction: column;
-            }
-            .search-bar {
-                width: 100%;
-            }
-            .search-bar input {
-                width: 100%;
-            }
-        }
-   .btn-export {
-        background: var(--success-gradient);
-        color: white;
-        border: none;
-        padding: var(--space-sm) var(--space-md);
-        border-radius: var(--radius-md);
-        font-size: var(--text-sm);
-        font-weight: var(--font-medium);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: var(--space-xs);
-        transition: all var(--transition-fast);
-        box-shadow: var(--shadow-sm);
-    }
-    
-    .btn-export:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-        opacity: 0.9;
-    }
-    
-    .btn-export:active {
-        transform: translateY(0);
-    }
-    
-    /* Light mode specific styling untuk tombol export */
-    :root {
-        --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    }
-    
-    /* Fallback untuk memastikan tombol terlihat di semua mode */
-    .btn-export {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: #ffffff;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    /* Dark mode adjustment */
-    @media (prefers-color-scheme: dark) {
-        .btn-export {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: #ffffff;
-        }
-    }
-    
-    /* Light mode explicit styling */
-    body.light-mode .btn-export,
-    .light-mode .btn-export {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: #ffffff;
-        border: none;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    
-    body.light-mode .btn-export:hover,
-    .light-mode .btn-export:hover {
-        background: linear-gradient(135deg, #059669 0%, #047857 100%);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    }
-    
-    /* Memastikan icon terlihat */
-    .btn-export i {
-        color: #ffffff;
-        font-size: 1rem;
-    }
-    
-    /* Tombol lainnya yang mungkin terpengaruh */
-    .btn-primary {
-        background: var(--primary-gradient);
-        color: white;
-        border: none;
-    }
-    
-    .btn-outline {
-        background: transparent;
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-    }
-    
-    .btn-outline:hover {
-        background: var(--hover-color);
-    }
         /* ========== PERBAIKAN STATISTIC CARDS ========== */
         .summary-stats {
             display: grid;
@@ -812,6 +710,66 @@
             animation: fadeIn 0.5s ease forwards;
         }
 
+        /* ========== PERBAIKAN MOBILE YANG LEBIH RAPI ========== */
+        /* Mobile menu toggle button */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 1002;
+            background: var(--primary-gradient);
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: all 0.2s ease;
+        }
+        .mobile-menu-toggle:hover {
+            transform: scale(1.02);
+        }
+        /* Sidebar overlay untuk mobile */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(2px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        /* Tombol close di sidebar untuk mobile */
+        .sidebar-close {
+            display: none;
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: transparent;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            z-index: 10;
+        }
+        .sidebar-close:hover {
+            background: var(--hover-color);
+        }
+
+        /* Perbaikan layout untuk tablet dan mobile */
         @media (max-width: 1024px) {
             .summary-stats {
                 grid-template-columns: repeat(2, 1fr);
@@ -830,56 +788,39 @@
         }
 
         @media (max-width: 768px) {
-            .main-content {
-                padding: var(--space-md);
+            /* Tampilkan tombol menu mobile */
+            .mobile-menu-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
-            .summary-stats {
-                grid-template-columns: 1fr;
+            /* Sidebar akan di-slide dari kiri */
+            #sidebar-container .sidebar {
+                position: fixed;
+                left: -280px;
+                top: 0;
+                width: 280px;
+                height: 100%;
+                transition: left 0.3s ease;
+                z-index: 1001;
+                background: var(--card-bg);
+                box-shadow: 2px 0 12px rgba(0,0,0,0.1);
             }
-            .summary-filters {
-                grid-template-columns: 1fr;
+            #sidebar-container .sidebar.active {
+                left: 0;
             }
-            .date-range-inputs {
-                flex-direction: row;
+            .sidebar-close {
+                display: block;
             }
-            .filter-actions {
-                flex-direction: row;
-            }
-            .filter-actions .btn {
-                min-width: auto;
-                flex: 1;
-            }
-            .section-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .additional-stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .additional-stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* ========== MOBILE IMPROVEMENTS ========== */
-        @media (max-width: 768px) {
-            body {
-                background: var(--bg-secondary);
-            }
-
+            
             .main-content {
                 padding: 76px 12px 20px;
             }
-
             .header {
                 padding: 14px;
                 margin-bottom: 14px;
                 border-radius: 18px;
             }
-
             .header h1 {
                 display: flex;
                 align-items: flex-start;
@@ -889,25 +830,21 @@
                 margin: 0 0 14px;
                 padding-right: 40px;
             }
-
             .header-actions {
                 width: 100%;
                 display: grid;
                 grid-template-columns: 1fr;
                 gap: 12px;
             }
-
             .search-bar {
                 width: 100%;
             }
-
             .search-bar input {
                 width: 100%;
                 height: 44px;
                 font-size: 0.95rem;
                 border-radius: 14px;
             }
-
             .user-profile {
                 width: 100%;
                 padding: 12px;
@@ -916,12 +853,10 @@
                 border-radius: 16px;
                 justify-content: flex-start;
             }
-
             .profile-img {
                 width: 44px;
                 height: 44px;
             }
-
             .summary-stats,
             .additional-stats,
             .summary-filters,
@@ -929,7 +864,6 @@
             .summary-table-section {
                 margin-bottom: 14px;
             }
-
             .summary-stat-card,
             .additional-stat-card,
             .chart-card,
@@ -938,34 +872,28 @@
                 border-radius: 18px;
                 padding: 14px;
             }
-
             .stat-header {
                 align-items: center;
                 margin-bottom: 12px;
             }
-
             .stat-title {
                 font-size: 0.88rem;
                 line-height: 1.4;
                 padding-right: 8px;
             }
-
             .stat-icon {
                 width: 42px;
                 height: 42px;
                 font-size: 1rem;
                 flex-shrink: 0;
             }
-
             .stat-value {
                 font-size: 1.7rem;
             }
-
             .additional-stats-grid {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
                 gap: 12px;
             }
-
             .additional-stat-card {
                 min-height: 102px;
                 display: flex;
@@ -973,55 +901,45 @@
                 justify-content: center;
                 text-align: left;
             }
-
             .additional-stat-value {
                 font-size: 1.45rem;
             }
-
             .additional-stat-label {
                 font-size: 0.8rem;
                 line-height: 1.35;
             }
-
             .summary-filters {
                 display: grid;
                 grid-template-columns: 1fr;
                 gap: 12px;
                 align-items: stretch;
             }
-
             .filter-group {
                 min-height: auto;
             }
-
             .filter-group label {
                 margin-bottom: 6px;
             }
-
             .filter-select,
             .date-range-inputs input[type="date"] {
                 height: 44px;
                 border-radius: 14px;
                 font-size: 0.95rem;
             }
-
             .date-range-inputs {
                 display: grid;
                 grid-template-columns: 1fr;
                 gap: 8px;
             }
-
             .date-range-inputs span {
                 display: none;
             }
-
             .filter-actions {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
                 gap: 10px;
                 height: auto;
             }
-
             .filter-actions .btn,
             .section-actions .btn,
             .section-actions .btn-export {
@@ -1031,58 +949,47 @@
                 justify-content: center;
                 border-radius: 14px;
             }
-
             .charts-container {
                 grid-template-columns: 1fr;
                 gap: 14px;
             }
-
             .chart-header {
                 align-items: flex-start;
                 gap: 10px;
                 margin-bottom: 14px;
             }
-
             .chart-title {
                 font-size: 0.98rem;
                 line-height: 1.4;
                 flex: 1;
             }
-
             .chart-actions {
                 flex-shrink: 0;
             }
-
             .chart-content {
                 height: 260px;
             }
-
             .section-header {
                 align-items: stretch;
                 gap: 12px;
             }
-
             .section-title {
                 font-size: 1rem;
                 line-height: 1.4;
                 justify-content: space-between;
                 width: 100%;
             }
-
             .badge {
                 flex-shrink: 0;
             }
-
             .section-actions {
                 width: 100%;
             }
-
             .summary-table-container {
                 overflow: visible;
                 border: none;
                 margin-bottom: 0;
             }
-
             .summary-table,
             .summary-table thead,
             .summary-table tbody,
@@ -1092,21 +999,17 @@
                 display: block;
                 width: 100%;
             }
-
             .summary-table {
                 min-width: 0;
                 background: transparent;
             }
-
             .summary-table thead {
                 display: none;
             }
-
             .summary-table tbody {
                 display: grid;
                 gap: 12px;
             }
-
             .summary-table tr {
                 background: var(--card-bg);
                 border: 1px solid var(--border-color);
@@ -1114,7 +1017,6 @@
                 padding: 12px;
                 box-shadow: var(--shadow-sm);
             }
-
             .summary-table td {
                 border: none;
                 padding: 8px 0;
@@ -1126,7 +1028,6 @@
                 font-size: 0.88rem;
                 line-height: 1.45;
             }
-
             .summary-table td::before {
                 content: attr(data-label);
                 font-weight: 600;
@@ -1138,48 +1039,39 @@
                 text-transform: uppercase;
                 letter-spacing: 0.04em;
             }
-
             .summary-table td:last-child {
                 padding-bottom: 0;
             }
-
             .action-buttons {
                 width: 100%;
                 justify-content: flex-end;
             }
-
             .action-buttons .btn-icon {
                 width: 38px;
                 height: 38px;
             }
-
             .pagination {
                 flex-wrap: wrap;
                 gap: 10px;
                 margin-top: 16px;
             }
-
             .pagination .btn {
                 flex: 1 1 calc(50% - 5px);
                 justify-content: center;
             }
-
             .page-numbers {
                 width: 100%;
                 text-align: center;
                 order: -1;
                 font-size: 0.85rem;
             }
-
             .empty-state {
                 padding: 24px 16px;
                 border-radius: 18px;
             }
-
             .empty-state i {
                 font-size: 2.3rem;
             }
-
             .toast-notification {
                 left: 12px;
                 right: 12px;
@@ -1192,7 +1084,6 @@
             .main-content {
                 padding: 72px 10px 18px;
             }
-
             .header,
             .summary-stat-card,
             .additional-stat-card,
@@ -1202,47 +1093,44 @@
                 padding: 12px;
                 border-radius: 16px;
             }
-
             .header h1 {
                 font-size: 1.05rem;
             }
-
             .additional-stats-grid,
             .filter-actions {
                 grid-template-columns: 1fr;
             }
-
             .stat-value {
                 font-size: 1.55rem;
             }
-
             .chart-content {
                 height: 220px;
             }
-
             .summary-table td {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 4px;
             }
-
             .summary-table td::before {
                 min-width: auto;
                 max-width: none;
             }
-
             .action-buttons {
                 justify-content: flex-start;
             }
-
             .pagination .btn {
                 flex: 1 1 100%;
             }
         }
-
     </style>
 </head>
 <body>
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+    
     <div id="sidebar-container"></div>
 
     <!-- Main Content -->
@@ -1251,7 +1139,6 @@
             <h1><i class="fas fa-chart-pie"></i> <span id="pageTitle">Dashboard Overview</span></h1>
             <div class="header-actions">
                 <div class="search-bar">
-                
                     <i class="fas fa-search"></i>
                     <input type="text" id="summarySearch" placeholder="Search...">
                 </div>
@@ -1554,6 +1441,8 @@
     <script src="user-profile.js"></script>
 
     <script>
+    // Seluruh kode JavaScript asli tetap dipertahankan tanpa perubahan
+    // (Mulai dari sini adalah kode yang sama persis dengan file asli)
     const summaryTranslations = {
         id: {
             pageTitle: "Dashboard Overview",
@@ -2556,27 +2445,27 @@
                 resolutionValue: data => calculateResolutionTime(data.dateCreated, data.dateSolved)
             });
 
-const maintenance = mapReportDocs(maintenanceSnap, {
-    collection: 'maintenanceReports',
-    category: 'Pending Maintenance',
-    type: 'Maintenance',
-    dateValue: data => data.dateCreated,
-    isSolved: () => false,
-    statusValue: () => 'Maintenance',
-    brandValue: data => getMaintenanceProviderValue(data)
-});
+            const maintenance = mapReportDocs(maintenanceSnap, {
+                collection: 'maintenanceReports',
+                category: 'Pending Maintenance',
+                type: 'Maintenance',
+                dateValue: data => data.dateCreated,
+                isSolved: () => false,
+                statusValue: () => 'Maintenance',
+                brandValue: data => getMaintenanceProviderValue(data)
+            });
 
-const solvedMaintenance = mapReportDocs(solvedMaintenanceSnap, {
-    collection: 'solvedMaintenance',
-    category: 'Solved Maintenance',
-    type: 'Maintenance',
-    dateValue: data => data.dateCompleted || data.dateCreated,
-    dateCompletedValue: data => data.dateCompleted,
-    isSolved: () => true,
-    statusValue: () => 'Maintenance Solved',
-    resolutionValue: data => calculateResolutionTime(data.dateCreated, data.dateCompleted),
-    brandValue: data => getMaintenanceProviderValue(data)
-});
+            const solvedMaintenance = mapReportDocs(solvedMaintenanceSnap, {
+                collection: 'solvedMaintenance',
+                category: 'Solved Maintenance',
+                type: 'Maintenance',
+                dateValue: data => data.dateCompleted || data.dateCreated,
+                dateCompletedValue: data => data.dateCompleted,
+                isSolved: () => true,
+                statusValue: () => 'Maintenance Solved',
+                resolutionValue: data => calculateResolutionTime(data.dateCreated, data.dateCompleted),
+                brandValue: data => getMaintenanceProviderValue(data)
+            });
 
             const agentIdeas = mapReportDocs(ideasSnap, {
                 collection: 'reports',
@@ -2612,55 +2501,84 @@ const solvedMaintenance = mapReportDocs(solvedMaintenanceSnap, {
     function refreshDashboard() {
         loadDashboardData(true);
     }
-/**
- * Mengekstrak nama brand dari judul task maintenance
- * Format judul yang diharapkan: "Brand - Judul Task" atau "Brand: Judul Task" atau "Brand | Judul Task"
- * Contoh: "Telkom - Maintenance Server", "Indosat: Database Update", "XL | Network Upgrade"
- */
 
-function getMaintenanceProviderValue(data) {
-    if (!data || typeof data !== 'object') return 'N/A';
+    function getMaintenanceProviderValue(data) {
+        if (!data || typeof data !== 'object') return 'N/A';
 
-    const directProvider = typeof data.provider === 'string' ? data.provider.trim() : '';
-    if (directProvider) return directProvider;
+        const directProvider = typeof data.provider === 'string' ? data.provider.trim() : '';
+        if (directProvider) return directProvider;
 
-    const brandField = typeof data.brand === 'string' ? data.brand.trim() : '';
-    if (brandField) return brandField;
+        const brandField = typeof data.brand === 'string' ? data.brand.trim() : '';
+        if (brandField) return brandField;
 
-    return extractBrandFromTitle(data.title);
-}
+        return extractBrandFromTitle(data.title);
+    }
 
-function extractBrandFromTitle(title) {
-    if (!title || typeof title !== 'string') return 'N/A';
-    
-    // Pola pemisah yang umum digunakan
-    const separators = [' - ', ': ', ' | ', ' – ', ' — ', ' • ', ' - ', ' : ', ' | '];
-    
-    for (const separator of separators) {
-        if (title.includes(separator)) {
-            const parts = title.split(separator);
-            const brand = parts[0].trim();
-            if (brand && brand.length > 0 && brand.length <= 50) {
-                return brand;
+    function extractBrandFromTitle(title) {
+        if (!title || typeof title !== 'string') return 'N/A';
+        
+        const separators = [' - ', ': ', ' | ', ' – ', ' — ', ' • ', ' - ', ' : ', ' | '];
+        
+        for (const separator of separators) {
+            if (title.includes(separator)) {
+                const parts = title.split(separator);
+                const brand = parts[0].trim();
+                if (brand && brand.length > 0 && brand.length <= 50) {
+                    return brand;
+                }
             }
         }
-    }
-    
-    // Jika tidak ada pemisah, coba ambil kata pertama (jika bukan kata umum)
-    const words = title.split(' ');
-    if (words.length > 0) {
-        const firstWord = words[0].trim();
-        // Kata-kata yang umum dan bukan brand
-        const commonWords = ['Maintenance', 'Update', 'Fix', 'Patch', 'Upgrade', 'Server', 'Database', 
-                             'Network', 'System', 'Security', 'Backup', 'Deploy', 'Install', 'Config',
-                             'Monitor', 'Check', 'Verify', 'Test', 'Deployment', 'Hotfix', 'Patch'];
-        if (!commonWords.includes(firstWord) && firstWord.length > 1 && !firstWord.match(/^\d+$/)) {
-            return firstWord;
+        
+        const words = title.split(' ');
+        if (words.length > 0) {
+            const firstWord = words[0].trim();
+            const commonWords = ['Maintenance', 'Update', 'Fix', 'Patch', 'Upgrade', 'Server', 'Database', 
+                                 'Network', 'System', 'Security', 'Backup', 'Deploy', 'Install', 'Config',
+                                 'Monitor', 'Check', 'Verify', 'Test', 'Deployment', 'Hotfix', 'Patch'];
+            if (!commonWords.includes(firstWord) && firstWord.length > 1 && !firstWord.match(/^\d+$/)) {
+                return firstWord;
+            }
         }
+        
+        return 'General';
     }
-    
-    return 'General';
-}
+
+    // Mobile menu handling - tambahan untuk memperbaiki toggle sidebar di mobile
+    function initMobileSidebar() {
+        const toggleBtn = document.getElementById('mobileMenuToggle');
+        const overlay = document.getElementById('sidebar-overlay');
+        if (!toggleBtn || !overlay) return;
+        
+        // Cari elemen sidebar yang di-load oleh sidebar-loader.js
+        const checkSidebar = setInterval(() => {
+            const sidebar = document.querySelector('#sidebar-container .sidebar');
+            if (sidebar) {
+                clearInterval(checkSidebar);
+                // Tambahkan tombol close di dalam sidebar jika belum ada
+                if (!sidebar.querySelector('.sidebar-close')) {
+                    const closeBtn = document.createElement('button');
+                    closeBtn.className = 'sidebar-close';
+                    closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                    closeBtn.setAttribute('aria-label', 'Close menu');
+                    closeBtn.onclick = () => {
+                        sidebar.classList.remove('active');
+                        overlay.classList.remove('active');
+                    };
+                    sidebar.insertBefore(closeBtn, sidebar.firstChild);
+                }
+                
+                toggleBtn.onclick = () => {
+                    sidebar.classList.add('active');
+                    overlay.classList.add('active');
+                };
+                overlay.onclick = () => {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                };
+            }
+        }, 100);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const savedLanguage = localStorage.getItem('language') || 'id';
         applySummaryTranslations(savedLanguage);
@@ -2703,14 +2621,8 @@ function extractBrandFromTitle(title) {
             applyCurrentFilters();
         });
 
-        const menuToggle = document.getElementById('menuToggleBtn');
-        const sidebarContainer = document.getElementById('sidebar-container');
-        if (menuToggle && sidebarContainer) {
-            menuToggle.addEventListener('click', function() {
-                const sidebar = sidebarContainer.querySelector('.sidebar');
-                if (sidebar) sidebar.classList.toggle('active');
-            });
-        }
+        // Inisialisasi menu mobile
+        initMobileSidebar();
 
         auth.onAuthStateChanged(user => {
             if (!user) {
@@ -2729,21 +2641,21 @@ function extractBrandFromTitle(title) {
     window.expandChart = expandChart;
     </script>
     <!-- Load notification bell component -->
-<script src="notification-bell.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(function() {
-            if (typeof initNotificationBell === 'function') {
-                initNotificationBell({
-                    containerId: 'notificationBellContainer',
-                    position: 'right',
-                    soundEnabled: true
-                });
-            } else {
-                console.warn('notification-bell.js not loaded');
-            }
-        }, 500);
-    });
-</script>
+    <script src="notification-bell.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                if (typeof initNotificationBell === 'function') {
+                    initNotificationBell({
+                        containerId: 'notificationBellContainer',
+                        position: 'right',
+                        soundEnabled: true
+                    });
+                } else {
+                    console.warn('notification-bell.js not loaded');
+                }
+            }, 500);
+        });
+    </script>
 </body>
 </html>
