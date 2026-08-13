@@ -85,7 +85,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 input,textarea{font-family:inherit;border:none;outline:none}
 
 /* ══ APP SHELL ══ */
-.app{display:flex;height:100vh;overflow:hidden}
+.app{display:flex;height:100vh;height:100dvh;overflow:hidden}
 
 /* ── NAV RAIL (col 1) ── */
 .nav-rail{
@@ -198,7 +198,7 @@ input,textarea{font-family:inherit;border:none;outline:none}
 }
 
 /* Topics list */
-.topics-scroll{flex:1;overflow-y:auto;padding:4px 8px 8px}
+.topics-scroll{flex:1;overflow-y:auto;min-height:0;padding:4px 8px 8px}
 
 .topic-card{
   display:flex;align-items:center;gap:10px;
@@ -311,7 +311,7 @@ input,textarea{font-family:inherit;border:none;outline:none}
 
 /* ── MESSAGES ── */
 .messages-container{
-  flex:1;overflow-y:auto;
+  flex:1;overflow-y:auto;min-height:0;
   padding:20px 24px;
   display:flex;flex-direction:column;gap:2px;
   position:relative;z-index:1;
@@ -340,7 +340,7 @@ input,textarea{font-family:inherit;border:none;outline:none}
 .msg-av.s-av{background:linear-gradient(135deg,var(--ok),#059669)}
 .msg-av.invisible{visibility:hidden}
 
-.msg-body{max-width:66%;display:flex;flex-direction:column}
+.msg-body{max-width:75%;display:flex;flex-direction:column}
 .msg-row.out .msg-body{align-items:flex-end}
 .msg-row.in  .msg-body{align-items:flex-start}
 
@@ -369,6 +369,7 @@ input,textarea{font-family:inherit;border:none;outline:none}
 /* ── INPUT BAR ── */
 .input-bar{
   padding:12px 20px;
+  padding-bottom:max(12px, env(safe-area-inset-bottom));
   background:var(--s0);border-top:1px solid var(--bd);
   flex-shrink:0;z-index:5;position:relative;
 }
@@ -561,7 +562,7 @@ input,textarea{font-family:inherit;border:none;outline:none}
 
   /* Pesan & input */
   .messages-container{padding:14px 12px}
-  .msg-body{max-width:82%}
+  .msg-body{max-width:85%}
   .input-bar{padding:10px 12px}
 }
 </style>
@@ -717,8 +718,8 @@ input,textarea{font-family:inherit;border:none;outline:none}
   <!-- Input -->
   <div class="input-bar">
     <div class="input-wrap">
-      <input type="text" id="messageInput" placeholder="Tulis pesan…" autocomplete="off">
-      <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+      <input type="text" id="messageInput" placeholder="Pilih kategori untuk mulai chat…" autocomplete="off" disabled>
+      <button class="send-btn" id="sendBtn" disabled><i class="fas fa-paper-plane"></i></button>
     </div>
   </div>
 </div>
@@ -886,6 +887,9 @@ function renderTopics() {
 async function selectTopic(topicId) {
     if (messagesUnsubscribe) messagesUnsubscribe();
     currentTopicId = topicId;
+    // Loading state instan — supaya tidak ada jeda menampilkan pesan topik lama
+    // sesaat sebelum pesan topik baru selesai dimuat dari Firestore.
+    document.getElementById('messagesContainer').innerHTML = '<div class="ring"></div>';
     const topic = topics.find(t => t.id === topicId);
     if (topic) {
         document.getElementById('chatTopicName').textContent = topic.topicName;
@@ -894,6 +898,11 @@ async function selectTopic(topicId) {
         iconDiv.style.background = `linear-gradient(135deg,${topic.topicColor},${topic.topicColor}cc)`;
         iconDiv.innerHTML = `<i class="fas ${topic.topicIcon}"></i>`;
     }
+    // Aktifkan input sekarang topik sudah dipilih
+    const msgInput = document.getElementById('messageInput');
+    msgInput.disabled = false;
+    msgInput.placeholder = 'Tulis pesan…';
+    document.getElementById('sendBtn').disabled = false;
     renderTopics(); // update active state
     // mark read immediately
     await db.collection('chat_users').doc(currentUser.uid).collection('topics').doc(topicId).update({ unreadUser: 0 });
@@ -951,7 +960,10 @@ function renderMessages(msgs) {
         </div>`;
     });
     mc.innerHTML = html;
-    mc.scrollTop = mc.scrollHeight;
+    // requestAnimationFrame memastikan browser sudah selesai melakukan reflow/paint
+    // atas innerHTML di atas sebelum kita membaca scrollHeight — supaya scroll ke
+    // bawah selalu akurat, termasuk pada kasus daftar pesan yang panjang.
+    requestAnimationFrame(() => { mc.scrollTop = mc.scrollHeight; });
 }
 
 /* ══════════════════════════════════════════
@@ -959,10 +971,17 @@ function renderMessages(msgs) {
 ══════════════════════════════════════════ */
 async function sendMessage() {
     const inp = document.getElementById('messageInput');
-    const text = inp.value.trim();
-    if (!text || !currentTopicId || !currentUser) return;
-    inp.value = '';
     const btn = document.getElementById('sendBtn');
+    // Guard: cegah double-send — baik lewat klik tombol yang sedang disabled
+    // MAUPUN lewat tombol Enter yang tidak terikat ke atribut disabled tombol.
+    if (btn.disabled) return;
+    const text = inp.value.trim();
+    if (!text) return;
+    if (!currentTopicId || !currentUser) {
+        showToast('Pilih kategori bantuan terlebih dahulu', 'err');
+        return;
+    }
+    inp.value = '';
     btn.disabled = true;
     try {
         const topicRef = db.collection('chat_users').doc(currentUser.uid).collection('topics').doc(currentTopicId);
